@@ -220,3 +220,12 @@ data/ cache/ logs/     运行时生成数据（已忽略，不提交）
 - node --test 24/24通过，含指针移动/松开保存。Windows EXE已重建；scripts/smoke-windows.mjs及SC smoke通过内嵌SC资源一致性、HTTP/SSE、展开同步、开关/语言不重置到期、三语、重复启动、配置重启与退出端口释放。
 - README、WINDOWS、ACCEPTANCE、日志与三语Release notes同步。dist含v0.4.0 ZIP、EXE、SHA256SUMS、RELEASE_TITLE/TAG/NOTES。准备本地commit及v0.4.0 tag，不推送、不发布远程Release。
 - 真实付费SC/各金额事件颜色、OBS内交互、长期实机、新Windows环境仍待验收，保留Preview标识。SC配置不需要正在连接直播间才能编辑，实际留言展示仍需开启SC并收到有效事件。
+
+## 2026-10-24 v0.4.1 醒目留言默认开启
+
+- 用户补充默认开启SC，并要求同样的验收、README/log/工程进度、commit及Release tag/title/notes流程。
+- defaults.scEnabled改为true；新安装及没有scEnabled字段的旧配置自动开启，已有显式false继续保留。没有强制修改用户生产配置。
+- SC位置保存、折叠/展开、无倒计时及有效期逻辑保持；三语使用说明与v0.4.1 Release notes同步。
+- 保留v0.4.0及其标签；v0.4.1作为新的未签名Preview，真实付费SC、OBS、长期与新环境实机验收边界不变。
+
+- 验收通过：24/24自动测试，EXE首次启动默认开启及手动关闭后重启保留关闭；SC/礼物HTTP/SSE、三语、内嵌源码与退出端口释放回归通过。新ZIP和title/tag/notes/校验和齐全。详见log/2026-10-24-sc-default-on.md。

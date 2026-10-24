@@ -31,6 +31,7 @@ async function stop(){if(child&&child.exitCode===null&&child.signalCode===null){
 async function initial(){const r=await fetch(base+'/api/events');const reader=r.body.getReader();let text='';const decoder=new TextDecoder();while(!text.includes('\n\n')){const chunk=await reader.read();if(chunk.done)throw Error('SSE ended');text+=decoder.decode(chunk.value,{stream:true});}await reader.cancel();return JSON.parse(text.split('\n')[0].slice(6)).data;}
 try{
   await start();
+  assert.equal((await initial()).config.scEnabled,true,'fresh installation enables SC by default');
   const duplicate=spawn(path.resolve('dist/BiliGiftDrop-windows-x64.exe'),['--no-open'],{env,windowsHide:true,stdio:['ignore','pipe','pipe']});
   let duplicateOutput='';duplicate.stdout.setEncoding('utf8');duplicate.stdout.on('data',b=>duplicateOutput+=b);duplicate.stderr.setEncoding('utf8');duplicate.stderr.on('data',b=>duplicateOutput+=b);
   assert.equal((await once(duplicate,'exit'))[0],0,duplicateOutput);
@@ -55,6 +56,8 @@ try{
     assert.equal(await response.text(),await readFile('.'+file,'utf8'),'embedded source matches current working tree');
   }
   assert.equal(JSON.parse(await readFile(path.join(data,'data/config.json'),'utf8')).language,'en');
+  assert.equal((await fetch(base+'/api/config',{method:'POST',headers:{Origin:base,'Content-Type':'application/json'},body:JSON.stringify({scEnabled:false})})).status,200);
+  await stop();await start();assert.equal((await initial()).config.scEnabled,false,'saved off survives restart despite default on');
   await stop();
   await assert.rejects(fetch(base,{signal:AbortSignal.timeout(1500)}),'port is released after process exits');
   console.log('EXE startup, duplicate launch, embedded assets, three locales, simulation, clear and restart persistence: PASS');

@@ -57,3 +57,11 @@ English: Valid drop settings save automatically after about 400 ms without typin
 日本語：SCを有効にし、枠をドラッグして位置を保存、または左・上・幅を入力して約400ミリ秒後に自動保存。初期値15秒で折りたたみ、0で無効。見出しをクリックして展開しOBSと同期（OBSでは「対話」）。カウントダウンは非表示で期限切れで削除。非表示・言語変更でも期限は変わりません。最大3件表示、最新100件まで保持します。
 
 English: Enable SC and drag the layout box (saves on release), or edit left/top/width (saves after about400ms). Default collapse delay15 seconds;0 disables it. Click headings to expand and sync OBS; use Interact inside OBS. No countdown is shown. Cards expire on schedule; hiding or switching language never resets expiry. Shows up to3 cards and retains the latest100 without extending queued lifetimes.
+
+## v0.4.1 默认开启 / 初期設定オン / Enabled by default
+
+中文：新安装和缺少SC设置的旧配置默认开启醒目留言；手动关闭并保存后，刷新和重启仍保持关闭。
+
+日本語：新規インストールとSC設定のない旧設定では初期値がオンです。保存したオフ設定は画面更新・再起動後も保持されます。
+
+English: SC defaults on for new installations and older configurations without the setting. A saved off choice stays off across refreshes and restarts.

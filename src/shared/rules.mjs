@@ -1,4 +1,4 @@
-export const defaults = {language:'zh-CN',scEnabled:false,scX:5,scY:5,scWidth:30,scCollapse:15,room:'',gravity:900,bounce:0.35,lifetime:30,maxObjects:120,includeFree:true,minGiftPrice:0,minGiftScale:50,maxGiftScale:150,maxGiftScaleAmount:100,maxCoverage:15,spawnRate:12,regionX:0,regionY:0,regionWidth:100,regionHeight:100};
+export const defaults = {language:'zh-CN',scEnabled:true,scX:5,scY:5,scWidth:30,scCollapse:15,room:'',gravity:900,bounce:0.35,lifetime:30,maxObjects:120,includeFree:true,minGiftPrice:0,minGiftScale:50,maxGiftScale:150,maxGiftScaleAmount:100,maxCoverage:15,spawnRate:12,regionX:0,regionY:0,regionWidth:100,regionHeight:100};
 export function config(input, previous=defaults) {
   const out={...previous};
   if (['zh-CN','ja','en'].includes(input.language)) out.language=input.language;

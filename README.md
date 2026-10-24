@@ -1,5 +1,15 @@
 # Bili Gift Drop
 
+## v0.4.1 醒目留言默认开启（2026-10-24）
+
+醒目留言在新安装、缺少SC设置的旧配置中默认开启。已保存的开关选择保持不变，手动关闭后刷新或重启不会重新开启。位置自动保存、折叠/展开和无倒计时卡片保持原有行为。
+
+日本語：SCは初期設定でオン。保存済みのオン・オフ設定は保持されます。
+
+English: SC defaults on for new or unmigrated configurations; existing saved choices are retained.
+
+Tag：`v0.4.1`；Title：**Bili Gift Drop v0.4.1 — 醒目留言默认开启（Preview）**。包：`dist/BiliGiftDrop-v0.4.1-windows-x64.zip`；[三语 Release notes](docs/releases/v0.4.1.md)。旧版本和标签保留。
+
 ## v0.4.0 醒目留言与布局自动保存（2026-10-24）
 
 醒目留言可独立启用。拖动布局框松开即提交保存；左侧、顶部、宽度和折叠秒数停止输入约400毫秒后自动保存，同步到OBS。支持方向键微调与刷新/重启恢复布局，无需再点击保存。默认15秒自动折叠，点击标题再次展开；卡片不显示倒计时，到期自动移除。切换语言和关闭显示不重置计时。
