@@ -40,3 +40,12 @@ Gifts last up to 30 seconds by default and fade during the final 0.75 seconds. L
 日本語：最小・最大サイズと最大サイズに達する金額を保存できます。既定は 50%、150%、100 人民元です。今回の合計金額に比例し、無料は最小サイズ。保存後の新しいギフトに適用します。
 
 English: Save minimum size, maximum size and the amount for maximum size. Defaults: 50%, 150%, CNY 100. Size scales with the event total; free gifts use the minimum. Changes apply to newly received gifts. Region and area protection may reduce the displayed size.
+
+
+## v0.3.1 自动保存 / 自動保存 / Autosave
+
+掉落设置的有效数值和免费开关在停止输入约 400 毫秒后自动保存并同步到 overlay，无需点击保存。空值及无效输入不保存，失败提示后可用保存按钮重试。
+
+日本語：有効な数値・無料ギフト設定は約 400 ミリ秒後に自動保存されます。無効な値は保存しません。失敗時は保存ボタンで再試行できます。
+
+English: Valid drop settings save automatically after about 400 ms without typing. Invalid values are not saved. Use the Save button to retry after an error.

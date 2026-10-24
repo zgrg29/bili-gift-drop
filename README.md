@@ -1,5 +1,17 @@
 # Bili Gift Drop
 
+## v0.3.1 自动保存设置（2026-10-24）
+
+「掉落设置」中的数值和免费礼物开关修改后自动保存，无需点击保存按钮。停止输入约 400 毫秒后保存有效值并同步到 overlay；空值、越界或不符合步长的输入不会保存。尺寸设置仍对新收到的礼物生效，不追溯改变已有和队列中礼物的尺寸。保留保存按钮，便于手动重试。保存失败显示错误提示。
+
+日本語：落下設定の有効な数値・スイッチ変更は約 400 ミリ秒後に自動保存・反映されます。保存ボタンは不要です。無効な値は保存しません。失敗時はエラーを表示し、保存ボタンで再試行できます。
+
+English: Valid numbers and toggles in Drop settings save and apply automatically after about 400 ms without typing. No Save click is needed. Invalid values are not saved. Errors are shown; the Save button remains available for retrying.
+
+验收：19/19 自动测试及 Windows EXE 回归通过；Chrome 未点击保存修改为 85%/35 元，刷新保持；新增自动保存提示的中日英 390 像素窄屏检查通过。OBS 实机和长期运行仍待验收。
+
+发布 tag：`v0.3.1`；标题：**Bili Gift Drop v0.3.1 — 设置自动保存（Preview）**。发布包为 `dist/BiliGiftDrop-v0.3.1-windows-x64.zip`，附 `SHA256SUMS.txt`；[三语 Release notes](docs/releases/v0.3.1.md)。历史版本记录保留在下方。
+
 ## v0.3.0 自定义礼物尺寸（2026-10-24）
 
 用户可在「掉落设置」中设置并保存**最小礼物尺寸、最大礼物尺寸、达到最大尺寸的金额**。默认 50%、150%、100 元；100% 为 1920 × 1080 画布中的 80 像素，尺寸范围 10%–400%。按本次总金额线性缩放，超过满尺寸金额封顶，免费礼物使用最小尺寸。最大值低于最小值时自动提高至最小值。

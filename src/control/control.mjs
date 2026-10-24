@@ -9,14 +9,36 @@ for(const [key,min,max,step]of [['minGiftScale',10,400,1],['maxGiftScale',10,400
   const label=document.createElement('label');label.className='field';const text=document.createElement('span');text.dataset.t=key;const input=document.createElement('input');Object.assign(input,{id:key,type:'number',min,max,step,required:true});label.append(text,input);$('fields').append(label);
 }
 function render(){document.documentElement.lang=language;document.title=t(language,'title');document.querySelectorAll('[data-t]').forEach(el=>el.textContent=t(language,el.dataset.t));$('language').value=language;if(typeof stats!=='undefined')renderStats();if(giftSelect.options[0])giftSelect.options[0].textContent=t(language,'demo');$('status').textContent=t(language,state);$('warning').textContent=warning?t(language,warning):'';$('empty').hidden=history.length>0;$('events').replaceChildren(...history.map(g=>{const li=document.createElement('li');li.textContent=t(language,'gift',{user:g.demo?t(language,'demo'):g.user,name:g.name??t(language,'demo'),count:new Intl.NumberFormat(language).format(g.count),amount:g.coinType==='gold'?new Intl.NumberFormat(language,{style:'currency',currency:'CNY'}).format(g.totalCoin/1000):t(language,'free')});return li;}));}
-function populate(){for(const key of ['room','minGiftScale','maxGiftScale','maxGiftScaleAmount','gravity','bounce','lifetime','maxObjects','minGiftPrice','maxCoverage','spawnRate','regionX','regionY','regionWidth','regionHeight'])$(key).value=cfg[key]??0;$('includeFree').checked=cfg.includeFree;}
+const edits=new Map();let autosaveTimer,saveQueue=Promise.resolve();
+function populate(){for(const key of ['room','minGiftScale','maxGiftScale','maxGiftScaleAmount','gravity','bounce','lifetime','maxObjects','minGiftPrice','maxCoverage','spawnRate','regionX','regionY','regionWidth','regionHeight'])if(!edits.has(key))$(key).value=cfg[key]??0;if(!edits.has('includeFree'))$('includeFree').checked=cfg.includeFree;}
 let toastTimer;function toast(key){$('toast').textContent=t(language,key);$('toast').style.display='block';clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').style.display='none',3500);}
 async function post(action,data={}){const res=await fetch('/api/'+action,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});if(!res.ok){const err=await res.json();throw Error(err.error||'failed');}}
 function run(fn){return async e=>{e?.preventDefault();try{await fn();}catch(err){toast(['invalid','failed'].includes(err.message)?err.message:'failed');}};}
 $('obs').value=location.origin+'/overlay';
 $('connection').onsubmit=run(async()=>{await post('config',{room:$('room').value});await post('connect',{room:$('room').value});});
 $('disconnect').onclick=run(()=>post('disconnect'));
-$('settings').onsubmit=run(async()=>{const d={includeFree:$('includeFree').checked};for(const key of ['minGiftScale','maxGiftScale','maxGiftScaleAmount','gravity','bounce','lifetime','maxObjects','minGiftPrice','maxCoverage','spawnRate','regionX','regionY','regionWidth','regionHeight'])d[key]=Number($(key).value);await post('config',d);toast('saved');});
+function flushSettings(){
+  clearTimeout(autosaveTimer);
+  const batch=[...edits].filter(([,edit])=>edit.valid);
+  if(!batch.length)return saveQueue;
+  const task=saveQueue.catch(()=>{}).then(async()=>{
+    await post('config',Object.fromEntries(batch.map(([key,edit])=>[key,edit.value])));
+    for(const [key,edit]of batch)if(edits.get(key)===edit)edits.delete(key);
+    populate();toast('saved');
+  });
+  saveQueue=task;return task;
+}
+$('settings').oninput=e=>{
+  const input=e.target;if(!input.id||input.id==='room')return;
+  edits.set(input.id,{value:input.type==='checkbox'?input.checked:Number(input.value),valid:input.type==='checkbox'||(input.value!==''&&input.checkValidity())});
+  clearTimeout(autosaveTimer);autosaveTimer=setTimeout(()=>flushSettings().catch(()=>toast('failed')),400);
+};
+$('settings').onsubmit=run(async()=>{
+  if(!$('settings').checkValidity())return;
+  // Keep the explicit save button as a retry and keyboard shortcut.
+  for(const input of $('settings').querySelectorAll('input'))edits.set(input.id,{value:input.type==='checkbox'?input.checked:Number(input.value),valid:true});
+  await flushSettings();
+});
 $('language').onchange=run(async()=>{language=$('language').value;localStorage.setItem('language',language);render();await post('config',{language});});
 $('demo').onsubmit=run(()=>post('test',{count:Number($('count').value),price:Number($('price').value),giftId:Number(giftSelect.value)}));
 $('clear').onclick=run(()=>post('clear'));
