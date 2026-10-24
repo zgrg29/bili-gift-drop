@@ -1,5 +1,13 @@
 # Bili Gift Drop
 
+## v0.4.0 醒目留言与布局自动保存（2026-10-24）
+
+醒目留言可独立启用。拖动布局框松开即提交保存；左侧、顶部、宽度和折叠秒数停止输入约400毫秒后自动保存，同步到OBS。支持方向键微调与刷新/重启恢复布局，无需再点击保存。默认15秒自动折叠，点击标题再次展开；卡片不显示倒计时，到期自动移除。切换语言和关闭显示不重置计时。
+
+SC uses platform expiry/duration and colors first; Japanese, Chinese and English UI are included. SCの位置・幅は自動保存され、カウントダウンは表示しません。
+
+发布 tag：`v0.4.0`；标题：**Bili Gift Drop v0.4.0 — 醒目留言与布局自动保存（Preview）**。下载包：`dist/BiliGiftDrop-v0.4.0-windows-x64.zip`；[三语 Release notes](docs/releases/v0.4.0.md)。验收记录见[SC日志](log/2026-10-24-superchat.md)。下方版本章节为历史记录。
+
 ## v0.3.1 自动保存设置（2026-10-24）
 
 「掉落设置」中的数值和免费礼物开关修改后自动保存，无需点击保存按钮。停止输入约 400 毫秒后保存有效值并同步到 overlay；空值、越界或不符合步长的输入不会保存。尺寸设置仍对新收到的礼物生效，不追溯改变已有和队列中礼物的尺寸。保留保存按钮，便于手动重试。保存失败显示错误提示。
@@ -41,11 +49,11 @@ English: Save minimum size, maximum size and the amount for maximum size in Drop
 
 English: v0.2.0 is a preview with bounded spawning, a short pending queue, count and estimated-area limits, early fading under crowding, configurable drop regions and preview statistics. Defaults: 12 icons/second, 120 active icons and a 15% region-area budget. Pending effects expire after 1.5 seconds. Settings persist and support all three languages. Browser visual QA and OBS verification remain pending.
 
-本次自动化测试 **16/16 通过**，包括规则/三语资源、三语控制面板执行、持续风暴及完整 overlay 事件与绘制循环。Windows EXE 本机回归通过，包含新设置重启恢复与内嵌源码一致性。浏览器视觉验收因工具无法连接本地页面及可靠识别 URL 而未完成，不据此宣称窄屏三语或 OBS 实机通过。SC、可编辑金额档位、长期实机压力及全新 Windows 验收仍属后续。
+本次自动化测试 **16/16 通过**，包括规则/三语资源、三语控制面板执行、持续风暴及完整 overlay 事件与绘制循环。Windows EXE 本机回归通过，包含新设置重启恢复与内嵌源码一致性。浏览器视觉验收因工具无法连接本地页面及可靠识别 URL 而未完成，不据此宣称窄屏三语或 OBS 实机通过。（此为v0.2.0历史状态；SC已于v0.4.0实现预览。）可编辑礼物金额档位、长期实机压力及全新 Windows 验收仍待完成。
 
 发布信息：tag **`v0.2.0`**，标题 **Bili Gift Drop v0.2.0 — 礼物高峰保护（Preview）**，勾选 **Pre-release**。完整三语说明见 [Release notes](docs/releases/v0.2.0.md)。本地构建输出 `dist/BiliGiftDrop-v0.2.0-windows-x64.zip`、`SHA256SUMS.txt`、`RELEASE_TAG.txt`、`RELEASE_TITLE.txt` 和 `RELEASE_NOTES.md`。上传带版本号 ZIP 与校验文件即可；本轮不推送或发布远程 Release。
 
-本地运行、浏览器设置的 Bilibili 礼物掉落原型，为 OBS 提供透明浏览器源。先做礼物，SC 后续开发。
+本地运行、浏览器设置的 Bilibili 礼物掉落原型，为 OBS 提供透明浏览器源。礼物掉落与醒目留言可组合显示，SC 已在 v0.4.0 提供预览功能。
 
 ## 工程进度与验收（早期记录，最新增量见上文）
 
@@ -62,7 +70,7 @@ English: v0.2.0 is a preview with bounded spawning, a short pending queue, count
 | Windows x64 便携 EXE | 已构建，本机回归通过 | 内含运行时；可见命令行同时显示中日英；重复启动、配置重启及退出释放端口已验证；全新电脑及完整浏览器自动打开验收待做 |
 | OBS 浏览器源 | 待实机验收 | 透明页面及接入地址已提供，尚未确认 OBS 内实际显示 |
 | 新礼物自动适配 | 部分完成 | 动态目录、未知 ID 刷新与图片缓存已实现；全新上架礼物和异常场景待验证 |
-| SC 金额时长与自定义位置 | 后续，未实现 | 需求已记录；卡片、独立计时、拖动缩放待开发 |
+| SC 金额时长与自定义位置 | v0.4.0 预览实现，真实SC/OBS待验收 | 独立计时、拖动与宽度自动保存、折叠/展开及三语已具备 |
 | 可靠性及正式交付 | 待完成 | 连送/盲盒实测、断网恢复、长期压力、缓存清理和新环境启动待验收 |
 
 本轮复验：`node --test` **8/8 通过**；`node scripts/smoke.mjs` **通过**。真实送礼与截图采用同日已取得的验证证据，不代表本轮重新监听或 OBS 已验收。
@@ -73,7 +81,7 @@ Windows EXE 回归：`node scripts/smoke-windows.mjs` **通过**，覆盖控制�
 
 English: This is a development prototype. Some real V2 gifts, browser rendering, the minimum unit price and the three-language UI have been verified. All 8 automated tests and HTTP/SSE checks pass. OBS rendering, SC, layout editing and long-running reliability remain pending.
 
-下一步优先验收 OBS 实机透明显示，再补齐金额分档、区域编辑与可靠性；SC 按后续阶段开发。完整任务清单和证据见 [任务验收报告](docs/ACCEPTANCE.md)。
+下一步优先验收 OBS 实机透明显示，再补齐金额分档、区域编辑与可靠性；SC 已在 v0.4.0 实现，真实事件及OBS继续验收。完整任务清单和证据见 [任务验收报告](docs/ACCEPTANCE.md)。
 
 ## 启动 / 起動 / Start
 
@@ -142,9 +150,9 @@ English: Run `node scripts/build-windows.mjs` on Windows x64 with Node.js 24. Th
 - 固定 1920×1080 逻辑画布和圆形碰撞近似；拖拽区域编辑、金额档位编辑、长期实机压力验证与缓存空间管理待做。透明页不回放刷新前的礼物。
 - 盲盒保留支付单价与爆出价值，效果暂按爆出价值计算；免费礼物不折算人民币；忽略连击汇总以避免重复掉落。
 
-日本語：一部の実際の V2 ギフト受信とブラウザ上の落下表示は検証済みです。OBS 内の表示と全ギフト種類は未検証です。匿名接続が制限される場合があります。ログイン機能、領域編集、金額別プリセット、SC は未実装です。画面更新時に過去のギフトは再生されません。
+日本語：一部の実際の V2 ギフト受信とブラウザ上の落下表示は検証済みです。OBS 内の表示と全ギフト種類は未検証です。匿名接続が制限される場合があります。ログイン機能、ギフト領域のドラッグ編集と金額別プリセットは未実装です。SC は v0.4.0 で利用できます。画面更新時に過去のギフトは再生されません。
 
-English: Some real V2 gifts and browser drops have been verified. Rendering inside OBS and all gift types are not yet verified. Anonymous access may be restricted. Login, area editing, editable price tiers and SC are not implemented. Refreshing the overlay does not replay earlier gifts.
+English: Some real V2 gifts and browser drops have been verified. Rendering inside OBS and all gift types are not yet verified. Anonymous access may be restricted. Login, gift-region drag editing and editable price tiers are not implemented. SC is available in v0.4.0. Refreshing the overlay does not replay earlier gifts.
 
 ## 文档
 
@@ -164,3 +172,11 @@ English: Some real V2 gifts and browser drops have been verified. Rendering insi
 日本語：本プロジェクトのオリジナルコードは [MIT License](LICENSE) で公開されています。商用利用、改変、再配布、非公開ソフトウェアへの組み込みが可能です。配布時は著作権表示と許諾表示を保持してください。無保証です。第三者のランタイム、ギフト画像、商標などには、それぞれのライセンスとプラットフォーム規約が適用されます。
 
 English: Original project code is licensed under the [MIT License](LICENSE), allowing commercial use, modification, redistribution and inclusion in proprietary software. Retain the copyright and permission notices when distributing copies. The software is provided without warranty. Third-party runtimes, platform gift images, trademarks and other third-party content remain subject to their own licenses and platform terms.
+
+### SC / 醒目留言 / スーパーチャット（v0.4.0）
+
+中文：设置里启用醒目留言，调整左侧、顶部、宽度与自动折叠秒数（0关闭自动折叠）；修改自动保存。点击预览标题展开/折叠并同步 OBS，OBS 内使用“交互”。卡片不显示倒计时，到期自动移除。最多显示3条、保留最新100条，等待不会延长时间。运行 v0.4.0 EXE 或源码 start.cmd 使用此功能。
+
+日本語：設定で SC を有効にし、左・上・幅・自動折りたたみ秒数（0で無効）を設定すると自動保存されます。見出しをクリックして展開・折りたたみを OBS と同期。OBS は「対話」を使用。カウントダウンは非表示で、期限切れで削除。最大3件表示、最新100件まで保持し、待機中も期限は延長されません。v0.4.0 の EXE または start.cmd で起動できます。
+
+English: Enable SC in settings and adjust left, top, width and auto-collapse seconds (0 disables). Changes save automatically. Click preview headings to sync expansion with OBS; in OBS use Interact. Cards show no countdown and expire on schedule. Up to 3 display; latest 100 retained, with no lifetime extension while waiting. Run the v0.4.0 EXE or the source using start.cmd.

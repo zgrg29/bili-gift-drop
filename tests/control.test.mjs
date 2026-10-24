@@ -16,11 +16,11 @@ test('control panel executes in all locales, renders new strings and submits all
       checkValidity(){return this.value!==''&&Number.isFinite(Number(this.value))&&(!this.min||Number(this.value)>=Number(this.min))&&(!this.max||Number(this.value)<=Number(this.max));}
       querySelectorAll(){return elements.filter(e=>e.type==='number'&&e.id!=='count'&&e.id!=='price').concat(ids.get('includeFree'));}
       append(...items){this.children.push(...items);}prepend(...items){this.children.unshift(...items);}
-      replaceChildren(...items){this.children=items;}after(){}get options(){return this.children;}
+      replaceChildren(...items){this.children=items;}after(){}before(){}getBoundingClientRect(){return {width:1000,height:500};}setPointerCapture(){}dispatchEvent(){ids.get('settings').oninput({target:this});}get options(){return this.children;}
     }
     for(const id of ['demo','fields','language','status','warning','empty','events','room','includeFree','toast','obs','connection','disconnect','settings','clear','copy','count','price']){const e=new Element();e.id=id;}
     const preview=new Element(),iframe=new Element();
-    const sandbox={t,Intl,JSON,Number,Map,console,document:{documentElement:{},getElementById:id=>ids.get(id),createElement:()=>new Element(),querySelector:q=>q==='iframe'?iframe:preview,querySelectorAll:()=>elements.filter(e=>e.dataset.t)},localStorage:{getItem:()=>language,setItem(){}},navigator:{language},location:{origin:'http://test'},setTimeout:(fn,delay)=>{timers.set(++timerId,{fn,delay});return timerId;},clearTimeout:id=>timers.delete(id),EventSource:class{constructor(){events=this;}},window:{addEventListener(type,fn){listener=fn;}},fetch:async(url,options)=>{posted=JSON.parse(options.body);return {ok:true};}};
+    const sandbox={Event:class{},t,Intl,JSON,Number,Map,console,document:{documentElement:{},getElementById:id=>ids.get(id),createElement:()=>new Element(),querySelector:q=>q==='iframe'?iframe:preview,querySelectorAll:()=>elements.filter(e=>e.dataset.t)},localStorage:{getItem:()=>language,setItem(){}},navigator:{language},location:{origin:'http://test'},setTimeout:(fn,delay)=>{timers.set(++timerId,{fn,delay});return timerId;},clearTimeout:id=>timers.delete(id),EventSource:class{constructor(){events=this;}},window:{addEventListener(type,fn){listener=fn;}},fetch:async(url,options)=>{posted=JSON.parse(options.body);return {ok:true};}};
     vm.runInNewContext(source,sandbox);
     events.onmessage({data:JSON.stringify({type:'init',data:{config:{...defaults,language},configured:true,status:'disconnected',warning:null,gifts:[]}})});
     for(const key of ['minGiftScale','maxGiftScale','maxGiftScaleAmount','maxCoverage','spawnRate','regionX','regionY','regionWidth','regionHeight'])assert.ok(ids.get(key));
@@ -46,6 +46,9 @@ test('control panel executes in all locales, renders new strings and submits all
     change('maxGiftScaleAmount','50');await [...timers.values()].find(x=>x.delay===400).fn();assert.equal(posted.maxGiftScaleAmount,50);
     ids.get('includeFree').checked=false;ids.get('settings').oninput({target:ids.get('includeFree')});
     await [...timers.values()].find(x=>x.delay===400).fn();assert.equal(posted.includeFree,false);
+    const handle=elements.find(e=>e.dataset.t==='scLayout');handle.onpointerdown({clientX:0,clientY:0,pointerId:1});handle.onpointermove({clientX:100,clientY:50});await handle.onpointerup();assert.equal(posted.scX,15);assert.equal(posted.scY,15);
+    handle.onkeydown({key:'ArrowRight',preventDefault(){}});await [...timers.values()].find(x=>x.delay===400).fn();assert.equal(posted.scX,16);
+
 
   }
 });

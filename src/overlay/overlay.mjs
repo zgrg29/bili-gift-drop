@@ -1,3 +1,4 @@
+import {superchat} from '/src/overlay/superchat.mjs';
 import {Crowd,region,collisionPairs} from '/src/shared/crowd.mjs';
 import {defaults} from '/src/shared/rules.mjs';
 import {t} from '/src/shared/i18n/index.mjs';
@@ -39,3 +40,5 @@ function frame(now){
     ctx.restore();
   }ctx.restore();requestAnimationFrame(frame);
 }requestAnimationFrame(frame);
+
+superchat(events,()=>cfg);

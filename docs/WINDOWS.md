@@ -18,11 +18,11 @@ Double-clicking the EXE keeps a visible console with the control panel and OBS U
 
 If the gift service is already running, another launch opens its control panel and exits normally. Other startup errors display an error code and wait for Enter in an interactive console.
 
-简体中文：适用于 Windows 10/11 x64。解压后双击 `BiliGiftDrop-windows-x64.exe`，自动打开浏览器控制面板，无需安装 Node.js。保持服务窗口运行，关闭窗口即停止服务。OBS 浏览器源地址为 `http://127.0.0.1:19321/overlay`，宽 1920、高 1080。设置和缓存保存在 `%LOCALAPPDATA%\BiliGiftDrop`，升级时替换 EXE 即可。请先停止旧版本，再启动新版；端口 19321 被其他程序占用时会提示启动失败；已有礼物服务运行时会打开原面板。此构建未签名。SC 尚未实现，OBS 实机验收尚未完成。
+简体中文：适用于 Windows 10/11 x64。解压后双击 `BiliGiftDrop-windows-x64.exe`，自动打开浏览器控制面板，无需安装 Node.js。保持服务窗口运行，关闭窗口即停止服务。OBS 浏览器源地址为 `http://127.0.0.1:19321/overlay`，宽 1920、高 1080。设置和缓存保存在 `%LOCALAPPDATA%\BiliGiftDrop`，升级时替换 EXE 即可。请先停止旧版本，再启动新版；端口 19321 被其他程序占用时会提示启动失败；已有礼物服务运行时会打开原面板。此构建未签名。SC 已提供预览功能，真实SC与OBS实机验收尚未完成。
 
-日本語：Windows 10/11 x64 対応。展開して `BiliGiftDrop-windows-x64.exe` をダブルクリックすると、ブラウザに設定画面が開きます。Node.js のインストールは不要です。サービスのウィンドウを開いたままにしてください。閉じると停止します。OBS ブラウザソースは `http://127.0.0.1:19321/overlay`、幅 1920、高さ 1080。設定とキャッシュは `%LOCALAPPDATA%\BiliGiftDrop` に保存され、EXE を交換しても保持されます。更新前に旧版を終了してください。ポート 19321 を別のアプリが使用している場合はエラーを表示し、既存のギフトサービスの場合はその画面を開きます。署名なしのビルドです。SC は未実装、OBS 内の動作確認は未完了です。
+日本語：Windows 10/11 x64 対応。展開して `BiliGiftDrop-windows-x64.exe` をダブルクリックすると、ブラウザに設定画面が開きます。Node.js のインストールは不要です。サービスのウィンドウを開いたままにしてください。閉じると停止します。OBS ブラウザソースは `http://127.0.0.1:19321/overlay`、幅 1920、高さ 1080。設定とキャッシュは `%LOCALAPPDATA%\BiliGiftDrop` に保存され、EXE を交換しても保持されます。更新前に旧版を終了してください。ポート 19321 を別のアプリが使用している場合はエラーを表示し、既存のギフトサービスの場合はその画面を開きます。署名なしのビルドです。SCのプレビュー機能を提供していますが、実際のSCとOBS内の動作確認は未完了です。
 
-English: Windows 10/11 x64. Extract and double-click `BiliGiftDrop-windows-x64.exe` to open the browser control panel. No Node.js installation is needed. Keep the service window open; closing it stops the service. Use `http://127.0.0.1:19321/overlay` as an OBS browser source, width 1920, height 1080. Settings and cache are stored in `%LOCALAPPDATA%\BiliGiftDrop` and survive EXE replacement. Stop the old version before upgrading. If another application uses port 19321, startup reports an error; an existing gift service is reused. This build is unsigned. SC is not implemented; testing inside OBS is still pending.
+English: Windows 10/11 x64. Extract and double-click `BiliGiftDrop-windows-x64.exe` to open the browser control panel. No Node.js installation is needed. Keep the service window open; closing it stops the service. Use `http://127.0.0.1:19321/overlay` as an OBS browser source, width 1920, height 1080. Settings and cache are stored in `%LOCALAPPDATA%\BiliGiftDrop` and survive EXE replacement. Stop the old version before upgrading. If another application uses port 19321, startup reports an error; an existing gift service is reused. This build is unsigned. SC preview is included; real SC and testing inside OBS are still pending.
 
 礼物默认从生成起最多存在 30 秒，最后 0.75 秒淡出。可设置 5–120 秒；拥挤时旧礼物提前淡出，缩小上限时超额旧对象直接移除。v0.2.0 默认每秒最多生成 12 个、同时最多 120 个，估算面积预算为掉落区域的 15%；待生成效果超过 1.5 秒丢弃。可在设置中调整区域左/上/宽/高百分比以避开主播。最近记录保留原始赠送数量，图标数量可能少于赠送数量。
 
@@ -49,3 +49,11 @@ English: Save minimum size, maximum size and the amount for maximum size. Defaul
 日本語：有効な数値・無料ギフト設定は約 400 ミリ秒後に自動保存されます。無効な値は保存しません。失敗時は保存ボタンで再試行できます。
 
 English: Valid drop settings save automatically after about 400 ms without typing. Invalid values are not saved. Use the Save button to retry after an error.
+
+## v0.4.0 SC / 醒目留言 / スーパーチャット
+
+中文：启用醒目留言，在布局框拖动位置（松开立即保存），或修改左侧、顶部与宽度（停止输入约400毫秒后保存）；默认15秒折叠，0关闭折叠。点击预览标题展开并同步OBS，OBS内使用“交互”。不显示倒计时，到期移除。关闭显示与切换语言不重置有效期。最多显示3条、保留最新100条，等待不延时。
+
+日本語：SCを有効にし、枠をドラッグして位置を保存、または左・上・幅を入力して約400ミリ秒後に自動保存。初期値15秒で折りたたみ、0で無効。見出しをクリックして展開しOBSと同期（OBSでは「対話」）。カウントダウンは非表示で期限切れで削除。非表示・言語変更でも期限は変わりません。最大3件表示、最新100件まで保持します。
+
+English: Enable SC and drag the layout box (saves on release), or edit left/top/width (saves after about400ms). Default collapse delay15 seconds;0 disables it. Click headings to expand and sync OBS; use Interact inside OBS. No countdown is shown. Cards expire on schedule; hiding or switching language never resets expiry. Shows up to3 cards and retains the latest100 without extending queued lifetimes.

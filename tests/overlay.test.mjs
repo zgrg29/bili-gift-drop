@@ -10,7 +10,7 @@ test('overlay event/render integration: storm, region clipping, language change,
  let next,events,clock=0,latest,clips=0,draws=0;
  const context=new Proxy({},{get(target,key){return target[key]??(()=>{if(key==='clip')clips++;if(key==='fillText')draws++;});},set(target,key,value){target[key]=value;return true;}});
  const canvas={getContext:()=>context};
- const sandbox={Crowd,region,collisionPairs,defaults,t,console,Math,Map,JSON,Image:class{},ResizeObserver:class{observe(){}},document:{querySelector:()=>canvas,documentElement:{}},location:{origin:'http://test'},parent:{postMessage(s){latest=s;}},performance:{now:()=>clock},EventSource:class{constructor(){events=this;}},requestAnimationFrame(fn){next=fn;}};
+ const sandbox={superchat(){},Crowd,region,collisionPairs,defaults,t,console,Math,Map,JSON,Image:class{},ResizeObserver:class{observe(){}},document:{querySelector:()=>canvas,documentElement:{}},location:{origin:'http://test'},parent:{postMessage(s){latest=s;}},performance:{now:()=>clock},EventSource:class{constructor(){events=this;}},requestAnimationFrame(fn){next=fn;}};
  vm.runInNewContext(source,sandbox);
  const send=(type,data)=>events.onmessage({data:JSON.stringify({type,data})});
  send('init',{config:{...defaults,regionY:70,regionHeight:30,maxCoverage:5}});
@@ -30,7 +30,7 @@ test('overlay draws sizes from event total and saved settings without resizing e
  let events,next,clock=0;const sizes=[];
  const ctx=new Proxy({roundRect(x,y,w){sizes.push(w);}},{get:(o,k)=>o[k]??(()=>{})});
  const canvas={getContext:()=>ctx};
- const sandbox={Crowd,region,collisionPairs,defaults,t,Math,Map,JSON,Image:class{},ResizeObserver:class{observe(){}},document:{querySelector:()=>canvas,documentElement:{}},location:{origin:'http://test'},parent:{postMessage(){}},performance:{now:()=>clock},EventSource:class{constructor(){events=this;}},requestAnimationFrame(fn){next=fn;}};
+ const sandbox={superchat(){},Crowd,region,collisionPairs,defaults,t,Math,Map,JSON,Image:class{},ResizeObserver:class{observe(){}},document:{querySelector:()=>canvas,documentElement:{}},location:{origin:'http://test'},parent:{postMessage(){}},performance:{now:()=>clock},EventSource:class{constructor(){events=this;}},requestAnimationFrame(fn){next=fn;}};
  vm.runInNewContext(source,sandbox);
  const send=(type,data)=>events.onmessage({data:JSON.stringify({type,data})});
  const cfg={...defaults,minGiftScale:50,maxGiftScale:150,maxGiftScaleAmount:100};

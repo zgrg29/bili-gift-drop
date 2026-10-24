@@ -1,3 +1,4 @@
+import {normalizeSC,SCStore,scDuration} from '../shared/superchat.mjs';
 import http from 'node:http';
 import {readFile,writeFile,mkdir,rename} from 'node:fs/promises';
 import {root,runtimeRoot} from './paths.mjs';
@@ -11,11 +12,19 @@ import {Catalog} from './catalog.mjs';
 import {expandGiftV2} from './gift-v2.mjs';
 await mkdir(path.join(runtimeRoot,'data'),{recursive:true});
 let cfg={...defaults},configured=false;try{cfg=config(JSON.parse(await readFile(path.join(runtimeRoot,'data/config.json'),'utf8')));configured=true;}catch{}
+const scStore=new SCStore();
 let status='disconnected',warning=null;const clients=new Set(),catalog=new Catalog(),dedup=new Deduplicator();
 let configWrites=Promise.resolve();
 const send=(type,data)=>{const msg=`data: ${JSON.stringify({type,data})}\n\n`;for(const r of clients){if(r.writableLength>1024*1024){r.destroy();clients.delete(r);}else r.write(msg);}};
 async function receive(msg){
-  try{const messages=msg.cmd?.split(':')[0]==='SEND_GIFT_V2'?expandGiftV2(msg):[msg];
+  try{
+    const command=msg.cmd?.split(':')[0];
+    if(command==='SUPER_CHAT_MESSAGE_DELETE'){scStore.remove(msg.data?.ids??[]);send('sc-list',scStore.list());return;}
+    if(['SUPER_CHAT_MESSAGE','SUPER_CHAT_MESSAGE_JPN'].includes(command)){
+      const sc=normalizeSC(msg);if(sc&&scStore.add(sc))send('sc',sc);
+      else if(!sc&&(!(Number(msg.data?.start_time)>0)||(!msg.data?.end_time&&!(Number(msg.data?.time)>0)&&!scDuration(Number(msg.data?.price))))){warning='scTiming';send('warning',warning);}return;
+    }
+    const messages=msg.cmd?.split(':')[0]==='SEND_GIFT_V2'?expandGiftV2(msg):[msg];
     for(const message of messages){const gift=normalizeGift(message);if(!gift||!dedup.accept(gift.id))continue;
       if(!effect(gift,cfg).count){gift.image=null;send('gift',gift);continue;}
       if(!catalog.validImage(gift.image)){const metadata=await catalog.lookup(gift.giftId,cfg.room);gift.image=metadata?.image??null;}
@@ -38,16 +47,18 @@ const server=http.createServer(async(req,res)=>{
     if(req.method==='GET'&&/^\/cache\/[a-f0-9]{64}$/.test(url.pathname)){const asset=await readFile(path.join(runtimeRoot,url.pathname));const type=asset.subarray(0,3).toString()==='GIF'?'image/gif':asset.subarray(8,12).toString()==='WEBP'?'image/webp':asset[0]===255?'image/jpeg':'image/png';res.writeHead(200,{'Content-Type':type,'Cache-Control':'public, max-age=86400'}).end(asset);return;}
     if(req.method==='GET'&&url.pathname==='/api/events'){
       res.writeHead(200,{'Content-Type':'text/event-stream','Cache-Control':'no-cache','Connection':'keep-alive'});
-      clients.add(res);res.write(`data: ${JSON.stringify({type:'init',data:{config:cfg,status,warning,configured,gifts:giftList()}})}\n\n`);
+      clients.add(res);res.write(`data: ${JSON.stringify({type:'init',data:{config:cfg,status,warning,configured,sc:scStore.list(),gifts:giftList()}})}\n\n`);
       req.on('close',()=>clients.delete(res));return;
     }
     if(req.method==='POST'&&url.pathname.startsWith('/api/')){
       const d=await body(req);
       switch(url.pathname){
         case '/api/config':{const task=configWrites.catch(()=>{}).then(async()=>{const next=config(d,cfg);await writeFile(path.join(runtimeRoot,'data/config.tmp'),JSON.stringify(next,null,2));await rename(path.join(runtimeRoot,'data/config.tmp'),path.join(runtimeRoot,'data/config.json'));cfg=next;configured=true;send('config',cfg);});configWrites=task;await task;break;}
-        case '/api/connect':if(!/^\d{1,12}$/.test(d.room)||Number(d.room)<1)throw Error('invalid');warning=null;send('warning',null);await live.connect(d.room);catalog.refresh(d.room).catch(()=>send('warning','catalog'));break;
+        case '/api/connect':if(!/^\d{1,12}$/.test(d.room)||Number(d.room)<1)throw Error('invalid');warning=null;send('warning',null);if(live.room!==d.room){scStore.items.clear();send('sc-list',[]);}await live.connect(d.room);catalog.refresh(d.room).catch(()=>send('warning','catalog'));break;
         case '/api/disconnect':live.stop();break;
-        case '/api/clear':send('clear',null);break;
+        case '/api/sc-toggle':{const x=scStore.items.get(String(d.id));if(x){x.expanded=!!d.expanded;x.interactedAt=Date.now();send('sc-list',scStore.list());}break;}
+        case '/api/sc-test':{const now=Date.now();const price=Number(d.price??30),duration=Number(d.duration??60);if(!Number.isFinite(price)||price<0||!Number.isFinite(duration)||duration<1||duration>7200)throw Error('invalid');const x={id:randomUUID(),demo:true,user:'',message:'',price,start:now,end:now+duration*1000,color:'#2a60b2',background:'#edf5ff',text:'#172033'};scStore.add(x);send('sc',x);break;}
+        case '/api/clear':scStore.items.clear();send('sc-list',[]);send('clear',null);break;
         case '/api/test':{const count=Number(d.count),price=Number(d.price);if(!Number.isInteger(count)||count<1||count>1000||!Number.isFinite(price)||price<0||price>100000)throw Error('invalid');const metadata=catalog.gifts.get(Number(d.giftId));const image=metadata?await catalog.cacheImage(metadata.image).catch(()=>null):null;send('gift',{id:randomUUID(),giftId:Number(d.giftId)||0,name:metadata?.name??null,user:null,demo:true,count,coinType:price?'gold':'silver',unitCoin:Math.round(price*1000),totalCoin:Math.round(price*1000)*count,image});break;}
         default:res.writeHead(404).end();return;
       }
