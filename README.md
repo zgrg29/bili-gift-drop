@@ -130,3 +130,11 @@ English: Some real V2 gifts and browser drops have been verified. Rendering insi
 - [初始需求纪要](log/2026-10-24-conversation.md)
 - [真实送礼与金额门槛记录](log/2026-10-24-live-validation.md)
 - [本轮任务汇总与验收日志](log/2026-10-24-acceptance.md)
+
+## 开源许可 / ライセンス / License
+
+本项目原创代码采用 [MIT License](LICENSE)，允许商用、修改、分发及闭源使用；分发时须保留版权和许可声明，软件不提供担保。第三方运行时、平台礼物图片、商标及其他第三方内容不因本项目许可而获得授权，须遵守其各自许可和平台条款。
+
+日本語：本プロジェクトのオリジナルコードは [MIT License](LICENSE) で公開されています。商用利用、改変、再配布、非公開ソフトウェアへの組み込みが可能です。配布時は著作権表示と許諾表示を保持してください。無保証です。第三者のランタイム、ギフト画像、商標などには、それぞれのライセンスとプラットフォーム規約が適用されます。
+
+English: Original project code is licensed under the [MIT License](LICENSE), allowing commercial use, modification, redistribution and inclusion in proprietary software. Retain the copyright and permission notices when distributing copies. The software is provided without warranty. Third-party runtimes, platform gift images, trademarks and other third-party content remain subject to their own licenses and platform terms.
