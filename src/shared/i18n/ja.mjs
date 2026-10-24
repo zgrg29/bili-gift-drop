@@ -1,4 +1,12 @@
 export default {
+  "consoleReady": "ギフトサービスを起動しました。このウィンドウを開いたままにしてください。",
+  "consolePanel": "設定画面（自動で開かない場合はブラウザに貼り付けてください）：{url}",
+  "consoleOverlay": "OBS ブラウザソース：{url}",
+  "consoleStop": "このウィンドウを閉じるか Ctrl+C を押すと、プログラムを終了してポートを解放します。ブラウザを閉じても終了しません。",
+  "consoleStopping": "ギフトサービスを終了しています……",
+  "browserFailed": "ブラウザを開けませんでした。手動で開いてください：{url}",
+  "startupFailed": "起動できませんでした（{code}）。ポートとフォルダーの権限を確認してください。Enter キーで閉じます。",
+  "alreadyRunning": "ギフトサービスは起動済みです。設定画面を開きます：{url}",
   "giftType": "テスト用ギフト",
   "title": "ギフトドロップ",
   "subtitle": "配信ルームにつなげて、届いた想いを画面へ。",

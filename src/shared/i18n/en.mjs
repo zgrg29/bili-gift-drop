@@ -1,4 +1,12 @@
 export default {
+  "consoleReady": "Gift service started. Keep this window open.",
+  "consolePanel": "Control panel (copy into your browser if it does not open automatically): {url}",
+  "consoleOverlay": "OBS browser source: {url}",
+  "consoleStop": "Close this console window or press Ctrl+C to stop the program and release the port. Closing the browser does not stop the program.",
+  "consoleStopping": "Stopping the gift service…",
+  "browserFailed": "Could not open the browser automatically. Open this address manually: {url}",
+  "startupFailed": "Startup failed ({code}). Check the port and folder permissions. Press Enter to close this window.",
+  "alreadyRunning": "The gift service is already running. Opening the control panel: {url}",
   "giftType": "Test gift",
   "title": "Gift Drop",
   "subtitle": "Connect your room. Let every gift land on screen.",

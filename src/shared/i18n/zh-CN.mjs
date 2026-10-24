@@ -1,4 +1,12 @@
 export default {
+  "consoleReady": "礼物服务已启动。请保持此窗口打开。",
+  "consolePanel": "控制面板（如未自动打开，请复制到浏览器）：{url}",
+  "consoleOverlay": "OBS 浏览器源：{url}",
+  "consoleStop": "关闭此命令行窗口，或按 Ctrl+C，即可停止程序并释放端口。关闭浏览器页面不会停止程序。",
+  "consoleStopping": "正在停止礼物服务……",
+  "browserFailed": "无法自动打开浏览器，请手动打开：{url}",
+  "startupFailed": "启动失败（{code}）。请检查端口及目录权限。按回车键关闭窗口。",
+  "alreadyRunning": "礼物服务已在运行，正在打开控制面板：{url}",
   "giftType": "测试礼物",
   "title": "礼物掉落",
   "subtitle": "连接直播间，让每一份心意落入画面。",

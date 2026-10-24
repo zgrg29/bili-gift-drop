@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-const base='http://127.0.0.1:19321';
+const base=process.env.BILI_GIFT_TEST_URL||'http://127.0.0.1:19321';
 for(const file of ['/','/overlay','/src/control/control.mjs','/src/shared/i18n/ja.mjs'])assert.equal((await fetch(base+file)).status,200,file);
 const events=await fetch(base+'/api/events');const reader=events.body.getReader();const decoder=new TextDecoder();let pending='';
 async function event(type){for(;;){let end;while((end=pending.indexOf('\n\n'))>=0){const line=pending.slice(0,end);pending=pending.slice(end+2);if(line.startsWith('data: ')){const value=JSON.parse(line.slice(6));if(value.type===type)return value;}}const chunk=await reader.read();if(chunk.done)throw Error('SSE ended');pending+=decoder.decode(chunk.value,{stream:true});}}

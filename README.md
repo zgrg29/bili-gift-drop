@@ -14,12 +14,15 @@
 | 金额影响效果、最低触发金额 | 部分完成 | 单价影响尺寸；数量有上限；最低单价可保存；可编辑金额档位及分档停留时间待做 |
 | 主播定制 | 部分完成 | 重力、弹性、停留时间、数量上限、免费开关；掉落区域编辑待做 |
 | 中日英语言设置 | 当前界面通过 | 资源键/参数一致、切换、保存和桌面布局已检查；完整窄屏验收待做 |
+| Windows x64 便携 EXE | 已构建，本机回归通过 | 内含运行时；可见命令行同时显示中日英；重复启动、配置重启及退出释放端口已验证；全新电脑及完整浏览器自动打开验收待做 |
 | OBS 浏览器源 | 待实机验收 | 透明页面及接入地址已提供，尚未确认 OBS 内实际显示 |
 | 新礼物自动适配 | 部分完成 | 动态目录、未知 ID 刷新与图片缓存已实现；全新上架礼物和异常场景待验证 |
 | SC 金额时长与自定义位置 | 后续，未实现 | 需求已记录；卡片、独立计时、拖动缩放待开发 |
 | 可靠性及正式交付 | 待完成 | 连送/盲盒实测、断网恢复、长期压力、缓存清理和新环境启动待验收 |
 
 本轮复验：`node --test` **8/8 通过**；`node scripts/smoke.mjs` **通过**。真实送礼与截图采用同日已取得的验证证据，不代表本轮重新监听或 OBS 已验收。
+
+Windows EXE 回归：`node scripts/smoke-windows.mjs` **通过**，覆盖控制台子系统、三语启动与重复启动提示、静态资源、模拟送礼、清空、配置重启恢复及退出后端口释放。构建为未签名预览版，尚未发布 GitHub Release。
 
 日本語：開発用プロトタイプです。実際の一部の V2 ギフト、ブラウザ表示、最低単価と三言語 UI を検証済みです。自動テスト 8 件と HTTP/SSE チェックに合格。OBS 内表示、SC、配置編集、長時間運用は未検証または未実装です。
 
@@ -29,7 +32,23 @@ English: This is a development prototype. Some real V2 gifts, browser rendering,
 
 ## 启动 / 起動 / Start
 
-需要 Node.js 22 或更新版本，无需安装 npm 依赖。当前机器也可使用已存在的 Codex Node 运行时。
+### Windows 便携版 / Windows ポータブル版 / Windows portable app
+
+1. 下载并解压 Release 包，双击 `BiliGiftDrop-windows-x64.exe`，无需另装 Node.js。
+2. 保持可见命令行窗口打开。窗口同时显示中、日、英三语说明、控制面板和 OBS 地址。
+3. 程序会尝试自动打开浏览器；没有打开时，把 `http://127.0.0.1:19321/` 复制到浏览器。
+4. **关闭原来的服务命令行窗口，或在其中按 Ctrl+C，即可停止程序并释放端口。关闭浏览器页面不会停止服务。**
+5. 重复启动会尝试打开已有面板，然后退出新进程；要停止服务，仍须关闭原来的服务窗口。其他启动错误会显示错误码，并在交互窗口等待回车。
+
+设置与图片缓存保存在 `%LOCALAPPDATA%\BiliGiftDrop`，升级前先关闭旧服务，再替换 EXE；设置会保留。源码运行仍使用项目中的 `data/` 和 `cache/`。
+
+日本語：ZIP を展開し、`BiliGiftDrop-windows-x64.exe` をダブルクリックします。Node.js は不要です。コンソールには中国語・日本語・英語の案内が同時に表示されます。ブラウザが開かない場合は `http://127.0.0.1:19321/` を貼り付けてください。元のサービスウィンドウを閉じるか Ctrl+C で終了し、ポートを解放します。ブラウザを閉じても終了しません。再実行は既存の画面を開いて新しいプロセスを終了します。設定とキャッシュは `%LOCALAPPDATA%\BiliGiftDrop` に保存されます。更新前に旧サービスを終了してください。
+
+English: Extract the ZIP and double-click `BiliGiftDrop-windows-x64.exe`; no Node.js installation is needed. Keep its visible console open. Instructions appear in Chinese, Japanese and English together. If the browser does not open, visit `http://127.0.0.1:19321/`. Close the original service console or press Ctrl+C to stop the program and release the port; closing the browser does not stop it. Another launch opens the existing panel and exits the new process. Settings and cache live in `%LOCALAPPDATA%\BiliGiftDrop`. Stop the old service before replacing the EXE.
+
+### 源码启动 / ソースから起動 / Run from source
+
+源码运行需要 Node.js 22 或更新版本，无需安装 npm 依赖。
 
 1. 双击 `start.cmd`，保持服务窗口运行；浏览器将自动打开设置页。
 2. 输入 Bilibili 直播间号并连接。也可不连接，选择真实礼物后点击「模拟送礼」预览图片效果。
@@ -48,6 +67,28 @@ English: Install Node.js 22 or later. Double-click `start.cmd` and keep the serv
 
 开发启动：`node src/server/index.mjs`。停止：服务窗口按 Ctrl+C。开发检查：`node --test`；服务启动后运行 `node scripts/smoke.mjs`。
 
+## 礼物堆积与消失 / 積み重なりと消去 / Stacking and expiry
+
+礼物受到重力、旋转、弹跳与圆形近似碰撞影响，会在底部堆积。默认从生成起显示 30 秒，最后 1 秒逐渐淡出，随后删除；停留时间可设 5–120 秒。达到数量上限时最早的礼物会提前直接移除；「清空画面」会立即清空。这次确认了已有行为，没有更改物理效果或增加金额分档停留时间。
+
+日本語：ギフトは重力・回転・反発と円形の近似衝突によって底に積み重なります。生成から既定で 30 秒間表示され、最後の 1 秒でフェードアウトします。5～120 秒に設定できます。個数上限を超えると古いギフトが先に削除され、クリア操作は即時に反映されます。
+
+English: Gifts fall, rotate, bounce and stack at the bottom using approximate circular collisions. They last 30 seconds from spawning by default and fade out during the final second. Lifetime is configurable from 5 to 120 seconds. The oldest gifts are removed immediately when the object limit is reached; Clear screen removes all gifts immediately.
+
+## Windows 构建与 Release / ビルドと Release / Build and Release
+
+在 Windows x64、Node.js 24 下运行 `node scripts/build-windows.mjs`。首次构建需要联网下载固定版本且校验 SHA-256 的 postject 构建工具，以及 Node.js 许可声明；使用者运行 EXE 不需要 npm 依赖。构建会输出：
+
+- `dist/BiliGiftDrop-windows-x64.exe`：可直接运行的未签名预览版。
+- `dist/BiliGiftDrop-windows-x64.zip`：EXE、三语使用说明和 Node.js 许可声明。
+- `dist/SHA256SUMS.txt`：ZIP 的 SHA-256 校验值。
+
+GitHub Release 可上传 ZIP 与校验文件；本次只生成本地产物并提交源码和文档，未创建或上传远程 Release。`build/`、`dist/`、个人设置和缓存均被 Git 忽略。构建后的本机检查为 `node scripts/smoke-windows.mjs`，使用隔离数据和端口 19329，完成后停止测试进程。
+
+日本語：Windows x64 と Node.js 24 で `node scripts/build-windows.mjs` を実行します。初回はビルドツールとライセンスをダウンロードします。`dist/` に EXE、説明書とライセンスを含む ZIP、SHA-256 ファイルを生成します。ZIP とチェックサムを GitHub Release に添付できます。未署名のプレビュー版であり、この作業では Release を公開していません。ビルド成果物と個人設定は Git に含めません。
+
+English: Run `node scripts/build-windows.mjs` on Windows x64 with Node.js 24. The first build downloads the checksum-verified build tool and Node license. Outputs in `dist/` include the EXE, a ZIP with instructions and license notices, and its SHA-256 checksum. Upload the ZIP and checksum to GitHub Release when ready. This is an unsigned preview; no remote Release was published. Build outputs and personal settings are excluded from Git.
+
 ## 当前能力与限制 / 制限 / Limitations
 
 - 三语控制面板、语言及配置保存、模拟真实礼物图片、透明画面、重力/旋转/圆形碰撞/弹跳/堆积/过期清理。
@@ -62,6 +103,8 @@ English: Some real V2 gifts and browser drops have been verified. Rendering insi
 
 ## 文档
 
+- [Windows EXE 三语使用与构建说明](docs/WINDOWS.md)：`node scripts/build-windows.mjs`，输出 `dist/BiliGiftDrop-windows-x64.zip`，可上传 GitHub Release。无需使用者另装 Node.js。
+- [Windows EXE 构建、启动修复与三语命令行日志](log/2026-10-24-windows-exe.md)
 - [项目规划与进度](docs/PROJECT_PLAN.md)
 - [接入研究与验证记录](docs/BILIBILI_INTEGRATION.md)
 - [本次开发日志](log/2026-10-24-development.md)
