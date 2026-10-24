@@ -3,6 +3,7 @@ import {spawn} from 'node:child_process';
 import {once} from 'node:events';
 import path from 'node:path';
 import {mkdtemp,readFile} from 'node:fs/promises';
+import {effect} from '../src/shared/rules.mjs';
 import {t} from '../src/shared/i18n/index.mjs';
 const languages=['zh-CN','ja','en'];
 const data=await mkdtemp(path.resolve('build/exe-test-'));
@@ -39,14 +40,15 @@ try{
   const smoke=spawn(process.execPath,['scripts/smoke.mjs'],{env,stdio:'inherit'});
   assert.equal((await once(smoke,'exit'))[0],0);
   for(const language of ['zh-CN','ja','en']){
-    assert.equal((await fetch(base+'/api/config',{method:'POST',headers:{Origin:base,'Content-Type':'application/json'},body:JSON.stringify({language,lifetime:45,maxCoverage:10,spawnRate:8,regionY:70,regionHeight:30})})).status,200);
+    assert.equal((await fetch(base+'/api/config',{method:'POST',headers:{Origin:base,'Content-Type':'application/json'},body:JSON.stringify({language,minGiftScale:75,maxGiftScale:200,maxGiftScaleAmount:25,lifetime:45,maxCoverage:10,spawnRate:8,regionY:70,regionHeight:30})})).status,200);
     assert.equal((await initial()).config.language,language);
     assert.equal((await fetch(base+`/src/shared/i18n/${language}.mjs`)).status,200);
   }
+  assert.equal(effect({coinType:'gold',unitCoin:1000,totalCoin:12500,count:1},(await initial()).config).size,110);
   await stop();await start();
   const state=await initial();assert.equal(state.config.language,'en');assert.equal(state.config.lifetime,45);
-  for(const [key,value] of Object.entries({maxCoverage:10,spawnRate:8,regionY:70,regionHeight:30}))assert.equal(state.config[key],value);
-  for(const file of ['/src/shared/crowd.mjs','/src/overlay/overlay.mjs','/src/control/control.mjs']){
+  for(const [key,value] of Object.entries({minGiftScale:75,maxGiftScale:200,maxGiftScaleAmount:25,maxCoverage:10,spawnRate:8,regionY:70,regionHeight:30}))assert.equal(state.config[key],value);
+  for(const file of ['/src/shared/rules.mjs','/src/shared/i18n/zh-CN.mjs','/src/shared/i18n/ja.mjs','/src/shared/i18n/en.mjs','/src/shared/crowd.mjs','/src/overlay/overlay.mjs','/src/control/control.mjs']){
     const response=await fetch(base+file);assert.equal(response.status,200);
     assert.equal(await response.text(),await readFile('.'+file,'utf8'),'embedded source matches current working tree');
   }

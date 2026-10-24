@@ -43,9 +43,10 @@ await inject(exe,'NODE_SEA_BLOB',await readFile('build/sea.blob'),{sentinelFuse:
 await copyFile('docs/WINDOWS.md','dist/README.md');
 await copyFile('LICENSE','dist/LICENSE');
 const {version}=JSON.parse(await readFile('package.json','utf8'));
-await copyFile(`docs/releases/v${version}.md`,'dist/RELEASE_NOTES.md');
+const releaseNotes=await readFile(`docs/releases/v${version}.md`,'utf8');
+await writeFile('dist/RELEASE_NOTES.md',releaseNotes);
 await writeFile('dist/RELEASE_TAG.txt',`v${version}\n`);
-await writeFile('dist/RELEASE_TITLE.txt',`Bili Gift Drop v${version} — 礼物高峰保护（Preview）\n`);
+await writeFile('dist/RELEASE_TITLE.txt',releaseNotes.split(/\r?\n/)[0].replace(/^# /,'')+'\n');
 // Node distributes its runtime and bundled dependencies under these notices.
 let license;try{license=await readFile('build/NODE-LICENSE.txt');}catch{
   const response=await fetch(`https://raw.githubusercontent.com/nodejs/node/${process.version}/LICENSE`);

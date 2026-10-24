@@ -31,3 +31,12 @@ English: Windows 10/11 x64. Extract and double-click `BiliGiftDrop-windows-x64.e
 Gifts last up to 30 seconds by default and fade during the final 0.75 seconds. Lifetime is configurable from 5 to 120 seconds. Crowding fades older gifts early; reducing limits removes excess old icons immediately. v0.2.0 defaults to 12 icons/second, 120 active icons and a conservative 15% drop-region area budget. Pending effects expire after 1.5 seconds. Configure the region position and size in percentages to avoid your camera. History retains original gift quantities; fewer visual icons may appear.
 
 开发构建 / 開発ビルド / Developer build: `node scripts/build-windows.mjs` (Windows x64, Node.js 24; initial build downloads checksum-verified postject and Node license). Runtime code has no external npm dependencies.
+
+
+## v0.3.0 礼物尺寸 / ギフトサイズ / Gift size
+
+控制面板「掉落设置」可保存最小尺寸、最大尺寸和满尺寸金额；默认 50%、150%、100 元。按本次总金额线性缩放，免费取最小值；保存后对新收到的礼物生效。100% 为 80 像素（1920 × 1080 画布），安全限制可能缩小实际尺寸。
+
+日本語：最小・最大サイズと最大サイズに達する金額を保存できます。既定は 50%、150%、100 人民元です。今回の合計金額に比例し、無料は最小サイズ。保存後の新しいギフトに適用します。
+
+English: Save minimum size, maximum size and the amount for maximum size. Defaults: 50%, 150%, CNY 100. Size scales with the event total; free gifts use the minimum. Changes apply to newly received gifts. Region and area protection may reduce the displayed size.

@@ -23,3 +23,20 @@ test('overlay event/render integration: storm, region clipping, language change,
  send('clear');clock+=600;next(clock);assert.equal(latest.count,0);assert.equal(latest.pending,0);
  console.log(`Overlay 3600 simulated frames / 60 seconds + 600 burst events: ${(performance.now()-started).toFixed(0)} ms CPU wall time (VM, not OBS FPS).`);
 });
+
+
+test('overlay draws sizes from event total and saved settings without resizing existing gifts',async()=>{
+ const source=(await readFile(new URL('../src/overlay/overlay.mjs',import.meta.url),'utf8')).replace(/^import .*;$/gm,'');
+ let events,next,clock=0;const sizes=[];
+ const ctx=new Proxy({roundRect(x,y,w){sizes.push(w);}},{get:(o,k)=>o[k]??(()=>{})});
+ const canvas={getContext:()=>ctx};
+ const sandbox={Crowd,region,collisionPairs,defaults,t,Math,Map,JSON,Image:class{},ResizeObserver:class{observe(){}},document:{querySelector:()=>canvas,documentElement:{}},location:{origin:'http://test'},parent:{postMessage(){}},performance:{now:()=>clock},EventSource:class{constructor(){events=this;}},requestAnimationFrame(fn){next=fn;}};
+ vm.runInNewContext(source,sandbox);
+ const send=(type,data)=>events.onmessage({data:JSON.stringify({type,data})});
+ const cfg={...defaults,minGiftScale:50,maxGiftScale:150,maxGiftScaleAmount:100};
+ send('init',{config:cfg});
+ send('gift',{giftId:1,count:1,coinType:'gold',unitCoin:1000,totalCoin:50000});clock=100;next(clock);assert.deepEqual(sizes,[80]);
+ send('config',{...cfg,language:'ja',minGiftScale:100,maxGiftScale:200});
+ sizes.length=0;send('gift',{giftId:2,count:1,coinType:'gold',unitCoin:1000,totalCoin:100000});clock=200;next(clock);
+ assert.deepEqual(sizes,[80,160]);assert.equal(sandbox.document.documentElement.lang,'ja');
+});

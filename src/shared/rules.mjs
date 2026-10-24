@@ -1,11 +1,12 @@
-export const defaults = {language:'zh-CN',room:'',gravity:900,bounce:0.35,lifetime:30,maxObjects:120,includeFree:true,minGiftPrice:0,maxCoverage:15,spawnRate:12,regionX:0,regionY:0,regionWidth:100,regionHeight:100};
+export const defaults = {language:'zh-CN',room:'',gravity:900,bounce:0.35,lifetime:30,maxObjects:120,includeFree:true,minGiftPrice:0,minGiftScale:50,maxGiftScale:150,maxGiftScaleAmount:100,maxCoverage:15,spawnRate:12,regionX:0,regionY:0,regionWidth:100,regionHeight:100};
 export function config(input, previous=defaults) {
   const out={...previous};
   if (['zh-CN','ja','en'].includes(input.language)) out.language=input.language;
   if (typeof input.room==='string' && /^\d{0,12}$/.test(input.room)) out.room=input.room;
-  for (const [k,min,max] of [['gravity',100,2400],['bounce',0,0.85],['lifetime',5,120],['maxObjects',10,200],['maxCoverage',1,30],['spawnRate',1,30],['regionX',0,90],['regionY',0,90],['regionWidth',10,100],['regionHeight',10,100]]) {
+  for (const [k,min,max] of [['minGiftScale',10,400],['maxGiftScale',10,400],['maxGiftScaleAmount',.001,100000],['gravity',100,2400],['bounce',0,0.85],['lifetime',5,120],['maxObjects',10,200],['maxCoverage',1,30],['spawnRate',1,30],['regionX',0,90],['regionY',0,90],['regionWidth',10,100],['regionHeight',10,100]]) {
     if (Number.isFinite(input[k])) out[k]=Math.min(max,Math.max(min,input[k]));
   }
+  out.maxGiftScale=Math.max(out.minGiftScale,out.maxGiftScale);
   out.maxObjects=Math.floor(out.maxObjects);
   out.regionWidth=Math.min(out.regionWidth,100-out.regionX);
   out.regionHeight=Math.min(out.regionHeight,100-out.regionY);
@@ -29,7 +30,10 @@ export function effect(gift,cfg) {
   if (gift.coinType!=='gold'&&!cfg.includeFree) return {count:0,size:40};
   const minimumCoin=Math.round((cfg.minGiftPrice??0)*1000);
   if ((gift.coinType==='gold'?gift.unitCoin:0)<minimumCoin) return {count:0,size:40};
-  return {count:Math.min(40,gift.count),size:Math.min(130,40+Math.log2(1+(gift.coinType==='gold'?gift.unitCoin:0)/1000)*12)};
+  const min=cfg.minGiftScale??defaults.minGiftScale,max=Math.max(min,cfg.maxGiftScale??defaults.maxGiftScale);
+  const total=gift.coinType==='gold'?(gift.totalCoin??gift.unitCoin*gift.count):0;
+  const ratio=Math.min(1,Math.max(0,total/Math.max(1,Math.round((cfg.maxGiftScaleAmount??defaults.maxGiftScaleAmount)*1000))));
+  return {count:Math.min(40,gift.count),size:80*(min+(max-min)*ratio)/100};
 }
 export class Deduplicator {
   seen=new Map();

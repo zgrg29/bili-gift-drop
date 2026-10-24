@@ -1,4 +1,9 @@
 export default {
+  "minGiftScale": "Minimum gift size (%)",
+  "maxGiftScale": "Maximum gift size (%)",
+  "maxGiftScaleAmount": "Amount for maximum size (CNY)",
+  "giftScaleHint": "Size scales linearly with this event’s total amount (unit price × quantity), capped at the maximum. Free gifts use the minimum. 100% is 80 pixels on the 1920 × 1080 canvas; allowed range: 10%–400%. A maximum below the minimum is raised to the minimum. Save to apply to new gifts, then simulate gifts to preview. Drop region and area limits may further reduce the displayed size.",
+
   "maxCoverage": "Area budget (%)",
   "spawnRate": "Maximum icons per second",
   "regionX": "Drop region left (%)",
