@@ -1,4 +1,13 @@
 export default {
+  "maxCoverage": "估算占区面积上限（%）",
+  "spawnRate": "每秒最多生成图标数",
+  "regionX": "掉落区域左侧位置（%）",
+  "regionY": "掉落区域顶部位置（%）",
+  "regionWidth": "掉落区域宽度（%）",
+  "regionHeight": "掉落区域高度（%）",
+  "safetyHint": "拥挤时旧礼物提前淡出。重复图标会合并，待生成效果超过 1.5 秒即丢弃。面积上限按旋转图标保守估算，占比相对于掉落区域，并非实际像素遮挡率。",
+  "crowdStats": "预览：{count} 个图标 · 估算占区 {coverage}% · 待生成 {pending} 个",
+
   "consoleReady": "礼物服务已启动。请保持此窗口打开。",
   "consolePanel": "控制面板（如未自动打开，请复制到浏览器）：{url}",
   "consoleOverlay": "OBS 浏览器源：{url}",

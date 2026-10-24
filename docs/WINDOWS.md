@@ -24,10 +24,10 @@ If the gift service is already running, another launch opens its control panel a
 
 English: Windows 10/11 x64. Extract and double-click `BiliGiftDrop-windows-x64.exe` to open the browser control panel. No Node.js installation is needed. Keep the service window open; closing it stops the service. Use `http://127.0.0.1:19321/overlay` as an OBS browser source, width 1920, height 1080. Settings and cache are stored in `%LOCALAPPDATA%\BiliGiftDrop` and survive EXE replacement. Stop the old version before upgrading. If another application uses port 19321, startup reports an error; an existing gift service is reused. This build is unsigned. SC is not implemented; testing inside OBS is still pending.
 
-礼物默认从生成起存在 30 秒，最后 1 秒淡出。可设置 5–120 秒；数量超过上限时最早的礼物提前移除。
+礼物默认从生成起最多存在 30 秒，最后 0.75 秒淡出。可设置 5–120 秒；拥挤时旧礼物提前淡出，缩小上限时超额旧对象直接移除。v0.2.0 默认每秒最多生成 12 个、同时最多 120 个，估算面积预算为掉落区域的 15%；待生成效果超过 1.5 秒丢弃。可在设置中调整区域左/上/宽/高百分比以避开主播。最近记录保留原始赠送数量，图标数量可能少于赠送数量。
 
-ギフトは生成から既定で 30 秒間表示され、最後の 1 秒でフェードアウトします。5～120 秒に設定可能です。個数上限を超えると古いギフトから削除されます。
+ギフトは生成から既定で最大 30 秒間表示され、最後の 0.75 秒でフェードアウトします。5～120 秒に設定可能です。混雑時は早めに消え、上限を縮小すると超過分を削除します。v0.2.0 の既定は毎秒 12 個、最大 120 個、落下領域の推定面積 15%。生成待ちは 1.5 秒で破棄されます。領域の位置とサイズを百分率で設定できます。履歴の数量は元の値を保持し、表示アイコン数とは異なる場合があります。
 
-Gifts last 30 seconds from spawning by default, fading out during the final second. Lifetime is configurable from 5 to 120 seconds. The oldest gifts are removed early when the object limit is reached.
+Gifts last up to 30 seconds by default and fade during the final 0.75 seconds. Lifetime is configurable from 5 to 120 seconds. Crowding fades older gifts early; reducing limits removes excess old icons immediately. v0.2.0 defaults to 12 icons/second, 120 active icons and a conservative 15% drop-region area budget. Pending effects expire after 1.5 seconds. Configure the region position and size in percentages to avoid your camera. History retains original gift quantities; fewer visual icons may appear.
 
 开发构建 / 開発ビルド / Developer build: `node scripts/build-windows.mjs` (Windows x64, Node.js 24; initial build downloads checksum-verified postject and Node license). Runtime code has no external npm dependencies.

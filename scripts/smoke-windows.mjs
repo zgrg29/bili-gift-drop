@@ -31,20 +31,25 @@ async function initial(){const r=await fetch(base+'/api/events');const reader=r.
 try{
   await start();
   const duplicate=spawn(path.resolve('dist/BiliGiftDrop-windows-x64.exe'),['--no-open'],{env,windowsHide:true,stdio:['ignore','pipe','pipe']});
-  let duplicateOutput='';duplicate.stdout.setEncoding('utf8');duplicate.stdout.on('data',b=>duplicateOutput+=b);
-  assert.equal((await once(duplicate,'exit'))[0],0);
+  let duplicateOutput='';duplicate.stdout.setEncoding('utf8');duplicate.stdout.on('data',b=>duplicateOutput+=b);duplicate.stderr.setEncoding('utf8');duplicate.stderr.on('data',b=>duplicateOutput+=b);
+  assert.equal((await once(duplicate,'exit'))[0],0,duplicateOutput);
   assert.ok(duplicateOutput.includes(base),'duplicate launch reports existing panel');
   for(const language of languages)assert.ok(duplicateOutput.includes(t(language,'alreadyRunning',{url:base})));
   assert.equal((await fetch(base+'/')).status,200,'original service remains available');
   const smoke=spawn(process.execPath,['scripts/smoke.mjs'],{env,stdio:'inherit'});
   assert.equal((await once(smoke,'exit'))[0],0);
   for(const language of ['zh-CN','ja','en']){
-    assert.equal((await fetch(base+'/api/config',{method:'POST',headers:{Origin:base,'Content-Type':'application/json'},body:JSON.stringify({language,lifetime:45})})).status,200);
+    assert.equal((await fetch(base+'/api/config',{method:'POST',headers:{Origin:base,'Content-Type':'application/json'},body:JSON.stringify({language,lifetime:45,maxCoverage:10,spawnRate:8,regionY:70,regionHeight:30})})).status,200);
     assert.equal((await initial()).config.language,language);
     assert.equal((await fetch(base+`/src/shared/i18n/${language}.mjs`)).status,200);
   }
   await stop();await start();
   const state=await initial();assert.equal(state.config.language,'en');assert.equal(state.config.lifetime,45);
+  for(const [key,value] of Object.entries({maxCoverage:10,spawnRate:8,regionY:70,regionHeight:30}))assert.equal(state.config[key],value);
+  for(const file of ['/src/shared/crowd.mjs','/src/overlay/overlay.mjs','/src/control/control.mjs']){
+    const response=await fetch(base+file);assert.equal(response.status,200);
+    assert.equal(await response.text(),await readFile('.'+file,'utf8'),'embedded source matches current working tree');
+  }
   assert.equal(JSON.parse(await readFile(path.join(data,'data/config.json'),'utf8')).language,'en');
   await stop();
   await assert.rejects(fetch(base,{signal:AbortSignal.timeout(1500)}),'port is released after process exits');

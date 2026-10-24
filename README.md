@@ -1,8 +1,27 @@
 # Bili Gift Drop
 
+## v0.2.0 礼物高峰保护（2026-10-24）
+
+本次为预览版本。已实现每秒生成限流、短队列合并与过期、数量及估算面积双上限、拥挤提前淡出、掉落区域百分比设置和预览统计；低价礼物在查图前过滤，碰撞改为邻近网格检查，减少缓存读盘与最近记录重绘。以下旧记录保留当时验收状态，本节与 [本次验收日志](log/2026-10-24-crowd-protection.md) 为最新增量。
+
+- 默认每秒最多 12 个图标，同时最多 120 个；面积预算为掉落区域的 15%（可调 1–30%）。按旋转图标外接方形面积求和，属于保守估算，不是像素遮挡率。
+- 一次送 1,000 个不会生成 1,000 张图：单事件最多 40 个视觉副本，同类待生成副本合并；队列最多 32 组，超过 1.5 秒丢弃。原始送礼数量、金额在最近记录中保留。
+- 接近上限时旧图标提前淡出；修改为更小上限时必要的旧图标直接移除。清空操作同时清空画面和待生成队列。
+- 可设置掉落区域左/上位置及宽/高（画布百分比），区域越界会自动收缩。画面裁切在该区域内，建议避开主播人物。
+- 未知礼物自动查询平台目录并缓存图片；目录查询合并、失败退避。平台协议兼容时一般无需为新增礼物更新代码；全新上架实测仍待完成。
+- 新设置及统计完整支持中日英，保存后重启恢复；只切换语言不清空画面和队列。
+
+日本語：v0.2.0 はプレビュー版です。生成レート、短い待機キュー、個数・推定面積の上限、混雑時の早期フェード、落下領域の設定と統計を追加しました。既定は毎秒 12 個、最大 120 個、領域の推定面積 15%。生成待ちは 1.5 秒で破棄されます。三言語と設定保存に対応。今回のブラウザ目視確認と OBS 実機検証は未完了です。
+
+English: v0.2.0 is a preview with bounded spawning, a short pending queue, count and estimated-area limits, early fading under crowding, configurable drop regions and preview statistics. Defaults: 12 icons/second, 120 active icons and a 15% region-area budget. Pending effects expire after 1.5 seconds. Settings persist and support all three languages. Browser visual QA and OBS verification remain pending.
+
+本次自动化测试 **16/16 通过**，包括规则/三语资源、三语控制面板执行、持续风暴及完整 overlay 事件与绘制循环。Windows EXE 本机回归通过，包含新设置重启恢复与内嵌源码一致性。浏览器视觉验收因工具无法连接本地页面及可靠识别 URL 而未完成，不据此宣称窄屏三语或 OBS 实机通过。SC、可编辑金额档位、长期实机压力及全新 Windows 验收仍属后续。
+
+发布信息：tag **`v0.2.0`**，标题 **Bili Gift Drop v0.2.0 — 礼物高峰保护（Preview）**，勾选 **Pre-release**。完整三语说明见 [Release notes](docs/releases/v0.2.0.md)。本地构建输出 `dist/BiliGiftDrop-v0.2.0-windows-x64.zip`、`SHA256SUMS.txt`、`RELEASE_TAG.txt`、`RELEASE_TITLE.txt` 和 `RELEASE_NOTES.md`。上传带版本号 ZIP 与校验文件即可；本轮不推送或发布远程 Release。
+
 本地运行、浏览器设置的 Bilibili 礼物掉落原型，为 OBS 提供透明浏览器源。先做礼物，SC 后续开发。
 
-## 工程进度与验收（2026-10-24）
+## 工程进度与验收（早期记录，最新增量见上文）
 
 目前交付为可运行的开发原型，尚未达到第一版正式发布标准。
 
@@ -24,7 +43,7 @@
 
 Windows EXE 回归：`node scripts/smoke-windows.mjs` **通过**，覆盖控制台子系统、三语启动与重复启动提示、静态资源、模拟送礼、清空、配置重启恢复及退出后端口释放。构建为未签名预览版，尚未发布 GitHub Release。
 
-日本語：開発用プロトタイプです。実際の一部の V2 ギフト、ブラウザ表示、最低単価と三言語 UI を検証済みです。自動テスト 8 件と HTTP/SSE チェックに合格。OBS 内表示、SC、配置編集、長時間運用は未検証または未実装です。
+日本語：開発用プロトタイプです。実際の一部の V2 ギフト、ブラウザ表示、最低単価と三言語 UI を検証済みです。OBS 内表示、SC、配置編集、長時間運用は未検証または未実装です。
 
 English: This is a development prototype. Some real V2 gifts, browser rendering, the minimum unit price and the three-language UI have been verified. All 8 automated tests and HTTP/SSE checks pass. OBS rendering, SC, layout editing and long-running reliability remain pending.
 
@@ -69,18 +88,18 @@ English: Install Node.js 22 or later. Double-click `start.cmd` and keep the serv
 
 ## 礼物堆积与消失 / 積み重なりと消去 / Stacking and expiry
 
-礼物受到重力、旋转、弹跳与圆形近似碰撞影响，会在底部堆积。默认从生成起显示 30 秒，最后 1 秒逐渐淡出，随后删除；停留时间可设 5–120 秒。达到数量上限时最早的礼物会提前直接移除；「清空画面」会立即清空。这次确认了已有行为，没有更改物理效果或增加金额分档停留时间。
+礼物受到重力、旋转、弹跳与圆形近似碰撞影响，会在底部堆积。默认从生成起显示 30 秒，最后 0.75 秒逐渐淡出，随后删除；停留时间可设 5–120 秒。达到数量上限时最早的礼物会提前直接移除；「清空画面」会立即清空。v0.2.0 还会在拥挤时提前淡出旧图标，修改上限时裁减超额对象；待生成效果不会无限积压。
 
 日本語：ギフトは重力・回転・反発と円形の近似衝突によって底に積み重なります。生成から既定で 30 秒間表示され、最後の 1 秒でフェードアウトします。5～120 秒に設定できます。個数上限を超えると古いギフトが先に削除され、クリア操作は即時に反映されます。
 
-English: Gifts fall, rotate, bounce and stack at the bottom using approximate circular collisions. They last 30 seconds from spawning by default and fade out during the final second. Lifetime is configurable from 5 to 120 seconds. The oldest gifts are removed immediately when the object limit is reached; Clear screen removes all gifts immediately.
+English: Gifts fall, rotate, bounce and stack at the bottom using approximate circular collisions. They last 30 seconds from spawning by default and fade out during the final 0.75 seconds. Lifetime is configurable from 5 to 120 seconds. The oldest gifts are removed immediately when the object limit is reached; Clear screen removes all gifts immediately.
 
 ## Windows 构建与 Release / ビルドと Release / Build and Release
 
 在 Windows x64、Node.js 24 下运行 `node scripts/build-windows.mjs`。首次构建需要联网下载固定版本且校验 SHA-256 的 postject 构建工具，以及 Node.js 许可声明；使用者运行 EXE 不需要 npm 依赖。构建会输出：
 
 - `dist/BiliGiftDrop-windows-x64.exe`：可直接运行的未签名预览版。
-- `dist/BiliGiftDrop-windows-x64.zip`：EXE、三语使用说明和 Node.js 许可声明。
+- `dist/BiliGiftDrop-v0.2.0-windows-x64.zip`：EXE、三语使用说明和 Node.js 许可声明。
 - `dist/SHA256SUMS.txt`：ZIP 的 SHA-256 校验值。
 
 GitHub Release 可上传 ZIP 与校验文件；本次只生成本地产物并提交源码和文档，未创建或上传远程 Release。`build/`、`dist/`、个人设置和缓存均被 Git 忽略。构建后的本机检查为 `node scripts/smoke-windows.mjs`，使用隔离数据和端口 19329，完成后停止测试进程。
@@ -94,7 +113,7 @@ English: Run `node scripts/build-windows.mjs` on Windows x64 with Node.js 24. Th
 - 三语控制面板、语言及配置保存、模拟真实礼物图片、透明画面、重力/旋转/圆形碰撞/弹跳/堆积/过期清理。
 - 房间短号解析、WBI 签名、匿名 WebSocket 接入、心跳/重连、旧版及 V2 礼物消息解析、交易去重、动态礼物资料及图片缓存。
 - 已实测公开房间匿名握手、987 条礼物资料、真实 V2 免费及付费礼物接收、图片缓存与浏览器掉落；尚未验收 OBS 软件内显示及所有礼物类型。匿名连接可能受平台限制，当前没有登录/授权功能。
-- 固定 1920×1080 逻辑画布和圆形碰撞近似；区域编辑、金额档位编辑、长期压力验证与缓存空间管理待做。透明页不回放刷新前的礼物。
+- 固定 1920×1080 逻辑画布和圆形碰撞近似；拖拽区域编辑、金额档位编辑、长期实机压力验证与缓存空间管理待做。透明页不回放刷新前的礼物。
 - 盲盒保留支付单价与爆出价值，效果暂按爆出价值计算；免费礼物不折算人民币；忽略连击汇总以避免重复掉落。
 
 日本語：一部の実際の V2 ギフト受信とブラウザ上の落下表示は検証済みです。OBS 内の表示と全ギフト種類は未検証です。匿名接続が制限される場合があります。ログイン機能、領域編集、金額別プリセット、SC は未実装です。画面更新時に過去のギフトは再生されません。
@@ -103,7 +122,7 @@ English: Some real V2 gifts and browser drops have been verified. Rendering insi
 
 ## 文档
 
-- [Windows EXE 三语使用与构建说明](docs/WINDOWS.md)：`node scripts/build-windows.mjs`，输出 `dist/BiliGiftDrop-windows-x64.zip`，可上传 GitHub Release。无需使用者另装 Node.js。
+- [Windows EXE 三语使用与构建说明](docs/WINDOWS.md)：`node scripts/build-windows.mjs`，输出 `dist/BiliGiftDrop-v0.2.0-windows-x64.zip`，可上传 GitHub Release。无需使用者另装 Node.js。
 - [Windows EXE 构建、启动修复与三语命令行日志](log/2026-10-24-windows-exe.md)
 - [项目规划与进度](docs/PROJECT_PLAN.md)
 - [接入研究与验证记录](docs/BILIBILI_INTEGRATION.md)

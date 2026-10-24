@@ -5,7 +5,7 @@ import path from 'node:path';
 import {randomUUID} from 'node:crypto';
 import {execFile} from 'node:child_process';
 import {consoleText} from './console.mjs';
-import {defaults,config,normalizeGift,Deduplicator} from '../shared/rules.mjs';
+import {defaults,config,normalizeGift,effect,Deduplicator} from '../shared/rules.mjs';
 import {LiveRoom} from './bilibili.mjs';
 import {Catalog} from './catalog.mjs';
 import {expandGiftV2} from './gift-v2.mjs';
@@ -17,6 +17,7 @@ const send=(type,data)=>{const msg=`data: ${JSON.stringify({type,data})}\n\n`;fo
 async function receive(msg){
   try{const messages=msg.cmd?.split(':')[0]==='SEND_GIFT_V2'?expandGiftV2(msg):[msg];
     for(const message of messages){const gift=normalizeGift(message);if(!gift||!dedup.accept(gift.id))continue;
+      if(!effect(gift,cfg).count){gift.image=null;send('gift',gift);continue;}
       if(!catalog.validImage(gift.image)){const metadata=await catalog.lookup(gift.giftId,cfg.room);gift.image=metadata?.image??null;}
       gift.image=await catalog.cacheImage(gift.image).catch(()=>null);send('gift',gift);
     }

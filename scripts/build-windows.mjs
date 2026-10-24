@@ -41,6 +41,10 @@ await writeFile(exe,certificate&&certificate+certificateSize===binary.length?bin
 const {inject}=createRequire(import.meta.url)('../build/package/dist/api.js');
 await inject(exe,'NODE_SEA_BLOB',await readFile('build/sea.blob'),{sentinelFuse:'NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2'});
 await copyFile('docs/WINDOWS.md','dist/README.md');
+const {version}=JSON.parse(await readFile('package.json','utf8'));
+await copyFile(`docs/releases/v${version}.md`,'dist/RELEASE_NOTES.md');
+await writeFile('dist/RELEASE_TAG.txt',`v${version}\n`);
+await writeFile('dist/RELEASE_TITLE.txt',`Bili Gift Drop v${version} — 礼物高峰保护（Preview）\n`);
 // Node distributes its runtime and bundled dependencies under these notices.
 let license;try{license=await readFile('build/NODE-LICENSE.txt');}catch{
   const response=await fetch(`https://raw.githubusercontent.com/nodejs/node/${process.version}/LICENSE`);
@@ -48,7 +52,9 @@ let license;try{license=await readFile('build/NODE-LICENSE.txt');}catch{
   await writeFile('build/NODE-LICENSE.txt',license);
 }
 await writeFile('dist/NODE-LICENSE.txt',license);
-execFileSync('tar',['-a','-cf','dist/BiliGiftDrop-windows-x64.zip','-C','dist','BiliGiftDrop-windows-x64.exe','README.md','NODE-LICENSE.txt']);
-const digest=createHash('sha256').update(await readFile('dist/BiliGiftDrop-windows-x64.zip')).digest('hex');
-await writeFile('dist/SHA256SUMS.txt',`${digest}  BiliGiftDrop-windows-x64.zip\n`);
+const zip=`BiliGiftDrop-v${version}-windows-x64.zip`;
+execFileSync('tar',['-a','-cf',`dist/${zip}`,'-C','dist','BiliGiftDrop-windows-x64.exe','README.md','NODE-LICENSE.txt','RELEASE_NOTES.md']);
+const checksums=[];
+for(const file of [zip,path.basename(exe)])checksums.push(`${createHash('sha256').update(await readFile('dist/'+file)).digest('hex')}  ${file}`);
+await writeFile('dist/SHA256SUMS.txt',checksums.join('\n')+'\n');
 console.log(exe);

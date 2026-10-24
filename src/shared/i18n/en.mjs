@@ -1,4 +1,13 @@
 export default {
+  "maxCoverage": "Area budget (%)",
+  "spawnRate": "Maximum icons per second",
+  "regionX": "Drop region left (%)",
+  "regionY": "Drop region top (%)",
+  "regionWidth": "Drop region width (%)",
+  "regionHeight": "Drop region height (%)",
+  "safetyHint": "Crowded scenes fade older gifts early. Visual copies merge and expire from the pending queue after 1.5 seconds. The area budget conservatively estimates rotated icons within the drop region; it is not measured pixel coverage.",
+  "crowdStats": "Preview: {count} icons · estimated area {coverage}% · {pending} pending",
+
   "consoleReady": "Gift service started. Keep this window open.",
   "consolePanel": "Control panel (copy into your browser if it does not open automatically): {url}",
   "consoleOverlay": "OBS browser source: {url}",

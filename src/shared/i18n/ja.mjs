@@ -1,4 +1,13 @@
 export default {
+  "maxCoverage": "推定面積の上限（%）",
+  "spawnRate": "1 秒あたりの最大生成数",
+  "regionX": "落下領域の左位置（%）",
+  "regionY": "落下領域の上位置（%）",
+  "regionWidth": "落下領域の幅（%）",
+  "regionHeight": "落下領域の高さ（%）",
+  "safetyHint": "混雑時は古いギフトを早めにフェードアウトします。重複アイコンは統合され、生成待ちは 1.5 秒で破棄されます。面積は落下領域内の回転アイコンを保守的に推定した値で、実際の画素の遮蔽率ではありません。",
+  "crowdStats": "プレビュー：{count} 個 · 推定面積 {coverage}% · 生成待ち {pending} 個",
+
   "consoleReady": "ギフトサービスを起動しました。このウィンドウを開いたままにしてください。",
   "consolePanel": "設定画面（自動で開かない場合はブラウザに貼り付けてください）：{url}",
   "consoleOverlay": "OBS ブラウザソース：{url}",

@@ -1,11 +1,14 @@
-export const defaults = {language:'zh-CN',room:'',gravity:900,bounce:0.35,lifetime:30,maxObjects:120,includeFree:true,minGiftPrice:0};
+export const defaults = {language:'zh-CN',room:'',gravity:900,bounce:0.35,lifetime:30,maxObjects:120,includeFree:true,minGiftPrice:0,maxCoverage:15,spawnRate:12,regionX:0,regionY:0,regionWidth:100,regionHeight:100};
 export function config(input, previous=defaults) {
   const out={...previous};
   if (['zh-CN','ja','en'].includes(input.language)) out.language=input.language;
   if (typeof input.room==='string' && /^\d{0,12}$/.test(input.room)) out.room=input.room;
-  for (const [k,min,max] of [['gravity',100,2400],['bounce',0,0.85],['lifetime',5,120],['maxObjects',10,200]]) {
+  for (const [k,min,max] of [['gravity',100,2400],['bounce',0,0.85],['lifetime',5,120],['maxObjects',10,200],['maxCoverage',1,30],['spawnRate',1,30],['regionX',0,90],['regionY',0,90],['regionWidth',10,100],['regionHeight',10,100]]) {
     if (Number.isFinite(input[k])) out[k]=Math.min(max,Math.max(min,input[k]));
   }
+  out.maxObjects=Math.floor(out.maxObjects);
+  out.regionWidth=Math.min(out.regionWidth,100-out.regionX);
+  out.regionHeight=Math.min(out.regionHeight,100-out.regionY);
   if (typeof input.includeFree==='boolean') out.includeFree=input.includeFree;
   if (Number.isFinite(input.minGiftPrice)) out.minGiftPrice=Math.round(Math.min(100000,Math.max(0,input.minGiftPrice))*1000)/1000;
   return out;
