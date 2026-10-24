@@ -1,5 +1,15 @@
 # Bili Gift Drop
 
+## v0.5.0 醒目留言区域滚动（2026-10-24）
+
+取消SC最多显示3条的限制，按区域高度显示所有仍有效的留言（容量保留最新100条）。默认延伸到画面底部，超出后缓慢上下往返滚动。区域高度、速度可在设置中自动保存；默认20画布像素/秒，0停止自动滚动。悬停/聚焦暂停滚动，独立到期时间继续运行，不显示倒计时。
+
+日本語：3件制限を撤廃。領域を超えるSCはゆっくり上下に往復します。高さ・速度は自動保存、0でスクロール停止。
+
+English: SC cards fill the region without a three-card limit. Overflow scrolls slowly back and forth; height and speed save automatically. 0 stops motion.
+
+Tag：`v0.5.0`；Title：**Bili Gift Drop v0.5.0 — 醒目留言区域滚动（Preview）**。包：`dist/BiliGiftDrop-v0.5.0-windows-x64.zip`；[三语 Release notes](docs/releases/v0.5.0.md)。旧版本和标签保留。
+
 ## v0.4.1 醒目留言默认开启（2026-10-24）
 
 醒目留言在新安装、缺少SC设置的旧配置中默认开启。已保存的开关选择保持不变，手动关闭后刷新或重启不会重新开启。位置自动保存、折叠/展开和无倒计时卡片保持原有行为。
@@ -185,8 +195,8 @@ English: Original project code is licensed under the [MIT License](LICENSE), all
 
 ### SC / 醒目留言 / スーパーチャット（v0.4.0）
 
-中文：设置里启用醒目留言，调整左侧、顶部、宽度与自动折叠秒数（0关闭自动折叠）；修改自动保存。点击预览标题展开/折叠并同步 OBS，OBS 内使用“交互”。卡片不显示倒计时，到期自动移除。最多显示3条、保留最新100条，等待不会延长时间。运行 v0.4.0 EXE 或源码 start.cmd 使用此功能。
+中文：设置里启用醒目留言，调整左侧、顶部、宽度与自动折叠秒数（0关闭自动折叠）；修改自动保存。点击预览标题展开/折叠并同步 OBS，OBS 内使用“交互”。卡片不显示倒计时，到期自动移除。按区域高度显示有效留言，超出时按可调速度往返滚动；保留最新100条，到期移除。运行 v0.4.0 EXE 或源码 start.cmd 使用此功能。
 
-日本語：設定で SC を有効にし、左・上・幅・自動折りたたみ秒数（0で無効）を設定すると自動保存されます。見出しをクリックして展開・折りたたみを OBS と同期。OBS は「対話」を使用。カウントダウンは非表示で、期限切れで削除。最大3件表示、最新100件まで保持し、待機中も期限は延長されません。v0.4.0 の EXE または start.cmd で起動できます。
+日本語：設定で SC を有効にし、左・上・幅・自動折りたたみ秒数（0で無効）を設定すると自動保存されます。見出しをクリックして展開・折りたたみを OBS と同期。OBS は「対話」を使用。カウントダウンは非表示で、期限切れで削除。高さに応じて表示し、超過時は設定速度で往復します。最新100件まで保持し、期限は延長しません。v0.4.0 の EXE または start.cmd で起動できます。
 
-English: Enable SC in settings and adjust left, top, width and auto-collapse seconds (0 disables). Changes save automatically. Click preview headings to sync expansion with OBS; in OBS use Interact. Cards show no countdown and expire on schedule. Up to 3 display; latest 100 retained, with no lifetime extension while waiting. Run the v0.4.0 EXE or the source using start.cmd.
+English: Enable SC in settings and adjust left, top, width and auto-collapse seconds (0 disables). Changes save automatically. Click preview headings to sync expansion with OBS; in OBS use Interact. Cards show no countdown and expire on schedule. Active cards fill the region and overflow scrolls at the configured speed. The latest 100 are retained without extending expiry. Run the v0.4.0 EXE or the source using start.cmd.

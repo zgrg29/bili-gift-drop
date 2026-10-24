@@ -1,3 +1,4 @@
+import {scrollSC} from '../src/shared/sc-scroll.mjs';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {normalizeSC,SCStore,scDuration} from '../src/shared/superchat.mjs';
@@ -15,11 +16,20 @@ import vm from 'node:vm';
 import {t} from '../src/shared/i18n/index.mjs';
 test('SC renderer: no countdown, auto collapse, click sync, language, expiry and enable',async()=>{
  const source=(await readFile(new URL('../src/overlay/superchat.mjs',import.meta.url),'utf8')).replace(/^import .*;$/gm,'').replace('export function','function');
- class E{children=[];style={};append(...x){this.children.push(...x);}replaceChildren(...x){this.children=x;}setAttribute(k,v){this[k]=v;}querySelectorAll(){return this.children.flatMap(x=>x.children.filter(y=>y.tag==='button'));}focus(){}}
- let listener,tick,clock=now,posted;const body=new E();let c={...defaults,scEnabled:true,scCollapse:15};
- const sandbox={t,Intl,Date:{now:()=>clock},document:{body,createElement:tag=>Object.assign(new E(),{tag})},setInterval:fn=>{tick=fn;},fetch:async(url,opts)=>{posted=JSON.parse(opts.body);return {ok:true};},events:{addEventListener:(type,fn)=>{listener=fn;}},getConfig:()=>c};
+ class E{children=[];style={};_top=0;get scrollTop(){return this._top;}set scrollTop(v){this._top=Math.floor(v);}scrollHeight=0;clientHeight=0;handlers={};addEventListener(k,fn){this.handlers[k]=fn;}contains(){return false;}append(...x){this.children.push(...x);}replaceChildren(...x){this.children=x;}setAttribute(k,v){this[k]=v;}querySelectorAll(){return this.children.flatMap(x=>x.children.filter(y=>y.tag==='button'));}focus(){}}
+ let listener,tick,frame,clock=now,posted;const body=new E();let c={...defaults,scEnabled:true,scCollapse:15};
+ const sandbox={scrollSC,requestAnimationFrame:fn=>{frame=fn;},t,Intl,Date:{now:()=>clock},document:{documentElement:{clientWidth:1920},body,createElement:tag=>Object.assign(new E(),{tag})},setInterval:fn=>{tick=fn;},fetch:async(url,opts)=>{posted=JSON.parse(opts.body);return {ok:true};},events:{addEventListener:(type,fn)=>{listener=fn;}},getConfig:()=>c};
  vm.runInNewContext(source+';superchat(events,getConfig);',sandbox);const send=(type,data)=>listener({data:JSON.stringify({type,data})});const x=normalizeSC(msg(),now);send('sc',x);const root=body.children[0];assert.equal(root.children[0].children.length,2);assert.equal(root.children[0].children[0].textContent,t('zh-CN','scToggle',{user:'原名',amount:new Intl.NumberFormat('zh-CN',{style:'currency',currency:'CNY'}).format(30),action:t('zh-CN','scFold')}));
  clock+=16000;tick();assert.equal(root.children[0].children.length,1);await root.children[0].children[0].onclick();assert.deepEqual(posted,{id:'1',expanded:true});send('sc-list',[{...x,expanded:true,interactedAt:clock}]);assert.equal(root.children[0].children.length,2);
  for(const language of ['ja','en','zh-CN']){c={...c,language};tick();assert.equal(root.children[0].children.length,2);assert.ok(!root.children[0].children[0].textContent.includes('seconds'));}
+ send('sc-list',Array.from({length:6},(_,i)=>({...x,id:String(i)})));assert.equal(root.children.length,6,'all six cards participate, with no three-card cap');
+ root.scrollHeight=2000;root.clientHeight=500;for(let i=0;i<300;i++)frame(i*1000/60);assert.ok(root.scrollTop>0,'overflow scrolls automatically');
+ const stopped=root.scrollTop;c.scScrollSpeed=0;for(let i=300;i<320;i++)frame(i*1000/60);assert.equal(root.scrollTop,stopped,'zero speed stops scrolling');
+ c.scScrollSpeed=20;root.handlers.pointerenter();for(let i=320;i<340;i++)frame(i*1000/60);assert.equal(root.scrollTop,stopped,'hover pauses scrolling');root.handlers.pointerleave();for(let i=340;i<400;i++)frame(i*1000/60);assert.ok(root.scrollTop>stopped,'leaving resumes scrolling');
  c.scEnabled=false;tick();assert.equal(root.hidden,true);clock=x.end;tick();assert.equal(root.children.length,0);
+});
+
+test('SC scrolling obeys speed, pauses at edges, reverses and handles shrinking content',()=>{
+ let s={offset:0,direction:1,hold:0};s=scrollSC(s,1,100,20);assert.equal(s.offset,20);s=scrollSC(s,1,100,40);assert.equal(s.offset,60);s=scrollSC(s,1,100,40);assert.deepEqual(s,{offset:100,direction:-1,hold:2});s=scrollSC(s,1,100,40);assert.equal(s.offset,100);s=scrollSC(s,1,100,40);s=scrollSC(s,1,100,40);assert.equal(s.offset,60);assert.equal(scrollSC(s,1,10,0).offset,10);assert.equal(scrollSC(s,1,0,20).offset,0);
+ const cfg=config({scY:70,scHeight:100,scScrollSpeed:999});assert.equal(cfg.scHeight,30);assert.equal(cfg.scScrollSpeed,120);assert.equal(config({scScrollSpeed:0}).scScrollSpeed,0);assert.equal(config({language:'ja'},cfg).scScrollSpeed,120);
 });

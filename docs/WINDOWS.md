@@ -52,11 +52,11 @@ English: Valid drop settings save automatically after about 400 ms without typin
 
 ## v0.4.0 SC / 醒目留言 / スーパーチャット
 
-中文：启用醒目留言，在布局框拖动位置（松开立即保存），或修改左侧、顶部与宽度（停止输入约400毫秒后保存）；默认15秒折叠，0关闭折叠。点击预览标题展开并同步OBS，OBS内使用“交互”。不显示倒计时，到期移除。关闭显示与切换语言不重置有效期。最多显示3条、保留最新100条，等待不延时。
+中文：启用醒目留言，在布局框拖动位置（松开立即保存），或修改左侧、顶部与宽度（停止输入约400毫秒后保存）；默认15秒折叠，0关闭折叠。点击预览标题展开并同步OBS，OBS内使用“交互”。不显示倒计时，到期移除。关闭显示与切换语言不重置有效期。v0.5.0起按区域高度显示，超出时滚动，保留最新100条且不延长有效期。
 
-日本語：SCを有効にし、枠をドラッグして位置を保存、または左・上・幅を入力して約400ミリ秒後に自動保存。初期値15秒で折りたたみ、0で無効。見出しをクリックして展開しOBSと同期（OBSでは「対話」）。カウントダウンは非表示で期限切れで削除。非表示・言語変更でも期限は変わりません。最大3件表示、最新100件まで保持します。
+日本語：SCを有効にし、枠をドラッグして位置を保存、または左・上・幅を入力して約400ミリ秒後に自動保存。初期値15秒で折りたたみ、0で無効。見出しをクリックして展開しOBSと同期（OBSでは「対話」）。カウントダウンは非表示で期限切れで削除。非表示・言語変更でも期限は変わりません。v0.5.0以降は領域の高さに応じて表示し、超過時はスクロールします。最新100件まで保持します。
 
-English: Enable SC and drag the layout box (saves on release), or edit left/top/width (saves after about400ms). Default collapse delay15 seconds;0 disables it. Click headings to expand and sync OBS; use Interact inside OBS. No countdown is shown. Cards expire on schedule; hiding or switching language never resets expiry. Shows up to3 cards and retains the latest100 without extending queued lifetimes.
+English: Enable SC and drag the layout box (saves on release), or edit left/top/width (saves after about400ms). Default collapse delay15 seconds;0 disables it. Click headings to expand and sync OBS; use Interact inside OBS. No countdown is shown. Cards expire on schedule; hiding or switching language never resets expiry. From v0.5.0, cards fill the region and overflow scrolls; the latest100 are retained without extending expiry.
 
 ## v0.4.1 默认开启 / 初期設定オン / Enabled by default
 
@@ -65,3 +65,11 @@ English: Enable SC and drag the layout box (saves on release), or edit left/top/
 日本語：新規インストールとSC設定のない旧設定では初期値がオンです。保存したオフ設定は画面更新・再起動後も保持されます。
 
 English: SC defaults on for new installations and older configurations without the setting. A saved off choice stays off across refreshes and restarts.
+
+## v0.5.0 区域滚动 / スクロール / Region scrolling
+
+中文：SC不再限制3条。区域高度默认延伸到画面底部，超出后缓慢上下往返，端点停2秒。设置“SC区域高度”和“SC滚动速度”自动保存；默认20画布像素/秒，0停止。悬停或聚焦暂停滚动，便于展开留言；到期时间继续计时。保留最新100条，滚动不会延长留言寿命。
+
+日本語：SCの3件制限を撤廃。表示高さを超えると上下に往復し両端で2秒停止。高さ・速度は自動保存、初期値20画素/秒、0で停止。ホバー・フォーカス中は一時停止しますが期限は進みます。最新100件まで保持します。
+
+English: No three-card SC limit. Overflow scrolls back and forth within the configured height, pausing two seconds at each end. Height and speed save automatically; default20 canvas pixels/second, 0 stops motion. Hover/focus pauses scrolling without pausing expiry. Retains the latest100 messages.

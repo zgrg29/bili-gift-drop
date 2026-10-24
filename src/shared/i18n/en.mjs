@@ -1,11 +1,14 @@
 export default {
+"scHeight":"SC region height (%)",
+"scScrollSpeed":"SC scroll speed (canvas pixels/second, 0 stops)",
+
 "scTitle":"Super Chat",
 "scEnabled":"Enable Super Chat",
 "scX":"SC left (%)",
 "scY":"SC top (%)",
 "scWidth":"SC width (%)",
 "scCollapse":"Auto-collapse seconds (0 disables)",
-"scHint":"Drag the box to save position. Click preview headings to sync expansion with OBS. In OBS use Interact. Shows 3 cards; others wait in arrival order and expire on schedule. Retains latest 100. Hiding does not pause timers.",
+"scHint":"Cards fill the region height without a 3-card limit. Overflow scrolls slowly back and forth, pausing for 2 seconds at each end. Hover or focus pauses scrolling for interaction. Position, size and speed save automatically; use Interact in OBS. Retains the latest 100 active messages. Expiry continues while collapsed, hidden or switching languages.",
 "scLayout":"Drag or use arrow keys to position SC",
 "scTest":"Simulate SC (60 seconds)",
 "scDemoUser":"Test viewer",
