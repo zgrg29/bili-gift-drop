@@ -5,3 +5,5 @@
 既有 dist 产物不变；新构建自动附带项目 LICENSE。GitHub 可见性与推送结果在操作后记录。
 
 验证：16 项 Node 测试通过，git diff --check 通过。使用 GitHub API 确认当前账户拥有管理员权限；后续将提交推送许可变更并将仓库设为 public。
+
+完成：GitHub API 已将仓库设为 public；无认证请求确认 visibility=public、license.spdx_id=MIT。许可变更提交 3f0bda8 已推送 main。未创建 Release，也未更新既有二进制包。

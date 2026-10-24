@@ -184,3 +184,4 @@ data/ cache/ logs/     运行时生成数据（已忽略，不提交）
 - 新增根目录 LICENSE（版权持有人 zgrg29），package.json 标记 SPDX MIT，README 同步中日英许可说明。
 - Windows 构建脚本将项目 LICENSE 与 Node.js 许可分别收入分发 ZIP；已有预览包未自动更新，需重新构建后再发布。
 - package.json 的 private 保留：仅防止误发 npm，不限制 GitHub 公开或 MIT 授权。礼物优先、SC 后续范围保持。
+- 公开操作已完成：GitHub 匿名 API 确认仓库为 public，识别许可证为 MIT；16 项测试通过，源码与许可已推送 main。未发布或更新远程 Release。
