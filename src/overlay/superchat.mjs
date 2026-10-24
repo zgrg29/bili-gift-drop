@@ -9,7 +9,7 @@ function animate(now){const c=getConfig(),dt=previous===undefined?0:Math.min(.1,
   requestAnimationFrame(animate);
 }
 requestAnimationFrame(animate);
-function render(){const c=getConfig(),l=c.language,now=Date.now();items=items.filter(x=>x.end>now);root.hidden=!c.scEnabled;Object.assign(root.style,{left:c.scX+'%',top:c.scY+'%',width:c.scWidth+'%',maxHeight:Math.min(c.scHeight??100,100-c.scY)+'%'});
+function render(){const c=getConfig(),l=c.language,now=Date.now();items=items.filter(x=>x.end>now);root.style.opacity=(c.scOpacity??100)/100;root.hidden=!c.scEnabled;Object.assign(root.style,{left:c.scX+'%',top:c.scY+'%',width:c.scWidth+'%',maxHeight:Math.min(c.scHeight??100,100-c.scY)+'%'});
 const visible=items.filter(x=>x.start<=now);
 const nextSignature=JSON.stringify([l,c.scCollapse,visible.map(x=>[x,x.expanded!==undefined&&(!c.scCollapse||now-(x.interactedAt??x.start)<c.scCollapse*1000)?x.expanded:(!c.scCollapse||now-x.start<c.scCollapse*1000)])]);
 if(nextSignature===signature)return;signature=nextSignature;

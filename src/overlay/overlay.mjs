@@ -1,3 +1,4 @@
+import {guardOverlay} from '/src/overlay/guard.mjs';
 import {superchat} from '/src/overlay/superchat.mjs';
 import {Crowd,region,collisionPairs} from '/src/shared/crowd.mjs';
 import {defaults} from '/src/shared/rules.mjs';
@@ -10,8 +11,9 @@ const images=new Map();
 function image(url){if(!url)return null;if(!images.has(url)){if(images.size>=256)images.delete(images.keys().next().value);const im=new Image();im.src=url;images.set(url,im);}return images.get(url);}
 const crowd=new Crowd();
 function spawn(g,r,box,now){objects.push({x:box.x+r+Math.random()*Math.max(0,box.w-2*r),y:box.y+r,vx:(Math.random()-.5)*180,vy:0,r,angle:Math.random()*6,spin:(Math.random()-.5)*3,born:now,expires:now+cfg.lifetime*1000,im:image(g.image),name:g.name,demo:g.demo});}
+window.addEventListener('message',e=>{if(e.origin===location.origin&&e.source===parent&&e.data?.type==='opacity-preview'&&['giftOpacity','scOpacity','guardOpacity'].includes(e.data.key)&&Number.isFinite(e.data.value))cfg={...cfg,[e.data.key]:Math.max(0,Math.min(100,e.data.value))};});
 const events=new EventSource('/api/events');events.onmessage=e=>{const {type,data}=JSON.parse(e.data);if(type==='init')cfg={...defaults,...data.config};if(type==='config')cfg={...defaults,...data};if(type==='clear'){objects=[];crowd.clear();}if(type==='gift')crowd.enqueue(data,cfg,performance.now());document.documentElement.lang=cfg.language;document.title=t(cfg.language,'title');};
-function step(dt){
+function step(dt){canvas.style.opacity=(cfg.giftOpacity??100)/100;
   const box=region(cfg);
   for(const o of objects){o.vy+=cfg.gravity*dt;o.x+=o.vx*dt;o.y+=o.vy*dt;o.angle+=o.spin*dt;
     if(o.x<box.x+o.r){o.x=box.x+o.r;o.vx=Math.abs(o.vx)*cfg.bounce;}if(o.x>box.x+box.w-o.r){o.x=box.x+box.w-o.r;o.vx=-Math.abs(o.vx)*cfg.bounce;}
@@ -42,3 +44,5 @@ function frame(now){
 }requestAnimationFrame(frame);
 
 superchat(events,()=>cfg);
+
+guardOverlay(events,()=>cfg);

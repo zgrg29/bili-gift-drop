@@ -1,4 +1,13 @@
-# Windows / 日本語 / English
+# Windows v0.6.2 Preview / 日本語 / English
+
+当前包：BiliGiftDrop-v0.6.2-windows-x64.zip。支持礼物、SC和默认开启的大航海；单一预览编辑三个区域，各自透明度默认100%。大航海按素材比例显示，观众信息在下方，宽度设置最高100%，高素材缩小以适应画面。以下按版本排列的说明保留功能演进，最终行为以v0.6.2为准。
+
+現行パッケージはBiliGiftDrop-v0.6.2-windows-x64.zip。ギフト・SC・大航海を単一プレビューで編集し、各不透明度の初期値は100%。大航海は素材比率を維持して情報を下に表示、要求幅は最大100%、画面高さに合わせて縮小。以下の版別説明は履歴、最終動作はv0.6.2です。
+
+Current package: BiliGiftDrop-v0.6.2-windows-x64.zip. One preview edits gifts, SC and enabled-by-default subscriptions; opacity defaults to100% per layer. Subscription proportions follow media with viewer details below, up to100% requested width and scaling down to fit canvas height. Versioned sections below retain history; v0.6.2 describes final behavior.
+
+验收：31项自动测试和本机EXE回归，浏览器移动/缩放、竖版GIF及三语桌面/390px字段检查已有证据。真实上舰、付费SC、OBS、全部视频编码、长期和全新Windows仍待验收。 / 検証：自動31件・EXE回帰、ブラウザ操作・縦長GIF・三言語と390pxの項目確認。実際の上艦・SC・OBS・全コーデック・長時間・新規Windowsは未検証。 / Validation includes31 automated tests, local EXE regression, browser interaction, portrait GIF and three-language desktop/390px fields. Real subscriptions, paid SC, OBS, all codecs, long-running streams and clean Windows installations remain unverified.
+
 
 命令行提示始终同时显示中文、日语和英语；不受控制面板语言设置影响。
 
@@ -73,3 +82,16 @@ English: SC defaults on for new installations and older configurations without t
 日本語：SCの3件制限を撤廃。表示高さを超えると上下に往復し両端で2秒停止。高さ・速度は自動保存、初期値20画素/秒、0で停止。ホバー・フォーカス中は一時停止しますが期限は進みます。最新100件まで保持します。
 
 English: No three-card SC limit. Overflow scrolls back and forth within the configured height, pausing two seconds at each end. Height and speed save automatically; default20 canvas pixels/second, 0 stops motion. Hover/focus pauses scrolling without pausing expiry. Retains the latest100 messages.
+
+
+## v0.6.0 大航海 / 大航海 / Great Voyage
+
+中文：默认开启；同一预览中拖动大航海框移动，右下角缩放。用“模拟上舰”查看等级、月数和顺序播放。每个等级可上传图片/GIF/MP4/WebM，最大32 MiB，视频静音循环，每位8秒。素材保存在程序数据目录的media/，配置在data/；迁移时保留两个目录。窗口关闭会停止服务且不恢复旧队列。真实上舰、OBS与视频编码兼容性需实机确认。
+
+日本語：初期設定は有効。同じプレビューの大航海枠を移動、右下でサイズ変更。テストでランク・月数・順次再生を確認。画像/GIF/MP4/WebM、最大32 MiB、無音ループ、1人8秒。素材はmedia/、設定はdata/に保存し、移行時は両方を保持。終了後は待機列を復元しません。実際の上艦、OBS、動画コーデックは実機確認が必要。
+
+English: Enabled by default. Drag the Great Voyage frame in the shared preview; resize with its bottom-right corner. Simulate subscriptions to check tiers, months and sequential playback. Images/GIF/MP4/WebM up to 32 MiB; videos loop muted, 8 seconds per viewer. Assets live in media/ and settings in data/ under the program data directory; retain both when moving. Queues do not survive shutdown. Real subscriptions, OBS and video codecs require validation.
+
+v0.6.0追加：同一预览用绿色框编辑礼物范围、紫色框编辑SC宽高、蓝色框等比例编辑大航海。三类各有透明度滑杆，默认100%。 / 単一プレビュー：緑はギフト、紫はSC、青は大航海。各不透明度の初期値は100%。 / One preview: green gifts, purple SC, blue Great Voyage; each opacity slider defaults to 100%.
+
+v0.6.2：图片/GIF/视频按实际素材比例显示，编辑框自动跟随；头像昵称期限放在下方，画面高度不足时整体等比例缩小。 / 画像・GIF・動画の比率に編集枠も自動対応。情報は下に表示し、画面内に収まるよう縮小。 / Image/GIF/video aspect ratios determine the editor and effect layout. Viewer details sit below; the whole effect scales down to fit when needed.

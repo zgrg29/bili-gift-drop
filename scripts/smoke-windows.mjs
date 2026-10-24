@@ -31,6 +31,7 @@ async function stop(){if(child&&child.exitCode===null&&child.signalCode===null){
 async function initial(){const r=await fetch(base+'/api/events');const reader=r.body.getReader();let text='';const decoder=new TextDecoder();while(!text.includes('\n\n')){const chunk=await reader.read();if(chunk.done)throw Error('SSE ended');text+=decoder.decode(chunk.value,{stream:true});}await reader.cancel();return JSON.parse(text.split('\n')[0].slice(6)).data;}
 try{
   await start();
+  assert.equal((await initial()).config.guardEnabled,true);
   assert.equal((await initial()).config.scEnabled,true,'fresh installation enables SC by default');
   const duplicate=spawn(path.resolve('dist/BiliGiftDrop-windows-x64.exe'),['--no-open'],{env,windowsHide:true,stdio:['ignore','pipe','pipe']});
   let duplicateOutput='';duplicate.stdout.setEncoding('utf8');duplicate.stdout.on('data',b=>duplicateOutput+=b);duplicate.stderr.setEncoding('utf8');duplicate.stderr.on('data',b=>duplicateOutput+=b);
@@ -42,6 +43,8 @@ try{
   assert.equal((await once(smoke,'exit'))[0],0);
   const scSmoke=spawn(process.execPath,['scripts/smoke-sc.mjs'],{env,stdio:'inherit'});
   assert.equal((await once(scSmoke,'exit'))[0],0);
+  const guardSmoke=spawn(process.execPath,['scripts/smoke-guard.mjs'],{env,stdio:'inherit'});assert.equal((await once(guardSmoke,'exit'))[0],0);
+  const guardMedia=(await initial()).config.guardAsset3;
   for(const language of ['zh-CN','ja','en']){
     assert.equal((await fetch(base+'/api/config',{method:'POST',headers:{Origin:base,'Content-Type':'application/json'},body:JSON.stringify({language,minGiftScale:75,maxGiftScale:200,maxGiftScaleAmount:25,lifetime:45,maxCoverage:10,spawnRate:8,regionY:70,regionHeight:30,scEnabled:true,scX:12.5,scY:9,scWidth:35,scCollapse:15,scHeight:60,scScrollSpeed:35})})).status,200);
     assert.equal((await initial()).config.language,language);
@@ -49,12 +52,14 @@ try{
   }
   assert.equal(effect({coinType:'gold',unitCoin:1000,totalCoin:12500,count:1},(await initial()).config).size,110);
   await stop();await start();
-  const state=await initial();assert.equal(state.config.language,'en');assert.equal(state.config.lifetime,45);
+  const state=await initial();assert.equal(state.config.guardAsset3,guardMedia);assert.equal(state.config.guardWidth,100);assert.equal(state.config.guardX,85);assert.equal(state.config.guardY,89.5);assert.equal(state.config.guardOpacity,50);assert.equal(state.config.scOpacity,60);assert.equal(state.config.giftOpacity,70);assert.equal((await fetch(base+guardMedia)).status,200);assert.equal(state.guard.current,null);assert.equal(state.config.language,'en');assert.equal(state.config.lifetime,45);
   for(const [key,value] of Object.entries({minGiftScale:75,maxGiftScale:200,maxGiftScaleAmount:25,maxCoverage:10,spawnRate:8,regionY:70,regionHeight:30,scEnabled:true,scX:12.5,scY:9,scWidth:35,scCollapse:15,scHeight:60,scScrollSpeed:35}))assert.equal(state.config[key],value);
   for(const file of ['/src/shared/sc-scroll.mjs','/src/shared/superchat.mjs','/src/overlay/superchat.mjs','/src/shared/rules.mjs','/src/shared/i18n/zh-CN.mjs','/src/shared/i18n/ja.mjs','/src/shared/i18n/en.mjs','/src/shared/crowd.mjs','/src/overlay/overlay.mjs','/src/control/control.mjs']){
     const response=await fetch(base+file);assert.equal(response.status,200);
     assert.equal(await response.text(),await readFile('.'+file,'utf8'),'embedded source matches current working tree');
   }
+  const manifest=JSON.parse(await readFile('build/manifest.json','utf8'));
+  for(const file of manifest.files.filter(file=>/^src\/(control|overlay|shared)\//.test(file))){const response=await fetch(base+'/'+file);assert.equal(response.status,200,file);assert.deepEqual(Buffer.from(await response.arrayBuffer()),await readFile(file),'embedded bytes: '+file);}
   assert.equal(JSON.parse(await readFile(path.join(data,'data/config.json'),'utf8')).language,'en');
   assert.equal((await fetch(base+'/api/config',{method:'POST',headers:{Origin:base,'Content-Type':'application/json'},body:JSON.stringify({scEnabled:false})})).status,200);
   await stop();await start();assert.equal((await initial()).config.scEnabled,false,'saved off survives restart despite default on');

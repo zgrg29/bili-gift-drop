@@ -1,3 +1,4 @@
+import {normalizeGuard,GuardQueue} from '../shared/guard.mjs';
 import {normalizeSC,SCStore,scDuration} from '../shared/superchat.mjs';
 import http from 'node:http';
 import {readFile,writeFile,mkdir,rename} from 'node:fs/promises';
@@ -12,13 +13,20 @@ import {Catalog} from './catalog.mjs';
 import {expandGiftV2} from './gift-v2.mjs';
 await mkdir(path.join(runtimeRoot,'data'),{recursive:true});
 let cfg={...defaults},configured=false;try{cfg=config(JSON.parse(await readFile(path.join(runtimeRoot,'data/config.json'),'utf8')));configured=true;}catch{}
-const scStore=new SCStore();
+const scStore=new SCStore(),guardQueue=new GuardQueue();
 let status='disconnected',warning=null;const clients=new Set(),catalog=new Catalog(),dedup=new Deduplicator();
 let configWrites=Promise.resolve();
 const send=(type,data)=>{const msg=`data: ${JSON.stringify({type,data})}\n\n`;for(const r of clients){if(r.writableLength>1024*1024){r.destroy();clients.delete(r);}else r.write(msg);}};
 async function receive(msg){
   try{
     const command=msg.cmd?.split(':')[0];
+    if(['GUARD_BUY','USER_TOAST_MSG','USER_TOAST_MSG_V2'].includes(command)){
+      const item=normalizeGuard(msg);if(!item||!cfg.guardEnabled)return;
+      // Fetch only permitted CDN images; capture the connection generation across async work.
+      const generation=live.generation,avatarUrl=item.avatar;item.avatar=null;
+      const result=guardQueue.add(item);if(result==='full'){warning='guardFull';send('warning',warning);}send('guard-state',guardQueue.snapshot());
+      if(result!=='full'&&avatarUrl){const avatar=await catalog.cacheImage(avatarUrl).catch(()=>null);if(generation===live.generation&&cfg.guardEnabled){const existing=[guardQueue.current,...guardQueue.pending].find(x=>x?.key===item.key);if(existing&&avatar){existing.avatar=avatar;send('guard-state',guardQueue.snapshot());}}}return;
+    }
     if(command==='SUPER_CHAT_MESSAGE_DELETE'){scStore.remove(msg.data?.ids??[]);send('sc-list',scStore.list());return;}
     if(['SUPER_CHAT_MESSAGE','SUPER_CHAT_MESSAGE_JPN'].includes(command)){
       const sc=normalizeSC(msg);if(sc&&scStore.add(sc))send('sc',sc);
@@ -35,7 +43,7 @@ async function receive(msg){
 const live=new LiveRoom(s=>{status=s;send('status',s);},receive);
 const giftList=()=>[...catalog.gifts].map(([id,g])=>({id,name:g.name,price:g.price,coinType:g.coinType}));
 catalog.refresh(0).then(()=>send('catalog',giftList())).catch(()=>{});
-const mime={'.html':'text/html; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8'};
+const mime={'.html':'text/html; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.png':'image/png','.svg':'image/svg+xml','.jpg':'image/jpeg','.gif':'image/gif','.webp':'image/webp','.mp4':'video/mp4','.webm':'video/webm'};
 async function body(req){let raw='';for await(const chunk of req){raw+=chunk;if(raw.length>8192)throw Error('invalid');}return JSON.parse(raw||'{}');}
 const server=http.createServer(async(req,res)=>{
   try {
@@ -44,21 +52,30 @@ const server=http.createServer(async(req,res)=>{
     if(req.headers.host!==expected){res.writeHead(403).end();return;}
     if(req.method==='POST'&&req.headers.origin!==`http://${expected}`){res.writeHead(403).end();return;}
     res.setHeader('X-Content-Type-Options','nosniff');
+    if(req.method==='GET'&&/^\/media\/[a-f0-9-]+\.(png|jpg|webp|gif|mp4|webm)$/.test(url.pathname)){const asset=await readFile(path.join(runtimeRoot,url.pathname));res.writeHead(200,{'Content-Type':mime[path.extname(url.pathname)],'Cache-Control':'public, max-age=86400'}).end(asset);return;}
+    if(req.method==='POST'&&url.pathname==='/api/guard-upload'){
+      const level=Number(url.searchParams.get('level'));if(![1,2,3].includes(level))throw Error('invalid');
+      const chunks=[];let size=0;for await(const chunk of req){size+=chunk.length;if(size>32*1024*1024)throw Error('invalid');chunks.push(chunk);}const data=Buffer.concat(chunks);
+      const ext=data.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10]))?'png':data[0]===255&&data[1]===216&&data[2]===255?'jpg':/^GIF8[79]a$/.test(data.subarray(0,6).toString())?'gif':data.subarray(0,4).toString()==='RIFF'&&data.subarray(8,12).toString()==='WEBP'?'webp':data.subarray(4,8).toString()==='ftyp'?'mp4':data.subarray(0,4).equals(Buffer.from([26,69,223,163]))?'webm':null;
+      if(!ext)throw Error('invalid');const file='/media/'+randomUUID()+'.'+ext;await mkdir(path.join(runtimeRoot,'media'),{recursive:true});await writeFile(path.join(runtimeRoot,file),data);
+      const task=configWrites.catch(()=>{}).then(async()=>{const next=config({['guardAsset'+level]:file},cfg);await writeFile(path.join(runtimeRoot,'data/config.tmp'),JSON.stringify(next,null,2));await rename(path.join(runtimeRoot,'data/config.tmp'),path.join(runtimeRoot,'data/config.json'));cfg=next;configured=true;send('config',cfg);});configWrites=task;await task;res.writeHead(200,{'Content-Type':'application/json'}).end('{"ok":true}');return;
+    }
     if(req.method==='GET'&&/^\/cache\/[a-f0-9]{64}$/.test(url.pathname)){const asset=await readFile(path.join(runtimeRoot,url.pathname));const type=asset.subarray(0,3).toString()==='GIF'?'image/gif':asset.subarray(8,12).toString()==='WEBP'?'image/webp':asset[0]===255?'image/jpeg':'image/png';res.writeHead(200,{'Content-Type':type,'Cache-Control':'public, max-age=86400'}).end(asset);return;}
     if(req.method==='GET'&&url.pathname==='/api/events'){
       res.writeHead(200,{'Content-Type':'text/event-stream','Cache-Control':'no-cache','Connection':'keep-alive'});
-      clients.add(res);res.write(`data: ${JSON.stringify({type:'init',data:{config:cfg,status,warning,configured,sc:scStore.list(),gifts:giftList()}})}\n\n`);
+      clients.add(res);res.write(`data: ${JSON.stringify({type:'init',data:{config:cfg,status,warning,configured,sc:scStore.list(),guard:guardQueue.snapshot(),gifts:giftList()}})}\n\n`);
       req.on('close',()=>clients.delete(res));return;
     }
     if(req.method==='POST'&&url.pathname.startsWith('/api/')){
       const d=await body(req);
       switch(url.pathname){
-        case '/api/config':{const task=configWrites.catch(()=>{}).then(async()=>{const next=config(d,cfg);await writeFile(path.join(runtimeRoot,'data/config.tmp'),JSON.stringify(next,null,2));await rename(path.join(runtimeRoot,'data/config.tmp'),path.join(runtimeRoot,'data/config.json'));cfg=next;configured=true;send('config',cfg);});configWrites=task;await task;break;}
-        case '/api/connect':if(!/^\d{1,12}$/.test(d.room)||Number(d.room)<1)throw Error('invalid');warning=null;send('warning',null);if(live.room!==d.room){scStore.items.clear();send('sc-list',[]);}await live.connect(d.room);catalog.refresh(d.room).catch(()=>send('warning','catalog'));break;
+        case '/api/config':{const task=configWrites.catch(()=>{}).then(async()=>{const next=config(d,cfg);await writeFile(path.join(runtimeRoot,'data/config.tmp'),JSON.stringify(next,null,2));await rename(path.join(runtimeRoot,'data/config.tmp'),path.join(runtimeRoot,'data/config.json'));cfg=next;if(!cfg.guardEnabled){guardQueue.clear();send('guard-state',guardQueue.snapshot());}configured=true;send('config',cfg);});configWrites=task;await task;break;}
+        case '/api/connect':if(!/^\d{1,12}$/.test(d.room)||Number(d.room)<1)throw Error('invalid');warning=null;send('warning',null);if(live.room!==d.room){guardQueue.clear();send('guard-state',guardQueue.snapshot());scStore.items.clear();send('sc-list',[]);}await live.connect(d.room);catalog.refresh(d.room).catch(()=>send('warning','catalog'));break;
+        case '/api/guard-test':{const level=Number(d.level??3),count=Number(d.count??1);if(![1,2,3].includes(level)||!Number.isSafeInteger(count)||count<1||count>1200)throw Error('invalid');const id=randomUUID();if(!cfg.guardEnabled)throw Error('invalid');if(guardQueue.add({id,key:id,demo:true,user:'',avatar:null,level,count,unit:'月'})==='full')throw Error('invalid');send('guard-state',guardQueue.snapshot());break;}
         case '/api/disconnect':live.stop();break;
         case '/api/sc-toggle':{const x=scStore.items.get(String(d.id));if(x){x.expanded=!!d.expanded;x.interactedAt=Date.now();send('sc-list',scStore.list());}break;}
         case '/api/sc-test':{const now=Date.now();const price=Number(d.price??30),duration=Number(d.duration??60);if(!Number.isFinite(price)||price<0||!Number.isFinite(duration)||duration<1||duration>7200)throw Error('invalid');const x={id:randomUUID(),demo:true,user:'',message:'',price,start:now,end:now+duration*1000,color:'#2a60b2',background:'#edf5ff',text:'#172033'};scStore.add(x);send('sc',x);break;}
-        case '/api/clear':scStore.items.clear();send('sc-list',[]);send('clear',null);break;
+        case '/api/clear':guardQueue.clear();send('guard-state',guardQueue.snapshot());scStore.items.clear();send('sc-list',[]);send('clear',null);break;
         case '/api/test':{const count=Number(d.count),price=Number(d.price);if(!Number.isInteger(count)||count<1||count>1000||!Number.isFinite(price)||price<0||price>100000)throw Error('invalid');const metadata=catalog.gifts.get(Number(d.giftId));const image=metadata?await catalog.cacheImage(metadata.image).catch(()=>null):null;send('gift',{id:randomUUID(),giftId:Number(d.giftId)||0,name:metadata?.name??null,user:null,demo:true,count,coinType:price?'gold':'silver',unitCoin:Math.round(price*1000),totalCoin:Math.round(price*1000)*count,image});break;}
         default:res.writeHead(404).end();return;
       }
@@ -70,6 +87,7 @@ const server=http.createServer(async(req,res)=>{
     const content=await readFile(path.join(root,file));res.writeHead(200,{'Content-Type':mime[path.extname(file)]??'application/octet-stream','Cache-Control':'no-cache'}).end(content);
   }catch(e){res.writeHead(e.code==='ENOENT'?404:400,{'Content-Type':'application/json'}).end(JSON.stringify({error:e.message==='invalid'?'invalid':'failed'}));}
 });
+let guardSignature='';const guardTick=setInterval(()=>{const state=guardQueue.snapshot(),signature=JSON.stringify(state);if(signature!==guardSignature){guardSignature=signature;send('guard-state',state);}},100);guardTick.unref();
 const keepalive=setInterval(()=>{for(const r of clients)r.write(': heartbeat\n\n');},20000);keepalive.unref();
 const port=Number(process.env.PORT)||19321;
 function openPanel(url){if(process.argv.includes('--open')&&process.platform==='win32')execFile('rundll32.exe',['url.dll,FileProtocolHandler',url],{windowsHide:true},error=>{if(error)console.error(consoleText('browserFailed',{url}));});}

@@ -1,202 +1,89 @@
 # Bili Gift Drop
 
-## v0.5.0 醒目留言区域滚动（2026-10-24）
+B站直播礼物、醒目留言（SC）与大航海的本地 OBS 透明画面工具。浏览器设置，支持简体中文、日本語和 English。
 
-取消SC最多显示3条的限制，按区域高度显示所有仍有效的留言（容量保留最新100条）。默认延伸到画面底部，超出后缓慢上下往返滚动。区域高度、速度可在设置中自动保存；默认20画布像素/秒，0停止自动滚动。悬停/聚焦暂停滚动，独立到期时间继续运行，不显示倒计时。
+Bilibili配信用のギフト・SC・大航海を表示するローカルOBSツール。ブラウザで設定し、中国語・日本語・英語に対応。
 
-日本語：3件制限を撤廃。領域を超えるSCはゆっくり上下に往復します。高さ・速度は自動保存、0でスクロール停止。
+A local, transparent OBS overlay for Bilibili gifts, Super Chat and Great Voyage subscriptions, with a Chinese/Japanese/English browser control panel.
 
-English: SC cards fill the region without a three-card limit. Overflow scrolls slowly back and forth; height and speed save automatically. 0 stops motion.
+## 当前版本 / 現行版 / Current version
 
-Tag：`v0.5.0`；Title：**Bili Gift Drop v0.5.0 — 醒目留言区域滚动（Preview）**。包：`dist/BiliGiftDrop-v0.5.0-windows-x64.zip`；[三语 Release notes](docs/releases/v0.5.0.md)。旧版本和标签保留。
+**v0.6.2 Preview** · Windows x64 · [Release notes](docs/releases/v0.6.2.md) · [验收记录 / 検証 / Acceptance](docs/ACCEPTANCE.md)
 
-## v0.4.1 醒目留言默认开启（2026-10-24）
+- ZIP: `BiliGiftDrop-v0.6.2-windows-x64.zip`
+- Tag: `v0.6.2`
+- Title: **Bili Gift Drop v0.6.2 — 大航海特效与统一布局编辑（Preview）**
+- 发布材料位于 `dist/RELEASE_TAG.txt`、`dist/RELEASE_TITLE.txt`、`dist/RELEASE_NOTES.md` 和 `dist/SHA256SUMS.txt`。 / リリース用ファイルは `dist/` 内。 / Release fields and checksums are prepared in `dist/`.
 
-醒目留言在新安装、缺少SC设置的旧配置中默认开启。已保存的开关选择保持不变，手动关闭后刷新或重启不会重新开启。位置自动保存、折叠/展开和无倒计时卡片保持原有行为。
+## 简体中文
 
-日本語：SCは初期設定でオン。保存済みのオン・オフ設定は保持されます。
+### 启动与 OBS
 
-English: SC defaults on for new or unmigrated configurations; existing saved choices are retained.
+1. 解压 Windows 包，双击 `BiliGiftDrop-windows-x64.exe`，无需安装 Node.js。
+2. 保持服务命令行窗口打开；浏览器未自动打开时访问 [控制面板](http://127.0.0.1:19321)。
+3. 输入 B 站直播间号并连接；可先用模拟礼物、模拟 SC、模拟上舰检查画面，不产生实际购买。
+4. OBS 添加浏览器源：`http://127.0.0.1:19321/overlay`，宽1920、高1080。预览棋盘格和编辑框不会出现在透明输出中。
+5. 关闭服务窗口或按 Ctrl+C 才会停止程序。升级前先关闭旧服务；重复启动会复用已有面板。
 
-Tag：`v0.4.1`；Title：**Bili Gift Drop v0.4.1 — 醒目留言默认开启（Preview）**。包：`dist/BiliGiftDrop-v0.4.1-windows-x64.zip`；[三语 Release notes](docs/releases/v0.4.1.md)。旧版本和标签保留。
+### 画面与设置
 
-## v0.4.0 醒目留言与布局自动保存（2026-10-24）
+- 一个预览，三个独立设置分区。绿色框为礼物掉落区域，拖动标签移动，右下角调整宽高；紫色框为SC，可移动和独立调整宽高；蓝色框为大航海，按素材比例缩放。保留百分比输入与方向键微调，拖动松开保存，数值停止输入约400毫秒后保存。
+- 礼物、SC、大航海各有0–100%透明度滑杆，默认100%。切换语言和修改透明度不清空效果、不重置SC到期或大航海队列。
+- 礼物按本次总金额缩放；最小50%、最大150%、100元达到最大为默认值。100%对应1920×1080画布中的80像素。最低触发金额按单价判断；视觉对象、生成速度、面积和等待队列均有容量保护。
+- SC默认开启，独立按平台有效期移除，无可见倒计时。默认15秒折叠，0关闭折叠；标题可展开。有效卡片按区域高度排列，超出后往返滚动，默认20画布像素/秒，0停止。悬停或聚焦暂停滚动但不暂停到期。最多保留最新100条。可打开透明画面或在OBS浏览器源中使用“交互”操作卡片。
+- 大航海默认开启，显示头像、原始昵称、舰长/提督/总督和本次购买期限。明确单位为月时显示“3个月舰长”等，特殊单位保留原信息，缺期限标记未知，缺头像显示昵称首字。
+- 每位上舰播放8秒，按收到顺序依次播放，最多100位等待；满队提示并跳过新事件。关闭大航海、换房或清空会清除对应队列；重启不回放旧购买。一次多月只播放一次。
+- 三个等级分别提供AI像素舰船默认素材，可替换PNG/JPEG/WebP/GIF/MP4/WebM，单文件不超过32 MiB。视频静音循环，每位仍按8秒轮换。各等级按实际图片/GIF尺寸或视频元数据决定比例，观众信息独立位于素材下方。设置宽度最大100%，高素材会整体缩小以适应画面，不拉伸素材。读取或解码失败回退默认显示。
+- 更换素材后，预览会按当前播放等级布局；空闲时可用“模拟大航海等级”选择要编辑、测试的等级。
 
-醒目留言可独立启用。拖动布局框松开即提交保存；左侧、顶部、宽度和折叠秒数停止输入约400毫秒后自动保存，同步到OBS。支持方向键微调与刷新/重启恢复布局，无需再点击保存。默认15秒自动折叠，点击标题再次展开；卡片不显示倒计时，到期自动移除。切换语言和关闭显示不重置计时。
+### 保存、验收与限制
 
-SC uses platform expiry/duration and colors first; Japanese, Chinese and English UI are included. SCの位置・幅は自動保存され、カウントダウンは表示しません。
+EXE设置、缓存及上传素材在 `%LOCALAPPDATA%\BiliGiftDrop`；配置在 `data/`、上传素材在 `media/`。升级替换EXE即可；迁移电脑时保留配置和素材两个目录。源码运行默认使用项目目录，`BILI_GIFT_DATA_DIR`可指定隔离数据目录。
 
-发布 tag：`v0.4.0`；标题：**Bili Gift Drop v0.4.0 — 醒目留言与布局自动保存（Preview）**。下载包：`dist/BiliGiftDrop-v0.4.0-windows-x64.zip`；[三语 Release notes](docs/releases/v0.4.0.md)。验收记录见[SC日志](log/2026-10-24-superchat.md)。下方版本章节为历史记录。
+31项自动测试和本机EXE隔离回归通过；已有浏览器鼠标移动/缩放、三语桌面和100×200竖版GIF比例证据。真实大航海、真实付费SC与各金额配色、OBS实机、完整三语窄屏、全部视频编码、长期直播和全新Windows环境仍待验收。匿名连接可能受平台限制；不保证收到的上舰通知总含头像、明确月份或稳定的交易标识。部分真实V2礼物已验证，不能据此推定所有平台事件均通过。本构建未签名，作为预览发布。
 
-## v0.3.1 自动保存设置（2026-10-24）
+## 日本語
 
-「掉落设置」中的数值和免费礼物开关修改后自动保存，无需点击保存按钮。停止输入约 400 毫秒后保存有效值并同步到 overlay；空值、越界或不符合步长的输入不会保存。尺寸设置仍对新收到的礼物生效，不追溯改变已有和队列中礼物的尺寸。保留保存按钮，便于手动重试。保存失败显示错误提示。
+1. Windows x64 ZIPを展開し `BiliGiftDrop-windows-x64.exe` を起動。Node.js不要。コンソールを開いたまま [設定画面](http://127.0.0.1:19321) でルーム番号を入力します。テスト機能は実際の購入を発生させません。
+2. OBSブラウザソースに `http://127.0.0.1:19321/overlay`、幅1920・高さ1080を設定。市松模様と編集枠は出力されません。終了はコンソールを閉じるかCtrl+C。更新前に旧サービスを停止してください。
+3. 単一プレビュー上で、緑のギフト領域はラベルをドラッグして移動、右下で幅・高さ変更。紫のSCも幅と高さを個別に変更。青の大航海は素材比率を維持。数値入力・矢印キーも使用でき、離した時または入力停止後約400msで自動保存します。各エフェクトの不透明度は0–100%、初期100%。言語・不透明度の変更でタイマーをリセットしません。
+4. ギフトは合計金額に応じてサイズ変更。既定50%–150%、100人民元で最大、100%は1920×1080上の80px。最低額は単価で判定し、個数・面積・生成速度に制限があります。
+5. SCは初期設定で有効。期限は個別、カウントダウンなし。既定15秒で折りたたみ、0で無効。領域を超えると初期20画素/秒で往復し、0で停止。ホバー・フォーカスでスクロールを一時停止しますが期限は進みます。最新100件まで保持。透明画面、またはOBSの「対話」で見出しを操作できます。
+6. 大航海は初期設定で有効。アバター・元の名前・ランク・今回の購入期間を表示。月以外の単位は元情報を保持し、期間不明は不明、アバター未取得は名前の先頭文字を表示。1人8秒、受信順、最大100人待機。満杯時は新規分を通知してスキップ。複数月でも1回再生。無効化・ルーム変更・クリアで列を消去し、再起動後は過去分を再生しません。
+7. 各ランクの標準AI素材をPNG/JPEG/WebP/GIF/MP4/WebM（最大32 MiB）に置換可能。動画は無音ループ。画像・GIFサイズまたは動画メタデータから比率を自動計算し、視聴者情報は下に表示。設定幅は最大100%、縦長素材は画面内に収まるよう全体を縮小。失敗時は標準表示。待機中はテストのランク選択で編集対象を切り替えます。
+8. 保存先は `%LOCALAPPDATA%\BiliGiftDrop`、設定は `data/`、素材は `media/`。移行時は両方を保持。31件の自動テスト・EXE回帰と一部ブラウザ操作は検証済み。実際の上艦・有料SC・OBS、完全な3言語狭幅レイアウト、全コーデック、長時間配信、新規Windows環境は未検証。匿名接続が制限されたり、一部フィールドが欠ける場合があります。署名なしのプレビュー版です。
 
-日本語：落下設定の有効な数値・スイッチ変更は約 400 ミリ秒後に自動保存・反映されます。保存ボタンは不要です。無効な値は保存しません。失敗時はエラーを表示し、保存ボタンで再試行できます。
+## English
 
-English: Valid numbers and toggles in Drop settings save and apply automatically after about 400 ms without typing. No Save click is needed. Invalid values are not saved. Errors are shown; the Save button remains available for retrying.
+1. Extract the Windows x 64 ZIP and run `BiliGiftDrop-windows-x 64.exe`. No Node.js installation is required. Keep its console open and enter a room ID in the [control panel](http://127.0.0.1:19321). Simulations do not make purchases.
+2. Add an OBS browser source at `http://127.0.0.1:19321/overlay`, width 1920, height 1080. Checkerboard and editing frames are preview-only. Close the console or press Ctrl+C to stop; stop the previous service before upgrading.
+3. One preview contains green gift-region, purple SC and blue subscription frames. Drag the gift label to move its region; use bottom-right handles to resize gift/SC width and height independently. Subscription resizing follows media proportions. Numbers and arrow keys remain available. Changes save on release or about 400 ms after typing. Each layer has a 0–100% opacity slider, default 100%. Language and opacity changes preserve timers.
+4. Gift sizes follow event totals. Defaults are 50%–150%, reaching maximum at CNY 100;100% means 80 px on a 1920×1080 canvas. Minimum trigger price uses unit price. Icon count, spawn rate, area and pending effects are bounded.
+5. SC is enabled by default, expires independently and shows no countdown. Default collapse delay is 15 seconds;0 disables it. Overflow scrolls back and forth at 20 canvas pixels/second by default;0 stops motion. Hover/focus pauses scrolling without pausing expiry. Retains the latest 100 active messages. Use the transparent page or OBS Interact to operate headings.
+6. Subscriptions are enabled by default and show avatar, original name, tier and purchased duration. Non-month units retain their original information; missing duration is marked unknown and missing avatars use the first name character. Each viewer plays for 8 seconds in arrival order, with up to 100 waiting. Full queues skip new events with a warning. Multi-month purchases play once. Disabling, changing room or clearing removes the queue; shutdown never replays old purchases.
+7. Replace each tier’s default AI pixel ship with PNG/JPEG/WebP/GIF/MP 4/WebM, up to 32 MiB per file. Videos loop muted. Native image/GIF dimensions or video metadata determine layout; viewer details sit below. Requested width supports 100%, with tall content scaling down to fit the canvas. Failures fall back to default display. While idle, select a simulation tier to edit its layout.
+8. EXE data lives in `%LOCALAPPDATA%\BiliGiftDrop`: configuration in `data/`, uploaded files in `media/`. Retain both when moving computers.31 automated tests and local EXE regressions pass, with browser interaction and portrait-GIF evidence. Real subscriptions, paid SC/colors, OBS, complete narrow layouts in all three languages, all codecs, long-running streams and clean Windows installations remain unverified. Anonymous access may be restricted and platform fields may be missing. This is an unsigned preview.
 
-验收：19/19 自动测试及 Windows EXE 回归通过；Chrome 未点击保存修改为 85%/35 元，刷新保持；新增自动保存提示的中日英 390 像素窄屏检查通过。OBS 实机和长期运行仍待验收。
+## 开发 / 開発 / Development
 
-发布 tag：`v0.3.1`；标题：**Bili Gift Drop v0.3.1 — 设置自动保存（Preview）**。发布包为 `dist/BiliGiftDrop-v0.3.1-windows-x64.zip`，附 `SHA256SUMS.txt`；[三语 Release notes](docs/releases/v0.3.1.md)。历史版本记录保留在下方。
+源码运行 / ソース起動 / Run source（Node.js22+；本机验证Node.js24 / tested with Node.js24）：
 
-## v0.3.0 自定义礼物尺寸（2026-10-24）
+```powershell
+node src/server/index.mjs
+node --test
+```
 
-用户可在「掉落设置」中设置并保存**最小礼物尺寸、最大礼物尺寸、达到最大尺寸的金额**。默认 50%、150%、100 元；100% 为 1920 × 1080 画布中的 80 像素，尺寸范围 10%–400%。按本次总金额线性缩放，超过满尺寸金额封顶，免费礼物使用最小尺寸。最大值低于最小值时自动提高至最小值。
+Windows x64构建与隔离回归 / ビルドと検証 / Build and isolated regression：
 
-例如默认设置下，本次总金额 0/50/100 元对应 40/80/120 像素。普通礼物总金额为单价 × 本次数量；最低触发门槛仍按单价判断。点击保存后同步至 overlay，对新收到的礼物生效；已有及队列中礼物保留接收时尺寸。掉落区域和面积保护可能进一步缩小实际尺寸。可使用「模拟送礼」与现有实时预览检查效果。旧配置自动补默认值，切换语言不清空效果。
+```powershell
+node scripts/build-windows.mjs
+node scripts/smoke-windows.mjs
+```
 
-日本語：設定画面で最小・最大サイズと最大サイズに達する金額を保存できます。既定は 50%、150%、100 人民元。今回の合計金額に比例して拡大し、無料ギフトは最小サイズです。100% は 80 ピクセルです。保存後の新しいギフトに適用され、既存・待機中のサイズは維持されます。領域と面積制限により実際のサイズが小さくなる場合があります。
+运行代码无外部npm依赖；首次构建下载并校验postject及Node许可。 / ランタイムは外部npm依存なし。初回ビルドでpostjectとNodeライセンスを取得。 / Runtime has no external npm dependencies; the first build downloads verified postject and Node license notices.
 
-English: Save minimum size, maximum size and the amount for maximum size in Drop settings. Defaults: 50%, 150%, CNY 100. Size scales linearly with the event total; free gifts use the minimum. 100% is 80 pixels. Saved changes apply to newly received gifts; existing and queued icons retain their size. Region and area limits may reduce the displayed size.
+## 文档与许可 / 資料・ライセンス / Documentation and license
 
-验收：**19/19 自动测试通过，本机 Windows EXE 回归通过**。覆盖总金额缩放、上限、免费礼物、配置迁移/保存/重启、三语提交和实际绘制尺寸。Chrome 已确认自定义数值保存及刷新恢复，新增设置在 390 像素窄屏的中日英布局无横向溢出。完整页面视觉、OBS、长期实机及全新 Windows 验收尚未完成。详见 [尺寸验收日志](log/2026-10-24-gift-size.md)。以下历史章节中的测试数量及状态保留当时记录，本节为最新结论。
+[Windows说明](docs/WINDOWS.md) · [工程规划](docs/PROJECT_PLAN.md) · [验收报告](docs/ACCEPTANCE.md) · [本轮日志](log/2026-10-24-v0.6.2-release.md) · [接入研究](docs/BILIBILI_INTEGRATION.md)
 
-发布 tag：`v0.3.0`；标题：**Bili Gift Drop v0.3.0 — 自定义礼物尺寸（Preview）**；使用 **Pre-release**。三语 [Release notes](docs/releases/v0.3.0.md) 已准备。上传 `dist/BiliGiftDrop-v0.3.0-windows-x64.zip` 与 `dist/SHA256SUMS.txt`，标题和正文分别见 `dist/RELEASE_TITLE.txt`、`dist/RELEASE_NOTES.md`。本轮提交并推送代码及 tag，GitHub Release 由用户发布。
-
-## v0.2.0 礼物高峰保护（2026-10-24）
-
-本次为预览版本。已实现每秒生成限流、短队列合并与过期、数量及估算面积双上限、拥挤提前淡出、掉落区域百分比设置和预览统计；低价礼物在查图前过滤，碰撞改为邻近网格检查，减少缓存读盘与最近记录重绘。以下旧记录保留当时验收状态，本节与 [本次验收日志](log/2026-10-24-crowd-protection.md) 为最新增量。
-
-- 默认每秒最多 12 个图标，同时最多 120 个；面积预算为掉落区域的 15%（可调 1–30%）。按旋转图标外接方形面积求和，属于保守估算，不是像素遮挡率。
-- 一次送 1,000 个不会生成 1,000 张图：单事件最多 40 个视觉副本，同类待生成副本合并；队列最多 32 组，超过 1.5 秒丢弃。原始送礼数量、金额在最近记录中保留。
-- 接近上限时旧图标提前淡出；修改为更小上限时必要的旧图标直接移除。清空操作同时清空画面和待生成队列。
-- 可设置掉落区域左/上位置及宽/高（画布百分比），区域越界会自动收缩。画面裁切在该区域内，建议避开主播人物。
-- 未知礼物自动查询平台目录并缓存图片；目录查询合并、失败退避。平台协议兼容时一般无需为新增礼物更新代码；全新上架实测仍待完成。
-- 新设置及统计完整支持中日英，保存后重启恢复；只切换语言不清空画面和队列。
-
-日本語：v0.2.0 はプレビュー版です。生成レート、短い待機キュー、個数・推定面積の上限、混雑時の早期フェード、落下領域の設定と統計を追加しました。既定は毎秒 12 個、最大 120 個、領域の推定面積 15%。生成待ちは 1.5 秒で破棄されます。三言語と設定保存に対応。今回のブラウザ目視確認と OBS 実機検証は未完了です。
-
-English: v0.2.0 is a preview with bounded spawning, a short pending queue, count and estimated-area limits, early fading under crowding, configurable drop regions and preview statistics. Defaults: 12 icons/second, 120 active icons and a 15% region-area budget. Pending effects expire after 1.5 seconds. Settings persist and support all three languages. Browser visual QA and OBS verification remain pending.
-
-本次自动化测试 **16/16 通过**，包括规则/三语资源、三语控制面板执行、持续风暴及完整 overlay 事件与绘制循环。Windows EXE 本机回归通过，包含新设置重启恢复与内嵌源码一致性。浏览器视觉验收因工具无法连接本地页面及可靠识别 URL 而未完成，不据此宣称窄屏三语或 OBS 实机通过。（此为v0.2.0历史状态；SC已于v0.4.0实现预览。）可编辑礼物金额档位、长期实机压力及全新 Windows 验收仍待完成。
-
-发布信息：tag **`v0.2.0`**，标题 **Bili Gift Drop v0.2.0 — 礼物高峰保护（Preview）**，勾选 **Pre-release**。完整三语说明见 [Release notes](docs/releases/v0.2.0.md)。本地构建输出 `dist/BiliGiftDrop-v0.2.0-windows-x64.zip`、`SHA256SUMS.txt`、`RELEASE_TAG.txt`、`RELEASE_TITLE.txt` 和 `RELEASE_NOTES.md`。上传带版本号 ZIP 与校验文件即可；本轮不推送或发布远程 Release。
-
-本地运行、浏览器设置的 Bilibili 礼物掉落原型，为 OBS 提供透明浏览器源。礼物掉落与醒目留言可组合显示，SC 已在 v0.4.0 提供预览功能。
-
-## 工程进度与验收（早期记录，最新增量见上文）
-
-目前交付为可运行的开发原型，尚未达到第一版正式发布标准。
-
-| 任务 | 状态 | 验收结果 |
-| --- | --- | --- |
-| 开源方案调研、独立本地及 GitHub 仓库 | 已完成 | 独立仓库，参考接入方式；未复制 LiveLink 应用代码 |
-| 工程规划、对话纪要和 log 目录 | 已完成 | 阶段、验收标准和决策记录已建立 |
-| 房间连接、真实礼物与图片掉落 | 样本通过 | 房间 1713548468 的真实 V2 免费及 ¥0.10 礼物；图片缓存及浏览器预览通过 |
-| 金额影响效果、最低触发金额 | 部分完成 | 总金额线性缩放，最小/最大尺寸与满尺寸金额可保存；数量有上限；最低单价可保存；分档停留时间待做 |
-| 主播定制 | 部分完成 | 重力、弹性、停留时间、数量/面积上限、尺寸缩放、免费开关与区域数值设置；拖拽编辑待做 |
-| 中日英语言设置 | 当前界面通过 | 资源键/参数一致、切换、保存和桌面布局已检查；完整窄屏验收待做 |
-| Windows x64 便携 EXE | 已构建，本机回归通过 | 内含运行时；可见命令行同时显示中日英；重复启动、配置重启及退出释放端口已验证；全新电脑及完整浏览器自动打开验收待做 |
-| OBS 浏览器源 | 待实机验收 | 透明页面及接入地址已提供，尚未确认 OBS 内实际显示 |
-| 新礼物自动适配 | 部分完成 | 动态目录、未知 ID 刷新与图片缓存已实现；全新上架礼物和异常场景待验证 |
-| SC 金额时长与自定义位置 | v0.4.0 预览实现，真实SC/OBS待验收 | 独立计时、拖动与宽度自动保存、折叠/展开及三语已具备 |
-| 可靠性及正式交付 | 待完成 | 连送/盲盒实测、断网恢复、长期压力、缓存清理和新环境启动待验收 |
-
-本轮复验：`node --test` **8/8 通过**；`node scripts/smoke.mjs` **通过**。真实送礼与截图采用同日已取得的验证证据，不代表本轮重新监听或 OBS 已验收。
-
-Windows EXE 回归：`node scripts/smoke-windows.mjs` **通过**，覆盖控制台子系统、三语启动与重复启动提示、静态资源、模拟送礼、清空、配置重启恢复及退出后端口释放。构建为未签名预览版，尚未发布 GitHub Release。
-
-日本語：開発用プロトタイプです。実際の一部の V2 ギフト、ブラウザ表示、最低単価と三言語 UI を検証済みです。OBS 内表示、SC、配置編集、長時間運用は未検証または未実装です。
-
-English: This is a development prototype. Some real V2 gifts, browser rendering, the minimum unit price and the three-language UI have been verified. All 8 automated tests and HTTP/SSE checks pass. OBS rendering, SC, layout editing and long-running reliability remain pending.
-
-下一步优先验收 OBS 实机透明显示，再补齐金额分档、区域编辑与可靠性；SC 已在 v0.4.0 实现，真实事件及OBS继续验收。完整任务清单和证据见 [任务验收报告](docs/ACCEPTANCE.md)。
-
-## 启动 / 起動 / Start
-
-### Windows 便携版 / Windows ポータブル版 / Windows portable app
-
-1. 下载并解压 Release 包，双击 `BiliGiftDrop-windows-x64.exe`，无需另装 Node.js。
-2. 保持可见命令行窗口打开。窗口同时显示中、日、英三语说明、控制面板和 OBS 地址。
-3. 程序会尝试自动打开浏览器；没有打开时，把 `http://127.0.0.1:19321/` 复制到浏览器。
-4. **关闭原来的服务命令行窗口，或在其中按 Ctrl+C，即可停止程序并释放端口。关闭浏览器页面不会停止服务。**
-5. 重复启动会尝试打开已有面板，然后退出新进程；要停止服务，仍须关闭原来的服务窗口。其他启动错误会显示错误码，并在交互窗口等待回车。
-
-设置与图片缓存保存在 `%LOCALAPPDATA%\BiliGiftDrop`，升级前先关闭旧服务，再替换 EXE；设置会保留。源码运行仍使用项目中的 `data/` 和 `cache/`。
-
-日本語：ZIP を展開し、`BiliGiftDrop-windows-x64.exe` をダブルクリックします。Node.js は不要です。コンソールには中国語・日本語・英語の案内が同時に表示されます。ブラウザが開かない場合は `http://127.0.0.1:19321/` を貼り付けてください。元のサービスウィンドウを閉じるか Ctrl+C で終了し、ポートを解放します。ブラウザを閉じても終了しません。再実行は既存の画面を開いて新しいプロセスを終了します。設定とキャッシュは `%LOCALAPPDATA%\BiliGiftDrop` に保存されます。更新前に旧サービスを終了してください。
-
-English: Extract the ZIP and double-click `BiliGiftDrop-windows-x64.exe`; no Node.js installation is needed. Keep its visible console open. Instructions appear in Chinese, Japanese and English together. If the browser does not open, visit `http://127.0.0.1:19321/`. Close the original service console or press Ctrl+C to stop the program and release the port; closing the browser does not stop it. Another launch opens the existing panel and exits the new process. Settings and cache live in `%LOCALAPPDATA%\BiliGiftDrop`. Stop the old service before replacing the EXE.
-
-### 源码启动 / ソースから起動 / Run from source
-
-源码运行需要 Node.js 22 或更新版本，无需安装 npm 依赖。
-
-1. 双击 `start.cmd`，保持服务窗口运行；浏览器将自动打开设置页。
-2. 输入 Bilibili 直播间号并连接。也可不连接，选择真实礼物后点击「模拟送礼」预览图片效果。
-3. 在 OBS 添加「浏览器」源，地址为 `http://127.0.0.1:19321/overlay`，宽 1920、高 1080。
-4. 设置最低触发单价（人民币）、重力、弹性、停留时间和数量上限，然后保存。语言切换也会保存。
-
-金额门槛按单个礼物单价判断，达到门槛（含相等）才掉落，不按连送总价累计。0 表示不限。门槛大于 0 时免费礼物不掉落；低价礼物仍可在最近记录中看到。
-
-日本語：最低ギフト単価（人民元）を設定できます。1 個の単価が設定額以上の場合のみ落下し、連続ギフトの合計額では判定しません。0 は制限なし。最低額が 0 より大きい場合、無料ギフトは落下しません。
-
-English: Set the minimum gift unit price in CNY. Gifts at or above it drop; quantities are not added together to reach the threshold. 0 means no minimum. Free gifts do not drop when the minimum is above 0.
-
-日本語：Node.js 22 以上が必要です。`start.cmd` をダブルクリックし、サービスのウィンドウを開いたままにします。ブラウザでルーム番号を入力して接続します。接続前でもギフトを選んでテストできます。OBS にブラウザソースを追加し、上記 URL・幅 1920・高さ 1080 を指定してください。設定と言語は保存されます。
-
-English: Install Node.js 22 or later. Double-click `start.cmd` and keep the service window open. Enter your room ID in the browser, or simulate a gift without connecting. Add an OBS browser source with the URL above, width 1920 and height 1080. Settings and language are saved. No npm dependencies are required.
-
-开发启动：`node src/server/index.mjs`。停止：服务窗口按 Ctrl+C。开发检查：`node --test`；服务启动后运行 `node scripts/smoke.mjs`。
-
-## 礼物堆积与消失 / 積み重なりと消去 / Stacking and expiry
-
-礼物受到重力、旋转、弹跳与圆形近似碰撞影响，会在底部堆积。默认从生成起显示 30 秒，最后 0.75 秒逐渐淡出，随后删除；停留时间可设 5–120 秒。达到数量上限时最早的礼物会提前直接移除；「清空画面」会立即清空。v0.2.0 还会在拥挤时提前淡出旧图标，修改上限时裁减超额对象；待生成效果不会无限积压。
-
-日本語：ギフトは重力・回転・反発と円形の近似衝突によって底に積み重なります。生成から既定で 30 秒間表示され、最後の 1 秒でフェードアウトします。5～120 秒に設定できます。個数上限を超えると古いギフトが先に削除され、クリア操作は即時に反映されます。
-
-English: Gifts fall, rotate, bounce and stack at the bottom using approximate circular collisions. They last 30 seconds from spawning by default and fade out during the final 0.75 seconds. Lifetime is configurable from 5 to 120 seconds. The oldest gifts are removed immediately when the object limit is reached; Clear screen removes all gifts immediately.
-
-## Windows 构建与 Release / ビルドと Release / Build and Release
-
-在 Windows x64、Node.js 24 下运行 `node scripts/build-windows.mjs`。首次构建需要联网下载固定版本且校验 SHA-256 的 postject 构建工具，以及 Node.js 许可声明；使用者运行 EXE 不需要 npm 依赖。构建会输出：
-
-- `dist/BiliGiftDrop-windows-x64.exe`：可直接运行的未签名预览版。
-- `dist/BiliGiftDrop-v0.2.0-windows-x64.zip`：EXE、三语使用说明和 Node.js 许可声明。
-- `dist/SHA256SUMS.txt`：ZIP 的 SHA-256 校验值。
-
-GitHub Release 可上传 ZIP 与校验文件；本次只生成本地产物并提交源码和文档，未创建或上传远程 Release。`build/`、`dist/`、个人设置和缓存均被 Git 忽略。构建后的本机检查为 `node scripts/smoke-windows.mjs`，使用隔离数据和端口 19329，完成后停止测试进程。
-
-日本語：Windows x64 と Node.js 24 で `node scripts/build-windows.mjs` を実行します。初回はビルドツールとライセンスをダウンロードします。`dist/` に EXE、説明書とライセンスを含む ZIP、SHA-256 ファイルを生成します。ZIP とチェックサムを GitHub Release に添付できます。未署名のプレビュー版であり、この作業では Release を公開していません。ビルド成果物と個人設定は Git に含めません。
-
-English: Run `node scripts/build-windows.mjs` on Windows x64 with Node.js 24. The first build downloads the checksum-verified build tool and Node license. Outputs in `dist/` include the EXE, a ZIP with instructions and license notices, and its SHA-256 checksum. Upload the ZIP and checksum to GitHub Release when ready. This is an unsigned preview; no remote Release was published. Build outputs and personal settings are excluded from Git.
-
-## 当前能力与限制 / 制限 / Limitations
-
-- 三语控制面板、语言及配置保存、模拟真实礼物图片、透明画面、重力/旋转/圆形碰撞/弹跳/堆积/过期清理。
-- 房间短号解析、WBI 签名、匿名 WebSocket 接入、心跳/重连、旧版及 V2 礼物消息解析、交易去重、动态礼物资料及图片缓存。
-- 已实测公开房间匿名握手、987 条礼物资料、真实 V2 免费及付费礼物接收、图片缓存与浏览器掉落；尚未验收 OBS 软件内显示及所有礼物类型。匿名连接可能受平台限制，当前没有登录/授权功能。
-- 固定 1920×1080 逻辑画布和圆形碰撞近似；拖拽区域编辑、金额档位编辑、长期实机压力验证与缓存空间管理待做。透明页不回放刷新前的礼物。
-- 盲盒保留支付单价与爆出价值，效果暂按爆出价值计算；免费礼物不折算人民币；忽略连击汇总以避免重复掉落。
-
-日本語：一部の実際の V2 ギフト受信とブラウザ上の落下表示は検証済みです。OBS 内の表示と全ギフト種類は未検証です。匿名接続が制限される場合があります。ログイン機能、ギフト領域のドラッグ編集と金額別プリセットは未実装です。SC は v0.4.0 で利用できます。画面更新時に過去のギフトは再生されません。
-
-English: Some real V2 gifts and browser drops have been verified. Rendering inside OBS and all gift types are not yet verified. Anonymous access may be restricted. Login, gift-region drag editing and editable price tiers are not implemented. SC is available in v0.4.0. Refreshing the overlay does not replay earlier gifts.
-
-## 文档
-
-- [Windows EXE 三语使用与构建说明](docs/WINDOWS.md)：`node scripts/build-windows.mjs`，输出 `dist/BiliGiftDrop-v0.2.0-windows-x64.zip`，可上传 GitHub Release。无需使用者另装 Node.js。
-- [Windows EXE 构建、启动修复与三语命令行日志](log/2026-10-24-windows-exe.md)
-- [项目规划与进度](docs/PROJECT_PLAN.md)
-- [接入研究与验证记录](docs/BILIBILI_INTEGRATION.md)
-- [本次开发日志](log/2026-10-24-development.md)
-- [初始需求纪要](log/2026-10-24-conversation.md)
-- [真实送礼与金额门槛记录](log/2026-10-24-live-validation.md)
-- [本轮任务汇总与验收日志](log/2026-10-24-acceptance.md)
-
-## 开源许可 / ライセンス / License
-
-本项目原创代码采用 [MIT License](LICENSE)，允许商用、修改、分发及闭源使用；分发时须保留版权和许可声明，软件不提供担保。第三方运行时、平台礼物图片、商标及其他第三方内容不因本项目许可而获得授权，须遵守其各自许可和平台条款。
-
-日本語：本プロジェクトのオリジナルコードは [MIT License](LICENSE) で公開されています。商用利用、改変、再配布、非公開ソフトウェアへの組み込みが可能です。配布時は著作権表示と許諾表示を保持してください。無保証です。第三者のランタイム、ギフト画像、商標などには、それぞれのライセンスとプラットフォーム規約が適用されます。
-
-English: Original project code is licensed under the [MIT License](LICENSE), allowing commercial use, modification, redistribution and inclusion in proprietary software. Retain the copyright and permission notices when distributing copies. The software is provided without warranty. Third-party runtimes, platform gift images, trademarks and other third-party content remain subject to their own licenses and platform terms.
-
-### SC / 醒目留言 / スーパーチャット（v0.4.0）
-
-中文：设置里启用醒目留言，调整左侧、顶部、宽度与自动折叠秒数（0关闭自动折叠）；修改自动保存。点击预览标题展开/折叠并同步 OBS，OBS 内使用“交互”。卡片不显示倒计时，到期自动移除。按区域高度显示有效留言，超出时按可调速度往返滚动；保留最新100条，到期移除。运行 v0.4.0 EXE 或源码 start.cmd 使用此功能。
-
-日本語：設定で SC を有効にし、左・上・幅・自動折りたたみ秒数（0で無効）を設定すると自動保存されます。見出しをクリックして展開・折りたたみを OBS と同期。OBS は「対話」を使用。カウントダウンは非表示で、期限切れで削除。高さに応じて表示し、超過時は設定速度で往復します。最新100件まで保持し、期限は延長しません。v0.4.0 の EXE または start.cmd で起動できます。
-
-English: Enable SC in settings and adjust left, top, width and auto-collapse seconds (0 disables). Changes save automatically. Click preview headings to sync expansion with OBS; in OBS use Interact. Cards show no countdown and expire on schedule. Active cards fill the region and overflow scrolls at the configured speed. The latest 100 are retained without extending expiry. Run the v0.4.0 EXE or the source using start.cmd.
+原创代码采用 [MIT License](LICENSE)，允许商用、修改和分发，保留版权与许可，无担保。第三方运行时、平台图片和商标遵循各自许可和平台规则。 / オリジナルコードはMIT、商用利用・改変・再配布可。著作権と許諾表示を保持、無保証。第三者コンテンツには各規約が適用されます。 / Original code is MIT licensed, permitting commercial use, modification and redistribution with notices retained, without warranty. Third-party runtimes, platform images and trademarks follow their own licenses and rules.
