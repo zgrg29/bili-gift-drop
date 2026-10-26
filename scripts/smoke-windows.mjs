@@ -50,7 +50,9 @@ try{
     assert.equal((await initial()).config.language,language);
     assert.equal((await fetch(base+`/src/shared/i18n/${language}.mjs`)).status,200);
   }
-  assert.equal(effect({coinType:'gold',unitCoin:1000,totalCoin:12500,count:1},(await initial()).config).size,110);
+  const sizeConfig=(await initial()).config;
+  assert.equal(effect({coinType:'gold',unitCoin:1000,totalCoin:1000,count:1},sizeConfig).size,64,'size follows unit price');
+  assert.equal(effect({coinType:'gold',unitCoin:1000,totalCoin:100000,count:100},sizeConfig).size,64,'quantity does not change size');
   await stop();await start();
   const state=await initial();assert.equal(state.config.guardAsset3,guardMedia);assert.equal(state.config.guardWidth,100);assert.equal(state.config.guardX,85);assert.equal(state.config.guardY,89.5);assert.equal(state.config.guardOpacity,50);assert.equal(state.config.scOpacity,60);assert.equal(state.config.giftOpacity,70);assert.equal((await fetch(base+guardMedia)).status,200);assert.equal(state.guard.current,null);assert.equal(state.config.language,'en');assert.equal(state.config.lifetime,45);
   for(const [key,value] of Object.entries({minGiftScale:75,maxGiftScale:200,maxGiftScaleAmount:25,maxCoverage:10,spawnRate:8,regionY:70,regionHeight:30,scEnabled:true,scX:12.5,scY:9,scWidth:35,scCollapse:15,scHeight:60,scScrollSpeed:35}))assert.equal(state.config[key],value);

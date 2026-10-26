@@ -6,6 +6,8 @@
 
 Current package: BiliGiftDrop-v0.6.6-windows-x64.zip. One preview edits gifts, SC and enabled-by-default subscriptions; opacity defaults to100% per layer. Subscription proportions follow media with viewer details below, up to100% requested width and scaling down to fit canvas height. Custom subscription media replaces the default pixel ship, all three tiers share one center axis, play time per viewer is configurable, and position/size can be restored to defaults. Gift caps follow your settings, gift size depends only on the unit price, and both gift and Super Chat settings include restore-defaults buttons. Versioned sections below retain history; v0.6.6 describes final behavior.
 
+当前礼物待生成队列无固定容量或超时丢弃，停刷后仍可能继续播放积压礼物。 / 現在のギフト生成待ちに固定容量や期限はなく、受信停止後も残りを再生する場合があります。 / Pending gifts have no fixed queue capacity or expiry and may continue playing after incoming gifts stop.
+
 验收：33项自动测试和本机EXE回归，浏览器移动/缩放、竖版GIF、替换素材实际显示、放开后的上限保存、三个上舰模拟按钮、礼物/大航海/醒目留言恢复默认、不同比例素材共用中轴及播放时长生效检查已有证据。真实上舰、付费SC、OBS、全部视频编码、长期和全新Windows仍待验收。 / 検証：自動33件・EXE回帰、ブラウザ操作・縦長GIF・カスタム素材表示・上限値の保存・3つの大航海テストボタン・各設定の初期化・比率の異なる素材の中心軸一致・再生時間の反映を確認。実際の上艦・SC・OBS・全コーデック・長時間・新規Windowsは未検証。 / Validation includes33 automated tests, local EXE regression, browser interaction, portrait GIF, replaced media display, saved uncapped values, all three subscription test buttons, gift/Great Voyage/Super Chat resets, one shared center axis across media ratios and the configured play time. Real subscriptions, paid SC, OBS, all codecs, long-running streams and clean Windows installations remain unverified.
 
 
@@ -32,6 +34,10 @@ If the gift service is already running, another launch opens its control panel a
 日本語：Windows 10/11 x64 対応。展開して `BiliGiftDrop-windows-x64.exe` をダブルクリックすると、ブラウザに設定画面が開きます。Node.js のインストールは不要です。サービスのウィンドウを開いたままにしてください。閉じると停止します。OBS ブラウザソースは `http://127.0.0.1:19321/overlay`、幅 1920、高さ 1080。設定とキャッシュは `%LOCALAPPDATA%\BiliGiftDrop` に保存され、EXE を交換しても保持されます。更新前に旧版を終了してください。ポート 19321 を別のアプリが使用している場合はエラーを表示し、既存のギフトサービスの場合はその画面を開きます。署名なしのビルドです。SCのプレビュー機能を提供していますが、実際のSCとOBS内の動作確認は未完了です。
 
 English: Windows 10/11 x64. Extract and double-click `BiliGiftDrop-windows-x64.exe` to open the browser control panel. No Node.js installation is needed. Keep the service window open; closing it stops the service. Use `http://127.0.0.1:19321/overlay` as an OBS browser source, width 1920, height 1080. Settings and cache are stored in `%LOCALAPPDATA%\BiliGiftDrop` and survive EXE replacement. Stop the old version before upgrading. If another application uses port 19321, startup reports an error; an existing gift service is reused. This build is unsigned. SC preview is included; real SC and testing inside OBS are still pending.
+
+## 早期行为记录 / 旧版の動作 / Historical behavior
+
+以下旧版段落中的1.5秒丢弃已在v0.6.4取消；当前队列无固定容量或超时。 / 1.5秒での破棄はv0.6.4で撤廃。現在の生成待ちに固定容量・期限はありません。 / The 1.5-second expiry below was removed in v0.6.4; pending gifts now have no fixed capacity or expiry.
 
 礼物默认从生成起最多存在 30 秒，最后 0.75 秒淡出。可设置 5–120 秒；拥挤时旧礼物提前淡出，缩小上限时超额旧对象直接移除。v0.2.0 默认每秒最多生成 12 个、同时最多 120 个，估算面积预算为掉落区域的 15%；待生成效果超过 1.5 秒丢弃。可在设置中调整区域左/上/宽/高百分比以避开主播。最近记录保留原始赠送数量，图标数量可能少于赠送数量。
 
