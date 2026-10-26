@@ -1,12 +1,12 @@
-# Windows v0.6.2 Preview / 日本語 / English
+# Windows v0.6.6 Preview / 日本語 / English
 
-当前包：BiliGiftDrop-v0.6.2-windows-x64.zip。支持礼物、SC和默认开启的大航海；单一预览编辑三个区域，各自透明度默认100%。大航海按素材比例显示，观众信息在下方，宽度设置最高100%，高素材缩小以适应画面。以下按版本排列的说明保留功能演进，最终行为以v0.6.2为准。
+当前包：BiliGiftDrop-v0.6.6-windows-x64.zip。支持礼物、SC和默认开启的大航海；单一预览编辑三个区域，各自透明度默认100%。大航海按素材比例显示，观众信息在下方，宽度设置最高100%，高素材缩小以适应画面。自定义大航海素材可正常替换默认像素舰船，三个等级按同一条中轴线对齐，每人播放时长可设置，位置与大小可一键恢复默认。礼物上限全部由设置决定，礼物尺寸只按单个礼物的单价；礼物和醒目留言都提供恢复默认按钮。以下按版本排列的说明保留功能演进，最终行为以v0.6.6为准。
 
-現行パッケージはBiliGiftDrop-v0.6.2-windows-x64.zip。ギフト・SC・大航海を単一プレビューで編集し、各不透明度の初期値は100%。大航海は素材比率を維持して情報を下に表示、要求幅は最大100%、画面高さに合わせて縮小。以下の版別説明は履歴、最終動作はv0.6.2です。
+現行パッケージはBiliGiftDrop-v0.6.6-windows-x64.zip。ギフト・SC・大航海を単一プレビューで編集し、各不透明度の初期値は100%。大航海は素材比率を維持して情報を下に表示、要求幅は最大100%、画面高さに合わせて縮小。カスタム素材は既定のピクセル艦船を置き換えて表示し、3 ランクは同じ中心軸で揃います。1 人あたりの再生時間を設定でき、位置とサイズは初期値に戻せます。ギフトの上限は設定値に従い、サイズは 1 個あたりの単価だけで決まり、ギフトとスーパーチャットの設定に初期化ボタンがあります。以下の版別説明は履歴、最終動作はv0.6.6です。
 
-Current package: BiliGiftDrop-v0.6.2-windows-x64.zip. One preview edits gifts, SC and enabled-by-default subscriptions; opacity defaults to100% per layer. Subscription proportions follow media with viewer details below, up to100% requested width and scaling down to fit canvas height. Versioned sections below retain history; v0.6.2 describes final behavior.
+Current package: BiliGiftDrop-v0.6.6-windows-x64.zip. One preview edits gifts, SC and enabled-by-default subscriptions; opacity defaults to100% per layer. Subscription proportions follow media with viewer details below, up to100% requested width and scaling down to fit canvas height. Custom subscription media replaces the default pixel ship, all three tiers share one center axis, play time per viewer is configurable, and position/size can be restored to defaults. Gift caps follow your settings, gift size depends only on the unit price, and both gift and Super Chat settings include restore-defaults buttons. Versioned sections below retain history; v0.6.6 describes final behavior.
 
-验收：31项自动测试和本机EXE回归，浏览器移动/缩放、竖版GIF及三语桌面/390px字段检查已有证据。真实上舰、付费SC、OBS、全部视频编码、长期和全新Windows仍待验收。 / 検証：自動31件・EXE回帰、ブラウザ操作・縦長GIF・三言語と390pxの項目確認。実際の上艦・SC・OBS・全コーデック・長時間・新規Windowsは未検証。 / Validation includes31 automated tests, local EXE regression, browser interaction, portrait GIF and three-language desktop/390px fields. Real subscriptions, paid SC, OBS, all codecs, long-running streams and clean Windows installations remain unverified.
+验收：33项自动测试和本机EXE回归，浏览器移动/缩放、竖版GIF、替换素材实际显示、放开后的上限保存、三个上舰模拟按钮、礼物/大航海/醒目留言恢复默认、不同比例素材共用中轴及播放时长生效检查已有证据。真实上舰、付费SC、OBS、全部视频编码、长期和全新Windows仍待验收。 / 検証：自動33件・EXE回帰、ブラウザ操作・縦長GIF・カスタム素材表示・上限値の保存・3つの大航海テストボタン・各設定の初期化・比率の異なる素材の中心軸一致・再生時間の反映を確認。実際の上艦・SC・OBS・全コーデック・長時間・新規Windowsは未検証。 / Validation includes33 automated tests, local EXE regression, browser interaction, portrait GIF, replaced media display, saved uncapped values, all three subscription test buttons, gift/Great Voyage/Super Chat resets, one shared center axis across media ratios and the configured play time. Real subscriptions, paid SC, OBS, all codecs, long-running streams and clean Windows installations remain unverified.
 
 
 命令行提示始终同时显示中文、日语和英语；不受控制面板语言设置影响。
@@ -95,3 +95,11 @@ English: Enabled by default. Drag the Great Voyage frame in the shared preview; 
 v0.6.0追加：同一预览用绿色框编辑礼物范围、紫色框编辑SC宽高、蓝色框等比例编辑大航海。三类各有透明度滑杆，默认100%。 / 単一プレビュー：緑はギフト、紫はSC、青は大航海。各不透明度の初期値は100%。 / One preview: green gifts, purple SC, blue Great Voyage; each opacity slider defaults to 100%.
 
 v0.6.2：图片/GIF/视频按实际素材比例显示，编辑框自动跟随；头像昵称期限放在下方，画面高度不足时整体等比例缩小。 / 画像・GIF・動画の比率に編集枠も自動対応。情報は下に表示し、画面内に収まるよう縮小。 / Image/GIF/video aspect ratios determine the editor and effect layout. Viewer details sit below; the whole effect scales down to fit when needed.
+
+v0.6.3：修复替换后的自定义大航海素材不显示，默认像素舰船画布不再占用版面；已上传素材无需重新上传。 / 置き換えたカスタム素材が表示されない不具合を修正。既定艦船キャンバスは領域を占有しません。再アップロード不要。 / Fixes replaced custom subscription media not appearing; the default ship canvas no longer occupies the layout. No re-upload needed.
+
+v0.6.4：取消礼物后台固定上限（40 个、队列 32 组/1.5 秒、半径 1/3），数量、面积、生成速率和尺寸输入不再封顶；礼物设置新增恢复默认按钮；模拟上舰改为舰长/提督/总督三个按钮。 / ギフトの固定上限を撤廃し、数量・面積・生成速度・サイズの入力上限も解除。ギフト設定に初期化ボタン、大航海テストに 3 つのランクボタンを追加。 / Removes fixed gift caps and the count/area/rate/size input ceilings; adds restore-gift-defaults and three subscription test buttons.
+
+v0.6.5：礼物尺寸只按单个礼物的单价，数量只影响图标个数；大航海三个等级按同一中轴线对齐，旧布局首次打开面板时自动换算为居中位置且画面不移动。 / ギフトサイズは単価のみで決まり、個数はアイコン数のみ変更。大航海の 3 ランクは同じ中心軸で揃い、既存配置は初回のパネル表示で中心へ換算され画面は動きません。 / Gift size follows the unit price only, quantity changes the icon count; Great Voyage tiers share one center axis, and existing layouts convert to it on first panel load without moving.
+
+v0.6.6：大航海每人播放时长可设置（默认8秒，最小1秒，无上限，从下一位生效）；新增“恢复大航海位置与大小”和“恢复醒目留言默认设置”，均不清除素材、现有留言或有效期。 / 大航海の1人あたり再生時間を設定可能（初期8秒・最小1秒・上限なし、次の待機者から適用）。「位置とサイズを初期値に戻す」「スーパーチャット設定を初期値に戻す」を追加。素材・表示中のコメント・有効期限は保持。 / Configurable play time per viewer (8s default, 1s minimum, no upper bound, applies from the next viewer), plus restore buttons for Great Voyage position/size and Super Chat defaults that keep media, visible messages and expiry.

@@ -4,16 +4,18 @@ import {Crowd,footprint,collisionPairs,region} from '../src/shared/crowd.mjs';
 import {defaults,config} from '../src/shared/rules.mjs';
 import {Catalog} from '../src/server/catalog.mjs';
 const gift={giftId:1,count:1000,coinType:'gold',unitCoin:1000};
-function simulation(cfg=defaults){const crowd=new Crowd(),objects=[];return {crowd,objects,tick(now){for(let i=objects.length-1;i>=0;i--)if(objects[i].expires<=now)objects.splice(i,1);return crowd.update(objects,cfg,now,(g,r,box,time)=>objects.push({r,x:box.x+r,y:box.y+r,born:time,expires:time+cfg.lifetime*1000}));}};}
-test('1000 gifts: bounded spawn rate, original quantity retained, no stale rain',()=>{
- const s=simulation();s.crowd.enqueue(gift,defaults,0);let peak=0;
- for(let now=0;now<=5000;now+=10){const stats=s.tick(now);peak=Math.max(peak,stats.count);assert.ok(stats.count<=Math.floor(now*12/1000));}
- assert.ok(peak>0&&peak<=18);assert.equal(gift.count,1000);assert.equal(s.crowd.queue.length,0);
- const count=s.objects.length;s.tick(6000);assert.equal(s.objects.length,count);
+function simulation(cfg=defaults){const crowd=new Crowd(),objects=[];const state={crowd,objects,spawned:0,tick(now){for(let i=objects.length-1;i>=0;i--)if(objects[i].expires<=now)objects.splice(i,1);return crowd.update(objects,cfg,now,(g,r,box,time)=>{state.spawned++;objects.push({r,x:box.x+r,y:box.y+r,born:time,expires:time+cfg.lifetime*1000});});}};return state;}
+test('gift quantity drains at the configured rate instead of being capped at 40',()=>{
+ const cfg={...defaults,maxObjects:200,maxCoverage:200},s=simulation(cfg);s.crowd.enqueue({...gift,count:100},cfg,0);
+ assert.equal(s.crowd.queue[0].count,100);
+ for(let now=0;now<=1000;now+=20)s.tick(now);assert.ok(s.spawned>=1&&s.spawned<=13,'about 12 spawns in the first second');
+ for(let now=1020;now<=10000;now+=20){s.tick(now);assert.ok(s.objects.length<=cfg.maxObjects);}
+ assert.equal(s.spawned,100);assert.equal(s.crowd.queue.length,0);
+ for(let now=10020;now<=45000;now+=20)s.tick(now);assert.equal(s.objects.length,0);
 });
-test('sustained storm: pending, count, area and expiry remain bounded',()=>{
+test('sustained storm: screen stays inside user count and area limits without dropping queued gifts',()=>{
  const cfg={...defaults,maxObjects:20,maxCoverage:1};const s=simulation(cfg);let faded=false;
- for(let now=0;now<60000;now+=20){for(let id=0;id<100;id++)s.crowd.enqueue({...gift,giftId:id,unitCoin:100000},cfg,now);const stats=s.tick(now);assert.ok(s.crowd.queue.length<=32);assert.ok(stats.pending<=1280);assert.ok(stats.count<=20);assert.ok(stats.coverage<=1+1e-8);faded ||=s.objects.some(o=>o.expires-o.born<cfg.lifetime*1000);}
+ for(let now=0;now<60000;now+=20){for(let id=0;id<100;id++)s.crowd.enqueue({...gift,giftId:id,unitCoin:100000},cfg,now);const stats=s.tick(now);assert.ok(s.crowd.queue.length<=100);assert.ok(stats.count<=20);assert.ok(stats.coverage<=1+1e-8);assert.ok(stats.pending>0);faded ||=s.objects.some(o=>o.expires-o.born<cfg.lifetime*1000);}
  assert.ok(faded);s.crowd.clear();s.objects.length=0;assert.equal(s.tick(61000).pending,0);
 });
 test('settings shrink applies limits; language preserves active gifts and pending work',()=>{

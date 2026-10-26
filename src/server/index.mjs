@@ -13,7 +13,7 @@ import {Catalog} from './catalog.mjs';
 import {expandGiftV2} from './gift-v2.mjs';
 await mkdir(path.join(runtimeRoot,'data'),{recursive:true});
 let cfg={...defaults},configured=false;try{cfg=config(JSON.parse(await readFile(path.join(runtimeRoot,'data/config.json'),'utf8')));configured=true;}catch{}
-const scStore=new SCStore(),guardQueue=new GuardQueue();
+const scStore=new SCStore(),guardQueue=new GuardQueue((cfg.guardDuration??8)*1000);
 let status='disconnected',warning=null;const clients=new Set(),catalog=new Catalog(),dedup=new Deduplicator();
 let configWrites=Promise.resolve();
 const send=(type,data)=>{const msg=`data: ${JSON.stringify({type,data})}\n\n`;for(const r of clients){if(r.writableLength>1024*1024){r.destroy();clients.delete(r);}else r.write(msg);}};
@@ -69,7 +69,7 @@ const server=http.createServer(async(req,res)=>{
     if(req.method==='POST'&&url.pathname.startsWith('/api/')){
       const d=await body(req);
       switch(url.pathname){
-        case '/api/config':{const task=configWrites.catch(()=>{}).then(async()=>{const next=config(d,cfg);await writeFile(path.join(runtimeRoot,'data/config.tmp'),JSON.stringify(next,null,2));await rename(path.join(runtimeRoot,'data/config.tmp'),path.join(runtimeRoot,'data/config.json'));cfg=next;if(!cfg.guardEnabled){guardQueue.clear();send('guard-state',guardQueue.snapshot());}configured=true;send('config',cfg);});configWrites=task;await task;break;}
+        case '/api/config':{const task=configWrites.catch(()=>{}).then(async()=>{const next=config(d,cfg);await writeFile(path.join(runtimeRoot,'data/config.tmp'),JSON.stringify(next,null,2));await rename(path.join(runtimeRoot,'data/config.tmp'),path.join(runtimeRoot,'data/config.json'));cfg=next;guardQueue.duration=(cfg.guardDuration??8)*1000;if(!cfg.guardEnabled){guardQueue.clear();send('guard-state',guardQueue.snapshot());}configured=true;send('config',cfg);});configWrites=task;await task;break;}
         case '/api/connect':if(!/^\d{1,12}$/.test(d.room)||Number(d.room)<1)throw Error('invalid');warning=null;send('warning',null);if(live.room!==d.room){guardQueue.clear();send('guard-state',guardQueue.snapshot());scStore.items.clear();send('sc-list',[]);}await live.connect(d.room);catalog.refresh(d.room).catch(()=>send('warning','catalog'));break;
         case '/api/guard-test':{const level=Number(d.level??3),count=Number(d.count??1);if(![1,2,3].includes(level)||!Number.isSafeInteger(count)||count<1||count>1200)throw Error('invalid');const id=randomUUID();if(!cfg.guardEnabled)throw Error('invalid');if(guardQueue.add({id,key:id,demo:true,user:'',avatar:null,level,count,unit:'月'})==='full')throw Error('invalid');send('guard-state',guardQueue.snapshot());break;}
         case '/api/disconnect':live.stop();break;

@@ -1,13 +1,15 @@
-export const defaults = {language:'zh-CN',guardEnabled:true,guardX:20,guardY:29,guardWidth:60,giftOpacity:100,scOpacity:100,guardOpacity:100,scEnabled:true,scX:5,scY:5,scWidth:30,scCollapse:15,scHeight:100,scScrollSpeed:20,room:'',gravity:900,bounce:0.35,lifetime:30,maxObjects:120,includeFree:true,minGiftPrice:0,minGiftScale:50,maxGiftScale:150,maxGiftScaleAmount:100,maxCoverage:15,spawnRate:12,regionX:0,regionY:0,regionWidth:100,regionHeight:100};
+export const defaults = {language:'zh-CN',guardEnabled:true,guardX:20,guardY:29,guardWidth:60,guardDuration:8,guardAnchor:'left',giftOpacity:100,scOpacity:100,guardOpacity:100,scEnabled:true,scX:5,scY:5,scWidth:30,scCollapse:15,scHeight:100,scScrollSpeed:20,room:'',gravity:900,bounce:0.35,lifetime:30,maxObjects:120,includeFree:true,minGiftPrice:0,minGiftScale:50,maxGiftScale:150,maxGiftScaleAmount:100,maxCoverage:15,spawnRate:12,regionX:0,regionY:0,regionWidth:100,regionHeight:100};
 export function config(input, previous=defaults) {
   const out={...previous};
   if (['zh-CN','ja','en'].includes(input.language)) out.language=input.language;
   if (typeof input.room==='string' && /^\d{0,12}$/.test(input.room)) out.room=input.room;
-  for (const [k,min,max] of [['giftOpacity',0,100],['scOpacity',0,100],['guardOpacity',0,100],['guardX',0,85],['guardY',0,89.5],['guardWidth',15,100],['scHeight',10,100],['scScrollSpeed',0,120],['scX',0,80],['scY',0,90],['scWidth',20,80],['scCollapse',0,300],['minGiftScale',10,400],['maxGiftScale',10,400],['maxGiftScaleAmount',.001,100000],['gravity',100,2400],['bounce',0,0.85],['lifetime',5,120],['maxObjects',10,200],['maxCoverage',1,30],['spawnRate',1,30],['regionX',0,90],['regionY',0,90],['regionWidth',10,100],['regionHeight',10,100]]) {
-    if (Number.isFinite(input[k])) out[k]=Math.min(max,Math.max(min,input[k]));
+  // Gift caps stay user-controlled: min/max size, object count, area and spawn rate have no upper bound.
+  for (const [k,min,max] of [['giftOpacity',0,100],['scOpacity',0,100],['guardOpacity',0,100],['guardX',0,100],['guardY',0,89.5],['guardWidth',15,100],['guardDuration',1,null],['scHeight',10,100],['scScrollSpeed',0,120],['scX',0,80],['scY',0,90],['scWidth',20,80],['scCollapse',0,300],['minGiftScale',10,null],['maxGiftScale',10,null],['maxGiftScaleAmount',.001,100000],['gravity',100,2400],['bounce',0,0.85],['lifetime',5,120],['maxObjects',10,null],['maxCoverage',1,null],['spawnRate',1,null],['regionX',0,90],['regionY',0,90],['regionWidth',10,100],['regionHeight',10,100]]) {
+    if (Number.isFinite(input[k])) out[k]=max===null?Math.max(min,input[k]):Math.min(max,Math.max(min,input[k]));
   }
   // Both layout bounds depend on media metadata and are resolved by guardBox.
   if(typeof input.guardEnabled==='boolean')out.guardEnabled=input.guardEnabled;
+  if(input.guardAnchor==='center'||input.guardAnchor==='left')out.guardAnchor=input.guardAnchor;
   for(const level of [1,2,3]){const k='guardAsset'+level,v=input[k];if(v===null||typeof v==='string'&&/^\/media\/[a-f0-9-]+\.(png|jpg|webp|gif|mp4|webm)$/.test(v))out[k]=v;}
   out.scHeight=Math.min(out.scHeight,100-out.scY);
   out.scWidth=Math.min(out.scWidth,100-out.scX);
@@ -37,9 +39,10 @@ export function effect(gift,cfg) {
   const minimumCoin=Math.round((cfg.minGiftPrice??0)*1000);
   if ((gift.coinType==='gold'?gift.unitCoin:0)<minimumCoin) return {count:0,size:40};
   const min=cfg.minGiftScale??defaults.minGiftScale,max=Math.max(min,cfg.maxGiftScale??defaults.maxGiftScale);
-  const total=gift.coinType==='gold'?(gift.totalCoin??gift.unitCoin*gift.count):0;
-  const ratio=Math.min(1,Math.max(0,total/Math.max(1,Math.round((cfg.maxGiftScaleAmount??defaults.maxGiftScaleAmount)*1000))));
-  return {count:Math.min(40,gift.count),size:80*(min+(max-min)*ratio)/100};
+  // Size follows the unit price of this gift only; quantity changes the icon count, never the size.
+  const unit=gift.coinType==='gold'?(gift.unitCoin??0):0;
+  const ratio=Math.min(1,Math.max(0,unit/Math.max(1,Math.round((cfg.maxGiftScaleAmount??defaults.maxGiftScaleAmount)*1000))));
+  return {count:gift.count,size:80*(min+(max-min)*ratio)/100};
 }
 export class Deduplicator {
   seen=new Map();

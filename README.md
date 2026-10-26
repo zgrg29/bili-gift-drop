@@ -8,11 +8,11 @@ A local, transparent OBS overlay for Bilibili gifts, Super Chat and Great Voyage
 
 ## 当前版本 / 現行版 / Current version
 
-**v0.6.2 Preview** · Windows x64 · [Release notes](docs/releases/v0.6.2.md) · [验收记录 / 検証 / Acceptance](docs/ACCEPTANCE.md)
+**v0.6.6 Preview** · Windows x64 · [Release notes](docs/releases/v0.6.6.md) · [验收记录 / 検証 / Acceptance](docs/ACCEPTANCE.md)
 
-- ZIP: `BiliGiftDrop-v0.6.2-windows-x64.zip`
-- Tag: `v0.6.2`
-- Title: **Bili Gift Drop v0.6.2 — 大航海特效与统一布局编辑（Preview）**
+- ZIP: `BiliGiftDrop-v0.6.6-windows-x64.zip`
+- Tag: `v0.6.6`
+- Title: **Bili Gift Drop v0.6.6 — 大航海播放时长与分区恢复默认（Preview）**
 - 发布材料位于 `dist/RELEASE_TAG.txt`、`dist/RELEASE_TITLE.txt`、`dist/RELEASE_NOTES.md` 和 `dist/SHA256SUMS.txt`。 / リリース用ファイルは `dist/` 内。 / Release fields and checksums are prepared in `dist/`.
 
 ## 简体中文
@@ -84,6 +84,6 @@ node scripts/smoke-windows.mjs
 
 ## 文档与许可 / 資料・ライセンス / Documentation and license
 
-[Windows说明](docs/WINDOWS.md) · [工程规划](docs/PROJECT_PLAN.md) · [验收报告](docs/ACCEPTANCE.md) · [本轮日志](log/2026-10-24-v0.6.2-release.md) · [接入研究](docs/BILIBILI_INTEGRATION.md)
+[Windows说明](docs/WINDOWS.md) · [工程规划](docs/PROJECT_PLAN.md) · [验收报告](docs/ACCEPTANCE.md) · [本轮日志](log/2026-10-26-guard-duration-resets.md) · [接入研究](docs/BILIBILI_INTEGRATION.md)
 
 原创代码采用 [MIT License](LICENSE)，允许商用、修改和分发，保留版权与许可，无担保。第三方运行时、平台图片和商标遵循各自许可和平台规则。 / オリジナルコードはMIT、商用利用・改変・再配布可。著作権と許諾表示を保持、無保証。第三者コンテンツには各規約が適用されます。 / Original code is MIT licensed, permitting commercial use, modification and redistribution with notices retained, without warranty. Third-party runtimes, platform images and trademarks follow their own licenses and rules.

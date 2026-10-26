@@ -18,12 +18,28 @@ test('guard FIFO starts each viewer after preceding animation, enriches without 
  assert.equal(q.snapshot(9000).current.id,'b');assert.equal(q.current.end,17000);assert.equal(q.snapshot(17000).current.id,'c');assert.equal(q.snapshot(25000).current,null);
  q.clear();assert.equal(q.snapshot(26000).pending,0);assert.equal(q.add(a,27000),'duplicate');
 });
+test('guard duration is user-configurable and drives each viewer slot',()=>{
+ const q=new GuardQueue(3000);q.add({id:'a',key:'a'},1000);
+ assert.equal(q.current.end-q.current.start,3000);
+ assert.equal(defaults.guardDuration,8);
+ assert.equal(config({guardDuration:0}).guardDuration,1);
+ assert.equal(config({guardDuration:12.5}).guardDuration,12.5);
+ assert.equal(config({language:'ja'}).guardDuration,8);
+});
 test('guard config defaults, media persistence and bounded proportional geometry',()=>{
  assert.equal(defaults.guardEnabled,true);assert.equal(defaults.guardX+defaults.guardWidth/2,50);assert.equal(defaults.guardY+defaults.guardWidth*.7/2,50);assert.equal(defaults.giftOpacity,100);assert.equal(config({guardOpacity:-1,scOpacity:110,giftOpacity:45}).guardOpacity,0);assert.equal(config({scOpacity:110}).scOpacity,100);const c=config({guardWidth:70,guardX:90,guardY:99,guardAsset3:'/media/abc-123.gif'});
- assert.equal(c.guardX,85);assert.equal(c.guardY,89.5);assert.equal(c.guardAsset3,'/media/abc-123.gif');
+ assert.equal(c.guardX,90);assert.equal(c.guardY,89.5);assert.equal(c.guardAsset3,'/media/abc-123.gif');
  const full=config({guardWidth:150,guardX:80,guardY:80});assert.equal(full.guardWidth,100);assert.equal(guardBox(full).height,100);assert.equal(guardBox(full).y,0);assert.ok(guardBox(full).x+guardBox(full).width<=100);assert.equal(config({language:'en'},full).guardWidth,100);
  const next=config({language:'ja'},JSON.parse(JSON.stringify(c)));assert.ok(guardBox(next).height<=100);assert.equal(guardBox(next).ratio,630/430);assert.equal(next.guardAsset3,c.guardAsset3);
  assert.equal(config({guardAsset3:'https://example.com/a.mp4'},c).guardAsset3,c.guardAsset3);
+ // Center-anchored configs keep the same vertical axis across different media ratios.
+ const centered=config({guardAnchor:'center',guardX:50,guardWidth:80});
+ const wide=guardBox(centered,3,4),tall=guardBox(centered,1,.5);
+ assert.ok(Math.abs((wide.x+wide.width/2)-(tall.x+tall.width/2))<1e-9);
+ assert.ok(Math.abs(guardBox({...defaults,guardX:20},3,.9).x-20)<1e-9);
+ assert.equal(config({guardAnchor:'center'}).guardAnchor,'center');
+ assert.equal(config({guardAnchor:'center'},{...defaults,guardAnchor:'left'}).guardAnchor,'center');
+ assert.equal(config({guardAnchor:'other'},{...defaults,guardAnchor:'center'}).guardAnchor,'center');
 });
 import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
@@ -53,6 +69,13 @@ test('guard renderer preserves animation on language/opacity, swaps custom media
  send({...a,id:'b',level:2});assert.ok(video.removed);assert.equal(elements.find(e=>e.className==='guard-sprite').hidden,false);assert.equal(animations,2);
  c={...c,guardAsset2:'/media/def.gif'};tick();assert.ok(elements.some(e=>e.tagName==='IMG'&&e.src==='/media/def.gif'));
  c={...c,guardEnabled:false};tick();assert.equal(elements.find(e=>e.className==='guard-effect').hidden,true);
+});
+
+test('overlay stylesheet lets the hidden attribute remove the default ship canvas',async()=>{
+ // The author rule canvas{display:block} otherwise beats [hidden]: the default sprite
+ // stayed in flow and pushed custom media below the clipped guard area.
+ const html=await readFile(new URL('../src/overlay/index.html',import.meta.url),'utf8');
+ assert.match(html,/canvas\[hidden\]\{display:none\}/);
 });
 
 test('media aspect layout handles landscape, square and portrait without distortion or clipping',()=>{

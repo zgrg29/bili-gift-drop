@@ -41,5 +41,8 @@ export function guardBox(c,level=3,ratio=guardDefaultRatio(level),canvasAspect=1
   // The media keeps its native ratio; a separate footer is 22% of its width.
   const factor=canvasAspect*(1/ratio+.22),requested=Math.max(15,Math.min(100,c.guardWidth??60));
   const width=Math.min(requested,100/factor),height=width*factor;
-  return {x:Math.max(0,Math.min(100-width,c.guardX??20)),y:Math.max(0,Math.min(100-height,c.guardY??29)),width,height,mediaHeight:100/(1+.22*ratio),ratio};
+  // The three tiers share one vertical center axis: guardX is that center once a
+  // configuration has been migrated, and the left edge for legacy configurations.
+  const center=c.guardAnchor==='center'?(c.guardX??50):(c.guardX??20)+width/2;
+  return {x:Math.max(0,Math.min(100-width,center-width/2)),y:Math.max(0,Math.min(100-height,c.guardY??29)),width,height,mediaHeight:100/(1+.22*ratio),ratio};
 }

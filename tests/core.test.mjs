@@ -7,7 +7,7 @@ import {packet,decode} from '../src/server/protocol.mjs';
 import {expandGiftV2} from '../src/server/gift-v2.mjs';
 import {sign} from '../src/server/wbi.mjs';
 const data={giftId:1,giftName:'原名',uname:'名前',uid:5,num:3,price:100,total_coin:300,coin_type:'gold',tid:'transaction-1'};
-test('gift units, original names, free gifts and bounded effects',()=>{const g=normalizeGift({cmd:'SEND_GIFT',data});assert.equal(g.totalCoin,300);assert.equal(g.name,'原名');assert.equal(g.user,'名前');assert.equal(g.count,3);assert.equal(effect({...g,count:10000},defaults).count,40);assert.equal(effect({...g,coinType:'silver'},{...defaults,includeFree:false}).count,0);assert.equal(normalizeGift({cmd:'COMBO_SEND',data}),null);assert.equal(normalizeGift({cmd:'SEND_GIFT',data:{...data,num:-1}}),null);});
+test('gift units, original names, free gifts and unbounded effect counts',()=>{const g=normalizeGift({cmd:'SEND_GIFT',data});assert.equal(g.totalCoin,300);assert.equal(g.name,'原名');assert.equal(g.user,'名前');assert.equal(g.count,3);assert.equal(effect({...g,count:10000},defaults).count,10000);assert.equal(effect({...g,coinType:'silver'},{...defaults,includeFree:false}).count,0);assert.equal(normalizeGift({cmd:'COMBO_SEND',data}),null);assert.equal(normalizeGift({cmd:'SEND_GIFT',data:{...data,num:-1}}),null);});
 test('duplicate transaction rejected and expires',()=>{const d=new Deduplicator();assert.equal(d.accept('a',0),true);assert.equal(d.accept('a',100),false);assert.equal(d.accept('a',300001),true);});
 test('minimum unit price is inclusive, not multiplied by quantity, and treats free gifts as zero',()=>{
   const gift=normalizeGift({cmd:'SEND_GIFT',data});
@@ -23,7 +23,7 @@ test('minimum unit price is inclusive, not multiplied by quantity, and treats fr
   assert.equal(config({minGiftPrice:.12345}).minGiftPrice,.123);
   assert.equal(config({language:'ja'},{...cfg}).minGiftPrice,1);
 });
-test('configuration limits and language-only changes preserve settings',()=>{assert.equal(config({maxObjects:999}).maxObjects,200);assert.equal(config({language:'ja'},{...defaults,room:'123'}).room,'123');assert.equal(config({language:'fr'}).language,defaults.language);});
+test('configuration limits and user-controlled gift maxima',()=>{assert.equal(config({maxObjects:9999}).maxObjects,9999);assert.equal(config({maxCoverage:99}).maxCoverage,99);assert.equal(config({spawnRate:500}).spawnRate,500);assert.equal(config({maxGiftScale:9999}).maxGiftScale,9999);assert.equal(config({minGiftScale:800}).minGiftScale,800);assert.equal(config({maxObjects:0}).maxObjects,10);assert.equal(config({language:'ja'},{...defaults,room:'123'}).room,'123');assert.equal(config({language:'fr'}).language,defaults.language);});
 test('three languages have identical keys and interpolation parameters',()=>{const base=resources.en;for(const r of Object.values(resources)){assert.deepEqual(Object.keys(r).sort(),Object.keys(base).sort());for(const key of Object.keys(base))assert.deepEqual(r[key].match(/\{\w+\}/g),base[key].match(/\{\w+\}/g));}});
 test('plain, combined, deflate and brotli websocket frames',()=>{const p=packet(5,{cmd:'SEND_GIFT',data});assert.equal(decode(Buffer.concat([p,p])).length,2);for(const [version,compress]of [[2,deflateSync],[3,brotliCompressSync]]){const h=packet(5,'').subarray(0,16),b=compress(p);h.writeUInt32BE(16+b.length);h.writeUInt16BE(version,6);assert.deepEqual(decode(Buffer.concat([h,b]))[0].data.data,data);}assert.throws(()=>decode(Buffer.from([1,2])));});
 function v(n){let value=BigInt(n),out=[];do{const b=Number(value&127n);value>>=7n;out.push(b|(value?128:0));}while(value);return Buffer.from(out);}
@@ -33,15 +33,17 @@ test('V2 protobuf batches map to the same gift model and retain image',()=>{cons
 test('WBI signature reference vector',()=>{const q=sign({foo:'114',bar:'514',zab:1919810},'7cd084941338484aae1ad9425b84077c','4932caff0ff746eab6f01bf08b70ac45',1702204169);assert.equal(q,'bar=514&foo=114&wts=1702204169&zab=1919810&w_rid=8f6f2b5b3d485fe1886cec6a0be8c5d4');});
 
 
-test('gift size scales linearly by total amount, caps and treats free gifts as minimum',()=>{
+test('gift size follows unit price only, caps and treats free gifts as minimum',()=>{
   const gift=normalizeGift({cmd:'SEND_GIFT',data});
   const cfg={...defaults,minGiftScale:50,maxGiftScale:150,maxGiftScaleAmount:100};
-  for(const [total,size] of [[0,40],[25000,60],[50000,80],[100000,120],[200000,120]])
-    assert.equal(effect({...gift,totalCoin:total},cfg).size,size);
-  assert.equal(effect({...gift,coinType:'silver',totalCoin:200000},cfg).size,40);
-  assert.equal(effect({...gift,unitCoin:1000,count:50,totalCoin:50000},cfg).size,80);
+  for(const [unit,size] of [[0,40],[5000,44],[10000,48],[20000,56],[100000,120],[200000,120]])
+    assert.equal(effect({...gift,unitCoin:unit,totalCoin:unit*gift.count},cfg).size,size);
+  assert.equal(effect({...gift,coinType:'silver',unitCoin:200000,totalCoin:200000},cfg).size,40);
+  // Quantity no longer changes the size of the same gift.
+  assert.equal(effect({...gift,unitCoin:10000,count:1,totalCoin:10000},cfg).size,48);
+  assert.equal(effect({...gift,unitCoin:10000,count:100,totalCoin:1000000},cfg).size,48);
   assert.equal(effect(gift,{...cfg,minGiftScale:100,maxGiftScale:100}).size,80);
-  assert.equal(effect({...gift,totalCoin:1},{...cfg,maxGiftScaleAmount:.001}).size,120);
+  assert.equal(effect({...gift,unitCoin:1},{...cfg,maxGiftScaleAmount:.001}).size,120);
 });
 
 test('size settings migrate, validate and survive language changes and JSON storage',()=>{
@@ -52,7 +54,7 @@ test('size settings migrate, validate and survive language changes and JSON stor
   assert.deepEqual(config({language:'ja'},saved),{...saved,language:'ja'});
   assert.equal(config({minGiftScale:200,maxGiftScale:50}).maxGiftScale,200);
   assert.equal(config({minGiftScale:-5}).minGiftScale,10);
-  assert.equal(config({maxGiftScale:999}).maxGiftScale,400);
+  assert.equal(config({maxGiftScale:999}).maxGiftScale,999);
   assert.equal(config({maxGiftScaleAmount:0}).maxGiftScaleAmount,.001);
   assert.equal(config({maxGiftScaleAmount:Infinity}).maxGiftScaleAmount,100);
 });

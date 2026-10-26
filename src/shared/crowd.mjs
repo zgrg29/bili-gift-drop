@@ -11,8 +11,8 @@ export class Crowd {
     // Merge only visual copies; original gift events and quantities remain untouched.
     const key=JSON.stringify([g.giftId,g.image,e.size,g.demo]);
     let item=this.queue.find(i=>i.key===key);
-    if(item){item.count=Math.min(40,item.count+e.count);item.until=now+1500;}
-    else {if(this.queue.length>=32)this.queue.shift();this.queue.push({key,g,size:e.size,count:e.count,until:now+1500});}
+    if(item)item.count+=e.count;
+    else this.queue.push({key,g,size:e.size,count:e.count});
   }
   update(objects,cfg,now,spawn){
     const box=region(cfg),budget=box.w*box.h*cfg.maxCoverage/100;
@@ -22,10 +22,10 @@ export class Crowd {
     if(area>budget*.8||objects.length>=cfg.maxObjects*.8){
       for(const o of objects.slice(0,Math.max(1,Math.ceil(objects.length*.25))))o.expires=Math.min(o.expires,now+750);
     }
-    this.queue=this.queue.filter(i=>i.until>now&&effect(i.g,cfg).count>0);
-    this.credit=Math.min(2,this.credit+Math.max(0,Math.min(100,now-this.last))*cfg.spawnRate/1000);this.last=now;
+    this.queue=this.queue.filter(i=>effect(i.g,cfg).count>0);
+    this.credit+=Math.max(0,Math.min(100,now-this.last))*cfg.spawnRate/1000;this.last=now;
     while(this.credit>=1&&this.queue.length){
-      const item=this.queue[0],r=Math.min(item.size/2,box.w/3,box.h/3,Math.sqrt(budget/8)),cost=8*r*r;
+      const item=this.queue[0],r=Math.min(item.size/2,Math.sqrt(budget/8)),cost=8*r*r;
       if(objects.length>=cfg.maxObjects||area+cost>budget){
         if(objects[0])objects[0].expires=Math.min(objects[0].expires,now+500);
         break;

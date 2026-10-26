@@ -22,10 +22,11 @@ test('control panel executes in all locales, renders new strings and submits all
     }
     for(const id of ['demo','fields','language','status','warning','empty','events','room','includeFree','toast','obs','connection','disconnect','settings','clear','copy','count','price']){const e=new Element();e.id=id;}
     const preview=new Element(),iframe=new Element();
-    const sandbox={guardBox,GuardMedia,Event:class{},t,Intl,JSON,Number,Map,console,document:{documentElement:{},getElementById:id=>ids.get(id),createElement:()=>new Element(),querySelector:q=>q==='iframe'?iframe:preview,querySelectorAll:()=>elements.filter(e=>e.dataset.t)},localStorage:{getItem:()=>language,setItem(){}},navigator:{language},location:{origin:'http://test'},setTimeout:(fn,delay)=>{timers.set(++timerId,{fn,delay});return timerId;},clearTimeout:id=>timers.delete(id),EventSource:class{constructor(){events=this;}},window:{addEventListener(type,fn){listener=fn;}},fetch:async(url,options)=>{posted=JSON.parse(options.body);return {ok:true};}};
+    const sandbox={guardBox,GuardMedia,defaults,Event:class{},t,Intl,JSON,Number,Map,console,document:{documentElement:{},getElementById:id=>ids.get(id),createElement:()=>new Element(),querySelector:q=>q==='iframe'?iframe:preview,querySelectorAll:()=>elements.filter(e=>e.dataset.t)},localStorage:{getItem:()=>language,setItem(){}},navigator:{language},location:{origin:'http://test'},setTimeout:(fn,delay)=>{timers.set(++timerId,{fn,delay});return timerId;},clearTimeout:id=>timers.delete(id),EventSource:class{constructor(){events=this;}},window:{addEventListener(type,fn){listener=fn;}},fetch:async(url,options)=>{posted=JSON.parse(options.body);return {ok:true};}};
     vm.runInNewContext(source,sandbox);
     events.onmessage({data:JSON.stringify({type:'init',data:{config:{...defaults,language},configured:true,status:'disconnected',warning:null,gifts:[]}})});
     for(const key of ['minGiftScale','maxGiftScale','maxGiftScaleAmount','maxCoverage','spawnRate','regionX','regionY','regionWidth','regionHeight'])assert.ok(ids.get(key));
+    assert.ok(ids.get('guardDuration'));assert.equal(ids.get('guardDuration').min,1);assert.equal(ids.get('guardDuration').max,undefined);
     for(const el of elements.filter(e=>e.dataset.t))assert.equal(el.textContent,t(language,el.dataset.t));
     listener({origin:'http://test',source:iframe.contentWindow,data:{type:'gift-stats',count:3,coverage:4,pending:5}});
     ids.get('minGiftScale').value='75';ids.get('maxGiftScale').value='200';ids.get('maxGiftScaleAmount').value='25';
@@ -48,14 +49,28 @@ test('control panel executes in all locales, renders new strings and submits all
     change('maxGiftScaleAmount','50');await [...timers.values()].find(x=>x.delay===400).fn();assert.equal(posted.maxGiftScaleAmount,50);
     ids.get('includeFree').checked=false;ids.get('settings').oninput({target:ids.get('includeFree')});
     await [...timers.values()].find(x=>x.delay===400).fn();assert.equal(posted.includeFree,false);
-    events.onmessage({data:JSON.stringify({type:'config',data:{...defaults,language,scHeight:40}})});
+    events.onmessage({data:JSON.stringify({type:'config',data:{...defaults,language,guardAnchor:'center',guardX:50,scHeight:40}})});
     const pointer={clientX:0,clientY:0,pointerId:1,preventDefault(){},stopPropagation(){}};
     const handle=elements.find(e=>e.className==='sc-move');handle.onpointerdown(pointer);handle.onpointermove({clientX:100,clientY:50});await handle.onpointerup();assert.equal(posted.scX,15);assert.equal(posted.scY,15);
-    events.onmessage({data:JSON.stringify({type:'config',data:{...defaults,language,scX:15,scY:15,scHeight:40}})});
+    events.onmessage({data:JSON.stringify({type:'config',data:{...defaults,language,guardAnchor:'center',guardX:50,scX:15,scY:15,scHeight:40}})});
     await handle.onkeydown({key:'ArrowRight',preventDefault(){},stopPropagation(){}});assert.equal(posted.scX,16);
     const resize=elements.find(e=>e.dataset.t==='scResize');resize.onpointerdown(pointer);handle.onpointermove({clientX:100,clientY:50});await handle.onpointerup();assert.equal(posted.scWidth,40);assert.equal(posted.scHeight,50);
-    const guardHandle=elements.find(e=>e.className==='guard-move'),guardResize=elements.find(e=>e.dataset.t==='guardResize');guardResize.onpointerdown(pointer);guardHandle.onpointermove({clientX:1000,clientY:0});await guardHandle.onpointerup();assert.equal(posted.guardWidth,100);assert.ok(posted.guardX+guardBox(posted).width<=100);assert.ok(guardBox(posted).y+guardBox(posted).height<=100.00001);
+    const guardHandle=elements.find(e=>e.className==='guard-move'),guardResize=elements.find(e=>e.dataset.t==='guardResize');guardResize.onpointerdown(pointer);guardHandle.onpointermove({clientX:1000,clientY:0});await guardHandle.onpointerup();assert.equal(posted.guardWidth,100);
+    const guardBoxAfterResize=guardBox({...defaults,guardAnchor:'center',...posted});assert.ok(guardBoxAfterResize.x+guardBoxAfterResize.width<=100.00001);assert.ok(guardBoxAfterResize.y+guardBoxAfterResize.height<=100.00001);assert.ok(Math.abs(guardBoxAfterResize.x+guardBoxAfterResize.width/2-posted.guardX)<1e-9);
+    guardHandle.onpointerdown(pointer);guardHandle.onpointermove({clientX:100,clientY:0});await guardHandle.onpointerup();
+    const moved=guardBox({...defaults,guardWidth:posted.guardWidth??defaults.guardWidth,guardAnchor:'center',...posted});assert.ok(moved.x+moved.width<=100.00001);assert.ok(Math.abs(moved.x+moved.width/2-posted.guardX)<1e-9);assert.equal(posted.guardX,60);
     const giftFrame=elements.find(e=>e.className==='gift-region-editor'),giftResize=elements.find(e=>e.dataset.t==='regionResize');giftResize.onpointerdown(pointer);giftFrame.onpointermove({clientX:-200,clientY:-100});await giftFrame.onpointerup();assert.equal(posted.regionWidth,80);assert.equal(posted.regionHeight,80);
-
+    // Restore gift defaults posts exactly the gift defaults and leaves other layers alone.
+    const giftReset=elements.find(e=>e.dataset.t==='giftReset');await giftReset.onclick({preventDefault(){}});
+    for(const key of ['giftOpacity','minGiftScale','maxGiftScale','maxGiftScaleAmount','gravity','bounce','lifetime','maxObjects','minGiftPrice','maxCoverage','spawnRate','regionX','regionY','regionWidth','regionHeight','includeFree'])assert.equal(posted[key],defaults[key]);
+    for(const key of ['scX','scY','guardX'])assert.equal(Object.hasOwn(posted,key),false);
+    // Simulate buttons exist for all three subscription tiers.
+    for(const tier of [3,2,1])assert.ok(elements.some(e=>e.dataset.t==='guard'+tier&&e.type==='button'));
+    // Guard layout reset and Super Chat reset post their own defaults only.
+    const guardReset=elements.find(e=>e.dataset.t==='guardResetLayout');await guardReset.onclick({preventDefault(){}});
+    assert.equal(posted.guardX,50);assert.equal(posted.guardY,29);assert.equal(posted.guardWidth,60);assert.equal(posted.guardAnchor,'center');assert.equal(Object.hasOwn(posted,'scX'),false);assert.equal(Object.hasOwn(posted,'guardAsset3'),false);
+    const scReset=elements.find(e=>e.dataset.t==='scReset');await scReset.onclick({preventDefault(){}});
+    for(const key of ['scEnabled','scOpacity','scX','scY','scWidth','scHeight','scCollapse','scScrollSpeed'])assert.equal(posted[key],defaults[key]);
+    assert.equal(Object.hasOwn(posted,'guardX'),false);
   }
 });
