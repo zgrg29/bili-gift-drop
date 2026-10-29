@@ -3,6 +3,13 @@ import {createHash} from 'node:crypto';
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import path from 'node:path';
 import {runtimeRoot} from './paths.mjs';
+export function imageType(data){
+  if(data.length>=8&&data.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10])))return 'image/png';
+  if(data.length>=3&&data[0]===255&&data[1]===216&&data[2]===255)return 'image/jpeg';
+  if(/^GIF8[79]a$/.test(data.subarray(0,6).toString()))return 'image/gif';
+  if(data.length>=12&&data.subarray(0,4).toString()==='RIFF'&&data.subarray(8,12).toString()==='WEBP')return 'image/webp';
+  return null;
+}
 export class Catalog {
   gifts=new Map();updated=0;pending=null;
   downloads=new Map();
@@ -16,9 +23,11 @@ export class Catalog {
     try{await readFile(file);this.remember(hash);return '/cache/'+hash;}catch{}
     if(this.downloads.has(hash))return this.downloads.get(hash);
     if(this.downloads.size>=8)return null;
-    const task=(async()=>{const r=await fetch(url,{redirect:'error',signal:AbortSignal.timeout(8000)});if(!r.ok||!/^image\/(png|webp|gif|jpeg)/.test(r.headers.get('content-type')??''))return null;
+    const task=(async()=>{const r=await fetch(url,{redirect:'error',signal:AbortSignal.timeout(8000)});if(!r.ok)return null;
       const chunks=[];let size=0;for await(const chunk of r.body){size+=chunk.length;if(size>4*1024*1024)throw Error('image');chunks.push(chunk);}
-      await mkdir(path.join(runtimeRoot,'cache'),{recursive:true});await writeFile(file,Buffer.concat(chunks));return '/cache/'+hash;
+      // Some Bilibili CDN assets report Content-Type: png. Trust supported file signatures instead.
+      const data=Buffer.concat(chunks);if(!imageType(data))return null;
+      await mkdir(path.join(runtimeRoot,'cache'),{recursive:true});await writeFile(file,data);return '/cache/'+hash;
     })().then(value=>{if(value)this.remember(hash);else this.failed(hash);return value;},error=>{this.failed(hash);throw error;}).finally(()=>this.downloads.delete(hash));this.downloads.set(hash,task);return task;
   }
   remember(hash){this.cached.set(hash,'/cache/'+hash);if(this.cached.size>512)this.cached.delete(this.cached.keys().next().value);}

@@ -8,12 +8,18 @@ A local, transparent OBS overlay for Bilibili gifts, Super Chat and Great Voyage
 
 ## 当前版本 / 現行版 / Current version
 
-**v0.6.6 Preview** · Windows x64 · [Release notes](docs/releases/v0.6.6.md) · [验收记录 / 検証 / Acceptance](docs/ACCEPTANCE.md)
+**v0.6.7 Preview** · Windows x64 · [Release notes](docs/releases/v0.6.7.md) · [验收记录 / 検証 / Acceptance](docs/ACCEPTANCE.md)
 
-- ZIP: `BiliGiftDrop-v0.6.6-windows-x64.zip`
-- Tag: `v0.6.6`
-- Title: **Bili Gift Drop v0.6.6 — 大航海播放时长与分区恢复默认（Preview）**
+- ZIP: `BiliGiftDrop-v0.6.7-windows-x64.zip`
+- Tag: `v0.6.7`
+- Title: **Bili Gift Drop v0.6.7 — 礼物图片类型兼容修复（Preview）**
 - 发布材料位于 `dist/RELEASE_TAG.txt`、`dist/RELEASE_TITLE.txt`、`dist/RELEASE_NOTES.md` 和 `dist/SHA256SUMS.txt`。 / リリース用ファイルは `dist/` 内。 / Release fields and checksums are prepared in `dist/`.
+
+图片兼容修复：按 PNG/JPEG/GIF/WebP 文件签名识别，兼容 CDN 返回 `Content-Type: png`，错误网页不缓存。
+
+画像互換性の修正：ファイル署名で PNG/JPEG/GIF/WebP を判定し、CDN の `Content-Type: png` に対応。エラーページは保存しません。
+
+Image compatibility fix: identify PNG/JPEG/GIF/WebP by file signature, accepting CDN `Content-Type: png` labels while rejecting error pages.
 
 ## 简体中文
 
@@ -40,7 +46,7 @@ A local, transparent OBS overlay for Bilibili gifts, Super Chat and Great Voyage
 
 EXE设置、缓存及上传素材在 `%LOCALAPPDATA%\BiliGiftDrop`；配置在 `data/`、上传素材在 `media/`。升级替换EXE即可；迁移电脑时保留配置和素材两个目录。源码运行默认使用项目目录，`BILI_GIFT_DATA_DIR`可指定隔离数据目录。
 
-33项自动测试和本机EXE隔离回归通过；已有浏览器鼠标移动/缩放、三语桌面和100×200竖版GIF比例证据。真实大航海、真实付费SC与各金额配色、OBS实机、完整三语窄屏、全部视频编码、长期直播和全新Windows环境仍待验收。匿名连接可能受平台限制；不保证收到的上舰通知总含头像、明确月份或稳定的交易标识。部分真实V2礼物已验证，不能据此推定所有平台事件均通过。本构建未签名，作为预览发布。
+35项自动测试和本机EXE隔离回归通过；已有浏览器鼠标移动/缩放、三语桌面和100×200竖版GIF比例证据。真实大航海、真实付费SC与各金额配色、OBS实机、完整三语窄屏、全部视频编码、长期直播和全新Windows环境仍待验收。匿名连接可能受平台限制；不保证收到的上舰通知总含头像、明确月份或稳定的交易标识。部分真实V2礼物已验证，不能据此推定所有平台事件均通过。本构建未签名，作为预览发布。
 
 ## 日本語
 
@@ -51,7 +57,7 @@ EXE设置、缓存及上传素材在 `%LOCALAPPDATA%\BiliGiftDrop`；配置在 `
 5. SCは初期設定で有効。期限は個別、カウントダウンなし。既定15秒で折りたたみ、0で無効。領域を超えると初期20画素/秒で往復し、0で停止。ホバー・フォーカスでスクロールを一時停止しますが期限は進みます。最新100件まで保持。透明画面、またはOBSの「対話」で見出しを操作できます。
 6. 大航海は初期設定で有効。アバター・元の名前・ランク・今回の購入期間を表示。月以外の単位は元情報を保持し、期間不明は不明、アバター未取得は名前の先頭文字を表示。1人あたりの時間は設定可能（初期8秒、最小1秒、上限なし、次の人から適用）。受信順、最大100人待機。満杯時は新規分を通知してスキップ。複数月でも1回再生。無効化・ルーム変更・クリアで列を消去し、再起動後は過去分を再生しません。
 7. 各ランクの標準AI素材をPNG/JPEG/WebP/GIF/MP4/WebM（最大32 MiB）に置換可能。動画は無音ループ。画像・GIFサイズまたは動画メタデータから比率を自動計算し、視聴者情報は下に表示。設定幅は最大100%、縦長素材は画面内に収まるよう全体を縮小。失敗時は標準表示。待機中は艦長・提督・総督の3つのテストボタンと共通の月数入力を使用します。3ランクは同じ中心軸で揃い、大航海の位置・サイズとSC設定を初期化できます。素材やコメントの有効期限は保持します。
-8. 保存先は `%LOCALAPPDATA%\BiliGiftDrop`、設定は `data/`、素材は `media/`。移行時は両方を保持。33件の自動テスト・EXE回帰と一部ブラウザ操作は検証済み。実際の上艦・有料SC・OBS、完全な3言語狭幅レイアウト、全コーデック、長時間配信、新規Windows環境は未検証。匿名接続が制限されたり、一部フィールドが欠ける場合があります。署名なしのプレビュー版です。
+8. 保存先は `%LOCALAPPDATA%\BiliGiftDrop`、設定は `data/`、素材は `media/`。移行時は両方を保持。35件の自動テスト・EXE回帰と一部ブラウザ操作は検証済み。実際の上艦・有料SC・OBS、完全な3言語狭幅レイアウト、全コーデック、長時間配信、新規Windows環境は未検証。匿名接続が制限されたり、一部フィールドが欠ける場合があります。署名なしのプレビュー版です。
 
 ## English
 
@@ -62,7 +68,7 @@ EXE设置、缓存及上传素材在 `%LOCALAPPDATA%\BiliGiftDrop`；配置在 `
 5. SC is enabled by default, expires independently and shows no countdown. Default collapse delay is 15 seconds;0 disables it. Overflow scrolls back and forth at 20 canvas pixels/second by default;0 stops motion. Hover/focus pauses scrolling without pausing expiry. Retains the latest 100 active messages. Use the transparent page or OBS Interact to operate headings.
 6. Subscriptions are enabled by default and show avatar, original name, tier and purchased duration. Non-month units retain their original information; missing duration is marked unknown and missing avatars use the first name character. Play time is configurable (8 seconds by default, minimum 1, no upper bound), applying from the next viewer, in arrival order, with up to 100 waiting. Full queues skip new events with a warning. Multi-month purchases play once. Disabling, changing room or clearing removes the queue; shutdown never replays old purchases.
 7. Replace each tier’s default AI pixel ship with PNG/JPEG/WebP/GIF/MP4/WebM, up to 32 MiB per file. Videos loop muted. Native image/GIF dimensions or video metadata determine layout; viewer details sit below. Requested width supports 100%, with tall content scaling down to fit the canvas. Failures fall back to default display. While idle, use the Captain, Admiral or Governor test buttons with the shared month input. All tiers share a center axis. Restore buttons reset subscription position/size or SC settings while preserving media and message expiry.
-8. EXE data lives in `%LOCALAPPDATA%\BiliGiftDrop`: configuration in `data/`, uploaded files in `media/`. Retain both when moving computers.33 automated tests and local EXE regressions pass, with browser interaction and portrait-GIF evidence. Real subscriptions, paid SC/colors, OBS, complete narrow layouts in all three languages, all codecs, long-running streams and clean Windows installations remain unverified. Anonymous access may be restricted and platform fields may be missing. This is an unsigned preview.
+8. EXE data lives in `%LOCALAPPDATA%\BiliGiftDrop`: configuration in `data/`, uploaded files in `media/`. Retain both when moving computers.35 automated tests and local EXE regressions pass, with browser interaction and portrait-GIF evidence. Real subscriptions, paid SC/colors, OBS, complete narrow layouts in all three languages, all codecs, long-running streams and clean Windows installations remain unverified. Anonymous access may be restricted and platform fields may be missing. This is an unsigned preview.
 
 ## 开发 / 開発 / Development
 
