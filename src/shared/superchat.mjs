@@ -10,7 +10,7 @@ export function normalizeSC(msg,now=Date.now()) {
   if(!Number.isFinite(end)||end<=now||!Number.isFinite(start)||start<=0||end<=start)return null;
   const price=Number(d.price);if(!Number.isFinite(price)||price<0)return null;
   const color=(v,f)=>/^#[0-9a-f]{6}$/i.test(v)?v:f;
-  return {id:String(d.id),user:String(d.user_info?.uname??''),message:String(d.message??''),price,start,end,
+  return {id:String(d.id),uid:String(d.uid??d.user_info?.uid??''),avatar:d.user_info?.face??null,user:String(d.user_info?.uname??''),message:String(d.message??''),price,start,end,
     color:color(d.background_bottom_color,'#2a60b2'),background:color(d.background_color,'#edf5ff'),text:color(d.message_font_color,'#172033')};
 }
 export class SCStore {

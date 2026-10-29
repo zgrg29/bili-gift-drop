@@ -65,6 +65,7 @@ test('guard renderer preserves animation on language/opacity, swaps custom media
  const now=Date.now();const send=x=>listeners[0]({data:JSON.stringify({type:'guard-state',data:{current:x,pending:0}})});
  const a={id:'a',level:3,count:1,unit:'月',user:'原名',start:now,end:now+8000};send(a);
  const video=elements.find(e=>e.tagName==='VIDEO'&&e.className==='guard-custom');assert.ok(video.muted&&video.loop&&video.autoplay);assert.equal(animations,1);
+ send({...a,avatar:'/cache/avatar'});assert.equal(elements.find(e=>e.tagName==='IMG'&&e.className==='guard-avatar').hidden,false);assert.equal(animations,1);
  c={...c,language:'en',guardOpacity:35};tick();assert.equal(animations,1);assert.equal(elements.find(e=>e.className==='guard-effect').style.filter,'opacity(35%)');assert.ok(elements.some(e=>e.textContent==='1 month · Captain'));
  send({...a,id:'b',level:2});assert.ok(video.removed);assert.equal(elements.find(e=>e.className==='guard-sprite').hidden,false);assert.equal(animations,2);
  c={...c,guardAsset2:'/media/def.gif'};tick();assert.ok(elements.some(e=>e.tagName==='IMG'&&e.src==='/media/def.gif'));

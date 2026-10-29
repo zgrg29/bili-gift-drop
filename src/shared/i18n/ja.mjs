@@ -1,4 +1,5 @@
 export default {
+"scAvatar":"投稿者のアバター",
 "guardMonth":"{count}か月の{level}",
 "giftOpacity":"ギフトの不透明度",
 "scOpacity":"SCの不透明度",

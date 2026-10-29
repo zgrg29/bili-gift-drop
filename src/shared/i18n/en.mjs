@@ -1,4 +1,5 @@
 export default {
+"scAvatar":"Message sender avatar",
 "guardMonth":"{count} month · {level}",
 "giftOpacity":"Gift opacity",
 "scOpacity":"SC opacity",

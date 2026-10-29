@@ -1,14 +1,20 @@
-# Windows v0.6.7 Preview / 日本語 / English
+# Windows v0.6.8 Preview / 日本語 / English
 
-当前包：BiliGiftDrop-v0.6.7-windows-x64.zip。支持礼物、SC和默认开启的大航海；单一预览编辑三个区域，各自透明度默认100%。大航海按素材比例显示，观众信息在下方，宽度设置最高100%，高素材缩小以适应画面。自定义大航海素材可正常替换默认像素舰船，三个等级按同一条中轴线对齐，每人播放时长可设置，位置与大小可一键恢复默认。礼物上限全部由设置决定，礼物尺寸只按单个礼物的单价；礼物和醒目留言都提供恢复默认按钮。以下按版本排列的说明保留功能演进，最终行为以v0.6.7为准。
+当前包：BiliGiftDrop-v0.6.8-windows-x64.zip。支持礼物、SC和默认开启的大航海；单一预览编辑三个区域，各自透明度默认100%。大航海按素材比例显示，观众信息在下方，宽度设置最高100%，高素材缩小以适应画面。自定义大航海素材可正常替换默认像素舰船，三个等级按同一条中轴线对齐，每人播放时长可设置，位置与大小可一键恢复默认。礼物上限全部由设置决定，礼物尺寸只按单个礼物的单价；礼物和醒目留言都提供恢复默认按钮。以下按版本排列的说明保留功能演进，最终行为以v0.6.8为准。
 
-現行パッケージはBiliGiftDrop-v0.6.7-windows-x64.zip。ギフト・SC・大航海を単一プレビューで編集し、各不透明度の初期値は100%。大航海は素材比率を維持して情報を下に表示、要求幅は最大100%、画面高さに合わせて縮小。カスタム素材は既定のピクセル艦船を置き換えて表示し、3 ランクは同じ中心軸で揃います。1 人あたりの再生時間を設定でき、位置とサイズは初期値に戻せます。ギフトの上限は設定値に従い、サイズは 1 個あたりの単価だけで決まり、ギフトとスーパーチャットの設定に初期化ボタンがあります。以下の版別説明は履歴、最終動作はv0.6.7です。
+現行パッケージはBiliGiftDrop-v0.6.8-windows-x64.zip。ギフト・SC・大航海を単一プレビューで編集し、各不透明度の初期値は100%。大航海は素材比率を維持して情報を下に表示、要求幅は最大100%、画面高さに合わせて縮小。カスタム素材は既定のピクセル艦船を置き換えて表示し、3 ランクは同じ中心軸で揃います。1 人あたりの再生時間を設定でき、位置とサイズは初期値に戻せます。ギフトの上限は設定値に従い、サイズは 1 個あたりの単価だけで決まり、ギフトとスーパーチャットの設定に初期化ボタンがあります。以下の版別説明は履歴、最終動作はv0.6.8です。
 
-Current package: BiliGiftDrop-v0.6.7-windows-x64.zip. One preview edits gifts, SC and enabled-by-default subscriptions; opacity defaults to100% per layer. Subscription proportions follow media with viewer details below, up to100% requested width and scaling down to fit canvas height. Custom subscription media replaces the default pixel ship, all three tiers share one center axis, play time per viewer is configurable, and position/size can be restored to defaults. Gift caps follow your settings, gift size depends only on the unit price, and both gift and Super Chat settings include restore-defaults buttons. Versioned sections below retain history; v0.6.7 describes final behavior.
+Current package: BiliGiftDrop-v0.6.8-windows-x64.zip. One preview edits gifts, SC and enabled-by-default subscriptions; opacity defaults to100% per layer. Subscription proportions follow media with viewer details below, up to100% requested width and scaling down to fit canvas height. Custom subscription media replaces the default pixel ship, all three tiers share one center axis, play time per viewer is configurable, and position/size can be restored to defaults. Gift caps follow your settings, gift size depends only on the unit price, and both gift and Super Chat settings include restore-defaults buttons. Versioned sections below retain history; v0.6.8 describes final behavior.
+
+v0.6.8 头像：SC 昵称左侧显示圆形头像；SC 和大航海优先使用事件头像，缺失或下载失败时按 UID 查询公开资料，再下载到本地。无需登录或付费触发测试；平台查询失败时显示昵称首字，模拟事件用本地示例头像。下载异步完成，不改变 SC 到期/折叠状态或大航海播放时间。公开接口可能受网络或平台限制，不保证每次获取成功。
+
+v0.6.8 アバター：SC の名前の左に丸い画像を表示。SC と大航海はイベント画像を優先し、不足・取得失敗時は UID で公開情報を照会して保存します。ログイン・有料テスト不要。失敗時は名前の先頭文字、シミュレーションはサンプル画像を使用。取得後も SC の期限・開閉状態や大航海の再生時間を変更しません。ネットワーク・プラットフォームによって取得できない場合があります。
+
+v0.6.8 avatars: SC shows a round avatar before the sender name. SC and subscriptions prefer event avatars and fall back to public UID lookup and local download. No login or paid test is required. Failures show the name initial; simulations use a sample image. Async updates preserve SC expiry/collapse state and subscription timing. Network or platform restrictions can prevent retrieval.
 
 当前礼物待生成队列无固定容量或超时丢弃，停刷后仍可能继续播放积压礼物。 / 現在のギフト生成待ちに固定容量や期限はなく、受信停止後も残りを再生する場合があります。 / Pending gifts have no fixed queue capacity or expiry and may continue playing after incoming gifts stop.
 
-验收：35项自动测试和本机EXE回归，浏览器移动/缩放、竖版GIF、替换素材实际显示、放开后的上限保存、三个上舰模拟按钮、礼物/大航海/醒目留言恢复默认、不同比例素材共用中轴及播放时长生效检查已有证据。真实上舰、付费SC、OBS、全部视频编码、长期和全新Windows仍待验收。 / 検証：自動35件・EXE回帰、ブラウザ操作・縦長GIF・カスタム素材表示・上限値の保存・3つの大航海テストボタン・各設定の初期化・比率の異なる素材の中心軸一致・再生時間の反映を確認。実際の上艦・SC・OBS・全コーデック・長時間・新規Windowsは未検証。 / Validation includes35 automated tests, local EXE regression, browser interaction, portrait GIF, replaced media display, saved uncapped values, all three subscription test buttons, gift/Great Voyage/Super Chat resets, one shared center axis across media ratios and the configured play time. Real subscriptions, paid SC, OBS, all codecs, long-running streams and clean Windows installations remain unverified.
+验收：37项自动测试和本机EXE回归，浏览器移动/缩放、竖版GIF、替换素材实际显示、放开后的上限保存、三个上舰模拟按钮、礼物/大航海/醒目留言恢复默认、不同比例素材共用中轴及播放时长生效检查已有证据。真实上舰、付费SC、OBS、全部视频编码、长期和全新Windows仍待验收。 / 検証：自動37件・EXE回帰、ブラウザ操作・縦長GIF・カスタム素材表示・上限値の保存・3つの大航海テストボタン・各設定の初期化・比率の異なる素材の中心軸一致・再生時間の反映を確認。実際の上艦・SC・OBS・全コーデック・長時間・新規Windowsは未検証。 / Validation includes37 automated tests, local EXE regression, browser interaction, portrait GIF, replaced media display, saved uncapped values, all three subscription test buttons, gift/Great Voyage/Super Chat resets, one shared center axis across media ratios and the configured play time. Real subscriptions, paid SC, OBS, all codecs, long-running streams and clean Windows installations remain unverified.
 
 
 命令行提示始终同时显示中文、日语和英语；不受控制面板语言设置影响。

@@ -61,6 +61,7 @@ try{
     assert.equal(await response.text(),await readFile('.'+file,'utf8'),'embedded source matches current working tree');
   }
   const manifest=JSON.parse(await readFile('build/manifest.json','utf8'));
+  for(const file of manifest.files)assert.deepEqual(await readFile(path.join(data,'app',manifest.hash,file)),await readFile(file),'extracted embedded bytes: '+file);
   for(const file of manifest.files.filter(file=>/^src\/(control|overlay|shared)\//.test(file))){const response=await fetch(base+'/'+file);assert.equal(response.status,200,file);assert.deepEqual(Buffer.from(await response.arrayBuffer()),await readFile(file),'embedded bytes: '+file);}
   assert.equal(JSON.parse(await readFile(path.join(data,'data/config.json'),'utf8')).language,'en');
   assert.equal((await fetch(base+'/api/config',{method:'POST',headers:{Origin:base,'Content-Type':'application/json'},body:JSON.stringify({scEnabled:false})})).status,200);

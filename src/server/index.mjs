@@ -1,3 +1,4 @@
+import {Avatars} from './avatars.mjs';
 import {normalizeGuard,GuardQueue} from '../shared/guard.mjs';
 import {normalizeSC,SCStore,scDuration} from '../shared/superchat.mjs';
 import http from 'node:http';
@@ -14,7 +15,7 @@ import {expandGiftV2} from './gift-v2.mjs';
 await mkdir(path.join(runtimeRoot,'data'),{recursive:true});
 let cfg={...defaults},configured=false;try{cfg=config(JSON.parse(await readFile(path.join(runtimeRoot,'data/config.json'),'utf8')));configured=true;}catch{}
 const scStore=new SCStore(),guardQueue=new GuardQueue((cfg.guardDuration??8)*1000);
-let status='disconnected',warning=null;const clients=new Set(),catalog=new Catalog(),dedup=new Deduplicator();
+let status='disconnected',warning=null;const clients=new Set(),catalog=new Catalog(),avatars=new Avatars(catalog),dedup=new Deduplicator();
 let configWrites=Promise.resolve();
 const send=(type,data)=>{const msg=`data: ${JSON.stringify({type,data})}\n\n`;for(const r of clients){if(r.writableLength>1024*1024){r.destroy();clients.delete(r);}else r.write(msg);}};
 async function receive(msg){
@@ -25,11 +26,20 @@ async function receive(msg){
       // Fetch only permitted CDN images; capture the connection generation across async work.
       const generation=live.generation,avatarUrl=item.avatar;item.avatar=null;
       const result=guardQueue.add(item);if(result==='full'){warning='guardFull';send('warning',warning);}send('guard-state',guardQueue.snapshot());
-      if(result!=='full'&&avatarUrl){const avatar=await catalog.cacheImage(avatarUrl).catch(()=>null);if(generation===live.generation&&cfg.guardEnabled){const existing=[guardQueue.current,...guardQueue.pending].find(x=>x?.key===item.key);if(existing&&avatar){existing.avatar=avatar;send('guard-state',guardQueue.snapshot());}}}return;
+      if(result!=='full'){const avatar=await avatars.resolve(item.uid,avatarUrl).catch(()=>null);if(generation===live.generation&&cfg.guardEnabled){const existing=[guardQueue.current,...guardQueue.pending].find(x=>x?.key===item.key);if(existing&&avatar){existing.avatar=avatar;send('guard-state',guardQueue.snapshot());}}}return;
     }
     if(command==='SUPER_CHAT_MESSAGE_DELETE'){scStore.remove(msg.data?.ids??[]);send('sc-list',scStore.list());return;}
     if(['SUPER_CHAT_MESSAGE','SUPER_CHAT_MESSAGE_JPN'].includes(command)){
-      const sc=normalizeSC(msg);if(sc&&scStore.add(sc))send('sc',sc);
+      const sc=normalizeSC(msg);if(sc){
+        const generation=live.generation,face=sc.avatar;sc.avatar=null;
+        if(scStore.add(sc)){
+          send('sc',sc);
+          const avatar=await avatars.resolve(sc.uid,face).catch(()=>null);
+          if(avatar&&generation===live.generation&&scStore.items.get(sc.id)===sc&&sc.end>Date.now()){
+            sc.avatar=avatar;send('sc-list',scStore.list());
+          }
+        }
+      }
       else if(!sc&&(!(Number(msg.data?.start_time)>0)||(!msg.data?.end_time&&!(Number(msg.data?.time)>0)&&!scDuration(Number(msg.data?.price))))){warning='scTiming';send('warning',warning);}return;
     }
     const messages=msg.cmd?.split(':')[0]==='SEND_GIFT_V2'?expandGiftV2(msg):[msg];

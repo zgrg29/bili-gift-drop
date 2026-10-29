@@ -1,4 +1,5 @@
 export default {
+"scAvatar":"留言者头像",
 "guardMonth":"{count}个月{level}",
 "giftOpacity":"礼物透明度",
 "scOpacity":"SC透明度",
