@@ -1,10 +1,16 @@
 import {guardBox} from '/src/shared/guard.mjs';
 import {GuardMedia} from '/src/shared/guard-media.mjs';
 import {defaults} from '/src/shared/rules.mjs';
+import {HistoryLedger} from '/src/shared/history.mjs';
+import {giftDisplayName} from '/src/shared/gift-names.mjs';
 import {t} from '/src/shared/i18n/index.mjs';
 const $=id=>document.getElementById(id);
-let cfg={},language=localStorage.getItem('language')||(['zh-CN','ja','en'].find(l=>navigator.language.startsWith(l.split('-')[0]))??'en'),state='disconnected',warning=null,history=[];
-let gifts=[],historyTimer;
+let cfg={},language=localStorage.getItem('language')||(['zh-CN','ja','en'].find(l=>navigator.language.startsWith(l.split('-')[0]))??'en'),state='disconnected',warning=null,recent=[];
+let gifts=[],recentTimer;
+const historyLedger=new HistoryLedger(),scTranslations=new Map();
+let historyDirty=true,historyLanguage=null,historyRenderTimer=null,scTranslator=null,scTranslatorPair='';
+let login={loggedIn:false,uid:'',user:'',avatar:null,verifiedAt:0,remembered:false},loginQrKey='',loginTimer=null;
+let exchange={rate:null,rateTime:null,fetchedAt:null,source:null,error:null,loading:false};
 const giftLabel=document.createElement('label'),giftText=document.createElement('span'),giftSelect=document.createElement('select');giftText.dataset.t='giftType';giftSelect.id='giftType';giftLabel.append(giftText,giftSelect);$('demo').prepend(giftLabel);
 function catalog(list){gifts=list;const value=giftSelect.value;const placeholder=document.createElement('option');placeholder.value='0';placeholder.textContent=t(language,'demo');giftSelect.replaceChildren(placeholder,...list.map(g=>{const o=document.createElement('option');o.value=g.id;o.textContent=g.name;return o;}));giftSelect.value=value||'0';}
 giftSelect.onchange=()=>{const g=gifts.find(g=>String(g.id)===giftSelect.value);if(g)$('price').value=g.coinType==='gold'?g.price/1000:0;};
@@ -15,12 +21,51 @@ const giftHeading=document.createElement('h2');giftHeading.dataset.t='giftTitle'
 for(const [key,min,max,step]of [['guardX',0,100,.1],['guardY',0,89.5,.1],['guardWidth',15,100,.1],['guardDuration',1,null,1],['scHeight',10,100,0.1],['scScrollSpeed',0,120,1],['scX',0,80,0.1],['scY',0,90,0.1],['scWidth',20,80,0.1],['scCollapse',0,300,1],['minGiftScale',10,null,1],['maxGiftScale',10,null,1],['maxGiftScaleAmount',.001,100000,.001],['minGiftPrice',0,100000,.001],['gravity',100,2400,10],['bounce',0,.85,.05],['lifetime',5,120,1],['maxObjects',10,null,1],['maxCoverage',1,null,1],['spawnRate',1,null,1],['regionX',0,90,1],['regionY',0,90,1],['regionWidth',10,100,1],['regionHeight',10,100,1]]){
   const label=document.createElement('label');label.className='field';const text=document.createElement('span');text.dataset.t=key;const input=document.createElement('input');Object.assign(input,{id:key,type:'number',min,step,required:true});if(max!==null)input.max=max;label.append(text,input);settingGroups[key.startsWith('guard')?'guard':key.startsWith('sc')?'sc':'gift'].append(label);
 }
-function render(){if(typeof opacityOutputs!=='undefined')opacityLabels();document.documentElement.lang=language;document.title=t(language,'title');document.querySelectorAll('[data-t]').forEach(el=>el.textContent=t(language,el.dataset.t));$('language').value=language;if(typeof guardWaiting!=='undefined')guardQueueLabel.textContent=t(language,'guardPending',{count:new Intl.NumberFormat(language).format(guardWaiting)});if(typeof stats!=='undefined')renderStats();if(giftSelect.options[0])giftSelect.options[0].textContent=t(language,'demo');$('status').textContent=t(language,state);$('warning').textContent=warning?t(language,warning):'';$('empty').hidden=history.length>0;$('events').replaceChildren(...history.map(g=>{const li=document.createElement('li');li.textContent=t(language,'gift',{user:g.demo?t(language,'demo'):g.user,name:g.name??t(language,'demo'),count:new Intl.NumberFormat(language).format(g.count),amount:g.coinType==='gold'?new Intl.NumberFormat(language,{style:'currency',currency:'CNY'}).format(g.totalCoin/1000):t(language,'free')});return li;}));}
+function render(){if(typeof opacityOutputs!=='undefined')opacityLabels();document.documentElement.lang=language;document.title=t(language,'title');document.querySelectorAll('[data-t]').forEach(el=>el.textContent=t(language,el.dataset.t));$('language').value=language;if(typeof guardWaiting!=='undefined')guardQueueLabel.textContent=t(language,'guardPending',{count:new Intl.NumberFormat(language).format(guardWaiting)});if(typeof stats!=='undefined')renderStats();if(giftSelect.options[0])giftSelect.options[0].textContent=t(language,'demo');$('status').textContent=t(language,state);$('warning').textContent=warning?t(language,warning):'';$('empty').hidden=recent.length>0;$('events').replaceChildren(...recent.map(g=>{const li=document.createElement('li');li.textContent=t(language,'gift',{user:g.demo?t(language,'demo'):g.user,name:giftDisplayName(g.name??t(language,'demo'),language,cfg.giftTranslation!==false),count:new Intl.NumberFormat(language).format(g.count),amount:g.coinType==='gold'?amountText((g.totalCoin??0)/100):t(language,'free')});return li;}));renderHistory();renderLogin();}
 const edits=new Map();let autosaveTimer,saveQueue=Promise.resolve();
-function populate(){for(const key of ['giftOpacity','scOpacity','guardOpacity','guardX','guardY','guardWidth','guardDuration','scHeight','scScrollSpeed','scX','scY','scWidth','scCollapse','room','minGiftScale','maxGiftScale','maxGiftScaleAmount','gravity','bounce','lifetime','maxObjects','minGiftPrice','maxCoverage','spawnRate','regionX','regionY','regionWidth','regionHeight'])if(!edits.has(key))$(key).value=cfg[key]??(key.endsWith('Opacity')?100:0);if(!edits.has('scEnabled'))$('scEnabled').checked=cfg.scEnabled;if(!edits.has('guardEnabled'))$('guardEnabled').checked=cfg.guardEnabled;opacityLabels();updateGuardLayout();updateLayout();if(!edits.has('includeFree'))$('includeFree').checked=cfg.includeFree;}
+function populate(){for(const key of ['giftOpacity','scOpacity','guardOpacity','guardX','guardY','guardWidth','guardDuration','scHeight','scScrollSpeed','scX','scY','scWidth','scCollapse','room','minGiftScale','maxGiftScale','maxGiftScaleAmount','gravity','bounce','lifetime','maxObjects','minGiftPrice','maxCoverage','spawnRate','regionX','regionY','regionWidth','regionHeight'])if(!edits.has(key))$(key).value=cfg[key]??(key.endsWith('Opacity')?100:0);if(!edits.has('scEnabled'))$('scEnabled').checked=cfg.scEnabled;if(!edits.has('guardEnabled'))$('guardEnabled').checked=cfg.guardEnabled;if($('historyCurrency'))$('historyCurrency').value=cfg.historyCurrency??'battery';if($('giftTranslation'))$('giftTranslation').checked=cfg.giftTranslation!==false;opacityLabels();updateGuardLayout();updateLayout();if(!edits.has('includeFree'))$('includeFree').checked=cfg.includeFree;}
 let toastTimer;function toast(key){$('toast').textContent=t(language,key);$('toast').style.display='block';clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').style.display='none',3500);}
-async function post(action,data={}){const res=await fetch('/api/'+action,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});if(!res.ok){const err=await res.json();throw Error(err.error||'failed');}}
-function run(fn){return async e=>{e?.preventDefault();try{await fn();}catch(err){toast(['invalid','failed'].includes(err.message)?err.message:'failed');}};}
+async function post(action,data={}){const res=await fetch('/api/'+action,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});const value=await res.json().catch(()=>({}));if(!res.ok)throw Error(value.error||'failed');return value;}
+function run(fn){return async e=>{e?.preventDefault();try{await fn();}catch(err){toast(['invalid','failed','auth'].includes(err.message)?err.message:'failed');}};}
+function loginAvatarUrl(value){if(typeof value!=='string')return null;if(value.startsWith('/cache/'))return value;try{const u=new URL(value);return u.protocol==='https:'&&u.hostname.endsWith('.hdslb.com')?value:null;}catch{return null;}}
+function renderLogin(){
+  if(!$('loginStatus'))return;
+  $('loginStatus').textContent=t(language,login.loggedIn?'loginLoggedIn':'loginAnonymous');
+  $('loginAccount').hidden=!login.loggedIn;$('loginButton').hidden=!!login.loggedIn;$('logoutButton').hidden=!login.loggedIn;
+  $('loginUser').textContent=login.user||'';$('loginUid').textContent=login.uid?`UID ${login.uid}`:'';
+  const url=loginAvatarUrl(login.avatar),img=$('loginAvatar'),fallback=$('loginAvatarFallback');
+  img.alt=t(language,'loginAvatar');img.hidden=!url;fallback.hidden=!!url;if(url)img.src=url;
+  fallback.textContent=Array.from(login.user||'?')[0]??'?';img.onerror=()=>{img.hidden=true;fallback.hidden=false;};
+}
+function stopLoginPoll(){clearTimeout(loginTimer);loginTimer=null;loginQrKey='';}
+function showLoginPanel(show){$('loginPanel').hidden=!show;}
+function renderQR(url){
+  const box=$('loginQR');box.replaceChildren();
+  if(typeof qrcode==='function'){const qr=qrcode(0,'M');qr.addData(url);qr.make();box.innerHTML=qr.createSvgTag({cellSize:5,margin:8});return;}
+  const text=document.createElement('code');text.className='login-qr-url';text.textContent=url;box.append(text);
+}
+async function pollLogin(){
+  if(!loginQrKey)return;
+  try{
+    const result=await post('login/qr/poll',{qrcode_key:loginQrKey});
+    if(result.status==='success'){stopLoginPoll();login=result.login??login;renderLogin();$('loginQRStatus').textContent=t(language,'loginSuccess');showLoginPanel(false);toast('loginSuccess');return;}
+    if(result.status==='expired'){stopLoginPoll();$('loginQRStatus').textContent=t(language,'loginExpired');return;}
+    $('loginQRStatus').textContent=t(language,result.status==='scanned'?'loginScanned':'loginWaiting');
+    loginTimer=setTimeout(pollLogin,2000);
+  }catch(error){stopLoginPoll();$('loginQRStatus').textContent=t(language,error.message==='auth'?'loginAuthFailed':'loginFailed');}
+}
+$('loginButton').onclick=run(async()=>{
+  showLoginPanel(true);$('loginQRStatus').textContent=t(language,'loginWaiting');$('loginQR').replaceChildren();
+  const qr=await post('login/qr',{remember:$('rememberLogin').checked});
+  loginQrKey=qr.key;renderQR(qr.url);pollLogin();
+});
+$('loginClose').onclick=()=>{stopLoginPoll();showLoginPanel(false);};
+$('logoutButton').onclick=run(async()=>{login=await post('login/logout',{});renderLogin();toast('logoutDone');});
+$('loginCookieButton').onclick=run(async()=>{
+  const cookie=$('loginCookie').value.trim();if(!cookie)throw Error('invalid');
+  login=await post('login/cookie',{cookie,remember:$('rememberLogin').checked});
+  $('loginCookie').value='';renderLogin();showLoginPanel(false);toast('loginSuccess');
+});
 $('obs').value=location.origin+'/overlay';
 $('connection').onsubmit=run(async()=>{await post('config',{room:$('room').value});await post('connect',{room:$('room').value});});
 $('disconnect').onclick=run(()=>post('disconnect'));
@@ -125,15 +170,180 @@ function bindBoxEditor(frame,prefix,limits,resizeKey){
 }
 bindBoxEditor(handle,'sc',{minW:20,maxW:80,maxX:80},'scResize');bindBoxEditor(giftFrame,'region',{minW:10,maxW:100,maxX:90},'regionResize');
 const editHint=document.createElement('p');editHint.dataset.t='previewEditingHint';layout.after(editHint);
-const events=new EventSource('/api/events');let initialized=false;
+const events=new EventSource('/api/events?history=1');let initialized=false;
 events.onmessage=e=>{const {type,data}=JSON.parse(e.data);
-  if(type==='init'){cfg=data.config;catalog(data.gifts);state=data.status;warning=data.warning;if(!initialized){initialized=true;const preferred=data.configured?cfg.language:language;language=preferred;if(preferred!==cfg.language||!data.configured)post('config',{language:preferred}).catch(()=>toast('failed'));}populate();}
+  if(type==='init'){cfg=data.config;catalog(data.gifts);state=data.status;warning=data.warning;if(data.history){historyLedger.load(data.history);historyDirty=true;}if(data.exchange)exchange={...exchange,...data.exchange,loading:false};if(data.login)login=data.login;if(!initialized){initialized=true;const preferred=data.configured?cfg.language:language;language=preferred;if(preferred!==cfg.language||!data.configured)post('config',{language:preferred}).catch(()=>toast('failed'));}populate();if((cfg.historyCurrency??'battery')==='jpy'&&!exchange.rate)loadExchange().catch(()=>{});}
   if(type==='catalog')catalog(data);if(type==='guard-state'){guardWaiting=data.pending;guardCurrentLevel=data.current?.level??null;updateGuardLayout();}if(type==='init'){guardWaiting=data.guard?.pending??0;guardCurrentLevel=data.guard?.current?.level??null;updateGuardLayout();}
-  if(type==='config'){cfg=data;language=cfg.language;localStorage.setItem('language',language);populate();}
+  if(type==='config'){const previous=cfg.historyCurrency;cfg=data;language=cfg.language;localStorage.setItem('language',language);if(previous!==cfg.historyCurrency)historyDirty=true;populate();}
   if(type==='status')state=data;if(type==='warning')warning=data;
-  if(type==='gift'){history.unshift(data);history=history.slice(0,20);if(!historyTimer)historyTimer=setTimeout(()=>{historyTimer=null;render();},100);return;}render();
+  if(type==='history'){clearTimeout(historyRenderTimer);historyRenderTimer=null;historyLedger.load(data);scTranslations.clear();historyDirty=true;renderHistory();return;}
+  if(type==='history-add'){const entry=data;if(entry.kind==='gift')historyLedger.addGift(entry.data);else if(entry.kind==='sc')historyLedger.addSC(entry.data);else if(entry.kind==='guard')historyLedger.addGuard(entry.data);scheduleHistoryRender();return;}
+  if(type==='history-update'){const patch={};if(data.user)patch.user=data.user;if(data.avatar)patch.avatar=data.avatar;const changed=data.key?historyLedger.updateViewerByKey(data.key,patch):historyLedger.updateViewer(data.uid,patch);if(changed)scheduleHistoryRender();return;}
+  if(type==='rate'){exchange={...exchange,...data,loading:false};historyDirty=true;if((cfg.historyCurrency??'battery')==='jpy')renderHistory();return;}
+  if(type==='login'){login=data;renderLogin();if(login.loggedIn){stopLoginPoll();showLoginPanel(false);}return;}
+  if(type==='gift'){recent.unshift(data);recent=recent.slice(0,20);if(!recentTimer)recentTimer=setTimeout(()=>{recentTimer=null;render();},100);return;}render();
 };events.onerror=()=>{state='transport';render();};
 
+const historySection=document.createElement('section');historySection.className='history-section';
+const historyDetails=document.createElement('details');historyDetails.className='history';
+const historySummary=document.createElement('summary');
+const historyTitle=document.createElement('span');historyTitle.dataset.t='historyTitle';
+const historySummaryText=document.createElement('span');historySummaryText.className='history-summary';
+const historyCaret=document.createElement('span');historyCaret.className='history-caret';historyCaret.textContent='▾';
+historySummary.append(historyTitle,historySummaryText,historyCaret);
+const historyBody=document.createElement('div');historyBody.className='history-body';
+const historyToolbar=document.createElement('div');historyToolbar.className='history-toolbar';
+const historyHint=document.createElement('p');historyHint.dataset.t='historyHint';
+const historyCurrencyLabel=document.createElement('label');historyCurrencyLabel.className='history-currency';
+const historyCurrencyText=document.createElement('span');historyCurrencyText.dataset.t='historyCurrency';
+const historyCurrencySelect=document.createElement('select');historyCurrencySelect.id='historyCurrency';
+for(const [value,key]of [['battery','historyCurrencyBattery'],['cny','historyCurrencyCny'],['jpy','historyCurrencyJpy']]){const option=document.createElement('option');option.value=value;option.dataset.t=key;historyCurrencySelect.append(option);}
+historyCurrencyLabel.append(historyCurrencyText,historyCurrencySelect);
+const giftTranslationLabel=document.createElement('label');giftTranslationLabel.className='history-toggle';
+const giftTranslationCheck=document.createElement('input');giftTranslationCheck.type='checkbox';giftTranslationCheck.id='giftTranslation';
+const giftTranslationText=document.createElement('span');giftTranslationText.dataset.t='giftTranslation';
+giftTranslationLabel.append(giftTranslationCheck,giftTranslationText);
+giftTranslationCheck.onchange=run(async()=>{const value=giftTranslationCheck.checked;cfg={...cfg,giftTranslation:value};historyDirty=true;await post('config',{giftTranslation:value});render();});
+const historyClearButton=document.createElement('button');historyClearButton.type='button';historyClearButton.className='secondary';historyClearButton.dataset.t='historyClear';
+historyClearButton.onclick=run(async()=>{await post('history-clear');toast('historyCleared');});
+historyToolbar.append(historyHint,historyCurrencyLabel,giftTranslationLabel,historyClearButton);
+const historyRate=document.createElement('p');historyRate.className='history-rate';historyRate.hidden=true;
+const historyEmpty=document.createElement('p');historyEmpty.dataset.t='historyEmpty';historyEmpty.className='history-empty';
+const historyList=document.createElement('ol');historyList.className='history-list';
+historyBody.append(historyToolbar,historyRate,historyEmpty,historyList);
+historyDetails.append(historySummary,historyBody);historySection.append(historyDetails);document.body.append(historySection);
+function amountText(battery){
+  const value=Number(battery)||0,currency=cfg.historyCurrency??'battery';
+  if(currency==='cny')return new Intl.NumberFormat(language,{style:'currency',currency:'CNY',maximumFractionDigits:2}).format(value/10);
+  if(currency==='jpy'&&exchange.rate)return new Intl.NumberFormat(language,{style:'currency',currency:'JPY',maximumFractionDigits:0}).format(value/10*exchange.rate);
+  const count=new Intl.NumberFormat(language,{maximumFractionDigits:2}).format(value);
+  return t(language,value===1?'batteryAmountOne':'batteryAmount',{count});
+}
+function historyItemBattery(item){if(item.unknownBattery&&!item.battery)return t(language,'batteryUnknown');return amountText(item.battery??0)+(item.unknownBattery?'*':'');}
+function updateRateHint(){
+  const currency=cfg.historyCurrency??'battery';historyRate.hidden=currency!=='jpy';
+  if(currency!=='jpy')return;
+  if(exchange.rate){
+    const time=Number(exchange.rateTime)||Number(exchange.fetchedAt)||Date.now();
+    historyRate.textContent=t(language,'historyRate',{rate:new Intl.NumberFormat(language,{maximumFractionDigits:4}).format(exchange.rate),date:new Intl.DateTimeFormat(language,{dateStyle:'medium'}).format(new Date(time))});
+  }else historyRate.textContent=t(language,exchange.loading?'historyRateLoading':'historyRateUnavailable');
+}
+async function loadExchange(){
+  exchange={...exchange,loading:true};historyDirty=true;renderHistory();
+  try{
+    const response=await fetch('/api/exchange-rate');if(!response.ok)throw Error('failed');
+    exchange={...await response.json(),loading:false};
+  }catch{exchange={...exchange,loading:false,error:'unavailable'};}
+  historyDirty=true;renderHistory();
+}
+historyCurrencySelect.onchange=run(async()=>{
+  const value=historyCurrencySelect.value;cfg={...cfg,historyCurrency:value};historyDirty=true;renderHistory();
+  await post('config',{historyCurrency:value});
+  if(value==='jpy')await loadExchange();
+});
+function historyGuardDetail(item){
+  const times=Number(item.purchases)||1;
+  if(times>1){
+    if(item.allMonths)return t(language,'historyGuardMonthsTimes',{times:new Intl.NumberFormat(language).format(times),months:new Intl.NumberFormat(language).format(item.months??0)});
+    if(item.unit)return t(language,'historyGuardSpecialTimes',{times:new Intl.NumberFormat(language).format(times),unit:item.unit});
+    return t(language,'historyTimes',{times:new Intl.NumberFormat(language).format(times)});
+  }
+  if(item.allMonths){const months=item.months??0;return t(language,months===1?'historyGuardMonthOne':'historyGuardMonths',{count:new Intl.NumberFormat(language).format(months)});}
+  if(item.unit)return t(language,'historyGuardSpecial',{unit:item.unit});
+  return t(language,'historyDurationUnknown');
+}
+function detectLanguage(text){
+  const value=String(text??'');
+  if(/[\u3040-\u30ff]/.test(value))return 'ja';
+  if(/[\u4e00-\u9fff]/.test(value))return 'zh';
+  if(/[A-Za-z]/.test(value))return 'en';
+  return null;
+}
+function targetLanguage(){return language==='zh-CN'?'zh':language;}
+async function translateText(text,target){
+  const Api=typeof Translator!=='undefined'?Translator:null;
+  if(!Api)throw Error('unsupported');
+  const source=detectLanguage(text);if(!source)throw Error('unsupported');
+  if(source===target)return null;
+  const pair=`${source}:${target}`;
+  if(!scTranslator||scTranslatorPair!==pair){
+    if(scTranslator?.destroy)scTranslator.destroy();
+    scTranslator=null;scTranslatorPair='';
+    const availability=await Api.availability({sourceLanguage:source,targetLanguage:target});
+    if(availability==='unavailable')throw Error('unsupported');
+    scTranslator=await Api.create({sourceLanguage:source,targetLanguage:target});
+    scTranslatorPair=pair;
+  }
+  return await scTranslator.translate(text);
+}
+async function translateSC(item){
+  const key=`${language}:${item.id}`;
+  const state=scTranslations.get(key);
+  if(state?.status==='done'){state.visible=!state.visible;historyDirty=true;renderHistory();return;}
+  if(state?.status==='loading')return;
+  scTranslations.set(key,{status:'loading',visible:true});
+  historyDirty=true;renderHistory();
+  try{const text=await translateText(item.message,targetLanguage());if(!text)throw Error('same');scTranslations.set(key,{status:'done',text,visible:true});}
+  catch(error){scTranslations.set(key,{status:'error',code:error.message==='unsupported'?'unsupported':'failed',visible:true});}
+  historyDirty=true;renderHistory();
+}
+function historyItemNode(item){
+  const li=document.createElement('li');li.className='history-item history-'+item.kind;
+  const row=document.createElement('div');row.className='history-item-row';
+  const badge=document.createElement('span');badge.className='history-badge';
+  const detail=document.createElement('span');detail.className='history-detail';
+  const battery=document.createElement('span');battery.className='history-battery';battery.textContent=historyItemBattery(item);
+  if(item.kind==='guard'){
+    li.dataset.level=String(item.level);badge.textContent=t(language,'guard'+item.level);detail.textContent=historyGuardDetail(item);
+  }else if(item.kind==='sc'){
+    badge.textContent=t(language,'historyScBadge');detail.textContent=t(language,'historyScLabel');
+  }else{
+    badge.textContent=t(language,'historyGiftBadge');detail.textContent=t(language,'historyGiftDetail',{name:giftDisplayName(item.name||t(language,'historyUnknownGift'),language,cfg.giftTranslation!==false),count:new Intl.NumberFormat(language).format(item.count??0)});
+  }
+  row.append(badge,detail,battery);li.append(row);
+  if(item.kind==='sc'){
+    const message=document.createElement('p');message.className='history-sc-message';message.textContent=item.message||t(language,'historyScEmpty');li.append(message);
+    const target=targetLanguage(),source=detectLanguage(item.message);
+    if(source&&source!==target){
+      const key=`${language}:${item.id}`,state=scTranslations.get(key);
+      const actions=document.createElement('div');actions.className='history-sc-actions';
+      const button=document.createElement('button');button.type='button';button.className='history-translate';
+      const label=state?.status==='loading'?'historyTranslating':state?.status==='error'?'historyTranslateRetry':state?.status==='done'&&state.visible?'historyTranslateHide':'historyTranslate';
+      button.textContent=t(language,label);button.disabled=state?.status==='loading';
+      button.onclick=()=>translateSC(item);actions.append(button);li.append(actions);
+      if(state?.status==='done'&&state.visible){const translated=document.createElement('p');translated.className='history-sc-translation';translated.textContent=t(language,'historyScTranslation',{text:state.text});li.append(translated);}
+      else if(state?.status==='error'){const failed=document.createElement('p');failed.className='history-sc-translation history-sc-translation-error';failed.textContent=t(language,state.code==='unsupported'?'historyTranslateUnsupported':'historyTranslateFailed');li.append(failed);}
+    }
+  }
+  return li;
+}
+function historyViewerNode(viewer){
+  const li=document.createElement('li');li.className='history-viewer';
+  const head=document.createElement('div');head.className='history-viewer-head';
+  const person=document.createElement('div');person.className='history-viewer-person';
+  const name=document.createElement('strong');name.className='history-viewer-name';name.textContent=viewer.user||t(language,'historyUnknownUser');
+  const avatar=document.createElement('img'),fallback=document.createElement('span');
+  avatar.className='history-viewer-avatar';avatar.alt=t(language,'historyAvatar');fallback.className='history-viewer-avatar history-viewer-avatar-fallback';fallback.textContent=Array.from(name.textContent)[0]??'✦';
+  const url=viewer.avatar?.startsWith('/cache/')?viewer.avatar:null;
+  avatar.hidden=!url;fallback.hidden=!!url;if(url)avatar.src=url;avatar.onerror=()=>{avatar.hidden=true;fallback.hidden=false;};
+  person.append(avatar,fallback,name);
+  const total=document.createElement('span');total.className='history-viewer-total';total.textContent=t(language,viewer.unknownBattery?'historyViewerTotalPartial':'historyViewerTotal',{battery:amountText(viewer.totalBattery??0)});
+  head.append(person,total);
+  const items=document.createElement('ul');items.className='history-items';items.append(...(viewer.items??[]).map(historyItemNode));
+  li.append(head,items);return li;
+}
+function scheduleHistoryRender(){historyDirty=true;if(historyRenderTimer)return;historyRenderTimer=setTimeout(()=>{historyRenderTimer=null;renderHistory();},150);}
+function renderHistory(){
+  if(!historyDirty&&historyLanguage===language)return;
+  historyDirty=false;historyLanguage=language;
+  const snapshot=historyLedger.snapshot(),viewers=snapshot.viewers;
+  const total=Number(snapshot.battery)||0,one=viewers.length===1;
+  const summaryKey=snapshot.unknownBattery?(one?'historySummaryPartialOne':'historySummaryPartial'):(one?'historySummaryOne':'historySummary');
+  historySummaryText.textContent=t(language,summaryKey,{viewers:new Intl.NumberFormat(language).format(viewers.length),battery:amountText(total)});
+  updateRateHint();
+  historyEmpty.hidden=viewers.length>0;historyList.hidden=viewers.length===0;
+  historyList.replaceChildren(...viewers.map(historyViewerNode));
+}
 const statsLine=document.createElement('p'),safetyHint=document.createElement('p');safetyHint.dataset.t='safetyHint';settingGroups.gift.append(safetyHint);document.querySelector('.preview').after(statsLine);
 let stats={count:0,coverage:0,pending:0};
 function renderStats(){statsLine.textContent=t(language,'crowdStats',{count:new Intl.NumberFormat(language).format(stats.count),coverage:new Intl.NumberFormat(language,{maximumFractionDigits:1}).format(stats.coverage),pending:new Intl.NumberFormat(language).format(stats.pending)});}

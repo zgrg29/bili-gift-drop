@@ -7,7 +7,9 @@ export function normalizeGuard(msg,now=Date.now()) {
   const count=Number(p.num);if(!Number.isSafeInteger(count)||count<1)return null;
   const stamp=Number(g.start_time??d.timestamp);if(!Number.isFinite(stamp)||stamp<=0||Math.abs(now-stamp*1000)>120000)return null;
   const uid=String(u?.uid??d.uid??'');if(!uid)return null;
-  return {id:String(d.payflow_id??d.msg_id??`${uid}:${g.guard_level}:${stamp}:${count}`),key:`${uid}:${g.guard_level}:${stamp}:${count}`,uid,user:String(u?.base?.name??d.username??''),avatar:u?.base?.face??d.face??null,level:g.guard_level,count,unit:typeof p.unit==='string'?p.unit:null,stamp};
+  const rawPrice=Number(p.price??d.price);
+  const price=Number.isFinite(rawPrice)&&rawPrice>=0?rawPrice:null;
+  return {id:String(d.payflow_id??d.msg_id??`${uid}:${g.guard_level}:${stamp}:${count}`),key:`${uid}:${g.guard_level}:${stamp}:${count}`,uid,user:String(u?.base?.name??d.username??''),avatar:u?.base?.face??d.face??null,level:g.guard_level,count,unit:typeof p.unit==='string'?p.unit:null,price,stamp};
 }
 
 export class GuardQueue {

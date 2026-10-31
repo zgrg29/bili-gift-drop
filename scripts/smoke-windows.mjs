@@ -28,11 +28,16 @@ async function start(){
   }throw Error('Startup timeout: '+output);
 }
 async function stop(){if(child&&child.exitCode===null&&child.signalCode===null){const exited=once(child,'exit');child.kill();await exited;}}
-async function initial(){const r=await fetch(base+'/api/events');const reader=r.body.getReader();let text='';const decoder=new TextDecoder();while(!text.includes('\n\n')){const chunk=await reader.read();if(chunk.done)throw Error('SSE ended');text+=decoder.decode(chunk.value,{stream:true});}await reader.cancel();return JSON.parse(text.split('\n')[0].slice(6)).data;}
+async function initial(query=''){const r=await fetch(base+'/api/events'+query);const reader=r.body.getReader();let text='';const decoder=new TextDecoder();while(!text.includes('\n\n')){const chunk=await reader.read();if(chunk.done)throw Error('SSE ended');text+=decoder.decode(chunk.value,{stream:true});}await reader.cancel();return JSON.parse(text.split('\n')[0].slice(6)).data;}
 try{
   await start();
-  assert.equal((await initial()).config.guardEnabled,true);
-  assert.equal((await initial()).config.scEnabled,true,'fresh installation enables SC by default');
+  const boot=await initial('?history=1');
+  assert.equal(boot.config.guardEnabled,true);
+  assert.equal(boot.config.scEnabled,true,'fresh installation enables SC by default');
+  assert.equal(boot.config.historyCurrency,'battery','battery is the default history amount');
+  assert.equal(boot.login?.loggedIn,false,'fresh install is anonymous');
+  assert.equal(boot.history.viewerCount,0,'fresh history starts empty');
+  assert.equal((await initial()).history,undefined,'overlay clients do not receive the history snapshot');
   const duplicate=spawn(path.resolve('dist/BiliGiftDrop-windows-x64.exe'),['--no-open'],{env,windowsHide:true,stdio:['ignore','pipe','pipe']});
   let duplicateOutput='';duplicate.stdout.setEncoding('utf8');duplicate.stdout.on('data',b=>duplicateOutput+=b);duplicate.stderr.setEncoding('utf8');duplicate.stderr.on('data',b=>duplicateOutput+=b);
   assert.equal((await once(duplicate,'exit'))[0],0,duplicateOutput);
@@ -54,10 +59,11 @@ try{
   assert.equal(effect({coinType:'gold',unitCoin:1000,totalCoin:1000,count:1},sizeConfig).size,64,'size follows unit price');
   assert.equal(effect({coinType:'gold',unitCoin:1000,totalCoin:100000,count:100},sizeConfig).size,64,'quantity does not change size');
   await stop();await start();
-  const state=await initial();assert.equal(state.config.guardAsset3,guardMedia);assert.equal(state.config.guardWidth,100);assert.equal(state.config.guardX,85);assert.equal(state.config.guardY,89.5);assert.equal(state.config.guardOpacity,50);assert.equal(state.config.scOpacity,60);assert.equal(state.config.giftOpacity,70);assert.equal((await fetch(base+guardMedia)).status,200);assert.equal(state.guard.current,null);assert.equal(state.config.language,'en');assert.equal(state.config.lifetime,45);
+  const state=await initial();assert.equal(state.config.guardAsset3,guardMedia);assert.equal(state.config.guardWidth,100);assert.equal(state.config.guardX,85);assert.equal(state.config.guardY,89.5);assert.equal(state.config.guardOpacity,50);assert.equal(state.config.scOpacity,60);assert.equal(state.config.giftOpacity,70);assert.equal((await fetch(base+guardMedia)).status,200);assert.equal(state.guard.current,null);assert.equal(state.config.language,'en');assert.equal(state.config.lifetime,45);assert.equal(state.config.historyCurrency,'jpy','history currency survives restart');
   for(const [key,value] of Object.entries({minGiftScale:75,maxGiftScale:200,maxGiftScaleAmount:25,maxCoverage:10,spawnRate:8,regionY:70,regionHeight:30,scEnabled:true,scX:12.5,scY:9,scWidth:35,scCollapse:15,scHeight:60,scScrollSpeed:35}))assert.equal(state.config[key],value);
-  for(const file of ['/src/shared/sc-scroll.mjs','/src/shared/superchat.mjs','/src/overlay/superchat.mjs','/src/shared/rules.mjs','/src/shared/i18n/zh-CN.mjs','/src/shared/i18n/ja.mjs','/src/shared/i18n/en.mjs','/src/shared/crowd.mjs','/src/overlay/overlay.mjs','/src/control/control.mjs']){
+  for(const file of ['/src/shared/sc-scroll.mjs','/src/shared/superchat.mjs','/src/overlay/superchat.mjs','/src/shared/rules.mjs','/src/shared/history.mjs','/src/shared/gift-names.mjs','/src/shared/i18n/zh-CN.mjs','/src/shared/i18n/ja.mjs','/src/shared/i18n/en.mjs','/src/shared/crowd.mjs','/src/overlay/overlay.mjs','/src/control/control.mjs','/src/control/vendor/qrcode.js']){
     const response=await fetch(base+file);assert.equal(response.status,200);
+    if(file.endsWith('.js'))assert.match(response.headers.get('content-type')??'',/javascript/,'qrcode.js is served as JavaScript');
     assert.equal(await response.text(),await readFile('.'+file,'utf8'),'embedded source matches current working tree');
   }
   const manifest=JSON.parse(await readFile('build/manifest.json','utf8'));

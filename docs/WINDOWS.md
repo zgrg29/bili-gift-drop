@@ -1,10 +1,52 @@
-# Windows v0.6.8 Preview / 日本語 / English
+# Windows v0.6.15 Preview / 日本語 / English
 
-当前包：BiliGiftDrop-v0.6.8-windows-x64.zip。支持礼物、SC和默认开启的大航海；单一预览编辑三个区域，各自透明度默认100%。大航海按素材比例显示，观众信息在下方，宽度设置最高100%，高素材缩小以适应画面。自定义大航海素材可正常替换默认像素舰船，三个等级按同一条中轴线对齐，每人播放时长可设置，位置与大小可一键恢复默认。礼物上限全部由设置决定，礼物尺寸只按单个礼物的单价；礼物和醒目留言都提供恢复默认按钮。以下按版本排列的说明保留功能演进，最终行为以v0.6.8为准。
+当前包：BiliGiftDrop-v0.6.15-windows-x64.zip。支持礼物、SC和默认开启的大航海；单一预览编辑三个区域，各自透明度默认100%。大航海按素材比例显示，观众信息在下方，宽度设置最高100%，高素材缩小以适应画面。自定义大航海素材可正常替换默认像素舰船，三个等级按同一条中轴线对齐，每人播放时长可设置，位置与大小可一键恢复默认。礼物上限全部由设置决定，礼物尺寸只按单个礼物的单价；礼物和醒目留言都提供恢复默认按钮。控制台最下方新增可折叠的本场直播礼物历史，按观众汇总并显示电池；历史观众显示头像和昵称，匿名连接的星号礼物昵称在事件有 UID 时用公开资料补全；没有 UID 时用事件头像兜底，昵称保留平台星号。控制台左侧新增 B 站登录（扫码/手动 Cookie），登录后使用账号 Cookie/UID 连接；匿名连接可能隐藏礼物观众昵称/UID，完整昵称通常需要登录。以下按版本排列的说明保留功能演进，最终行为以v0.6.15为准。
 
-現行パッケージはBiliGiftDrop-v0.6.8-windows-x64.zip。ギフト・SC・大航海を単一プレビューで編集し、各不透明度の初期値は100%。大航海は素材比率を維持して情報を下に表示、要求幅は最大100%、画面高さに合わせて縮小。カスタム素材は既定のピクセル艦船を置き換えて表示し、3 ランクは同じ中心軸で揃います。1 人あたりの再生時間を設定でき、位置とサイズは初期値に戻せます。ギフトの上限は設定値に従い、サイズは 1 個あたりの単価だけで決まり、ギフトとスーパーチャットの設定に初期化ボタンがあります。以下の版別説明は履歴、最終動作はv0.6.8です。
+現行パッケージはBiliGiftDrop-v0.6.15-windows-x64.zip。ギフト・SC・大航海を単一プレビューで編集し、各不透明度の初期値は100%。大航海は素材比率を維持して情報を下に表示、要求幅は最大100%、画面高さに合わせて縮小。カスタム素材は既定のピクセル艦船を置き換えて表示し、3 ランクは同じ中心軸で揃います。1 人あたりの再生時間を設定でき、位置とサイズは初期値に戻せます。ギフトの上限は設定値に従い、サイズは 1 個あたりの単価だけで決まり、ギフトとスーパーチャットの設定に初期化ボタンがあります。コンソール最下部に折りたたみ式の配信ギフト履歴を追加し、視聴者ごとに集計してバッテリーを表示。履歴にはアバターと名前を表示し、匿名接続の星号名は UID がある場合に公開情報で補完、UID がない場合はイベント画像でアバターのみ補完します。コンソール左側に B 站ログイン（QR/Cookie）を追加し、ログイン後はアカウントの Cookie/UID で接続します。匿名接続では名前/UID が隠れる場合があり、完全な名前には通常ログインが必要です。以下の版別説明は履歴、最終動作はv0.6.15です。
 
-Current package: BiliGiftDrop-v0.6.8-windows-x64.zip. One preview edits gifts, SC and enabled-by-default subscriptions; opacity defaults to100% per layer. Subscription proportions follow media with viewer details below, up to100% requested width and scaling down to fit canvas height. Custom subscription media replaces the default pixel ship, all three tiers share one center axis, play time per viewer is configurable, and position/size can be restored to defaults. Gift caps follow your settings, gift size depends only on the unit price, and both gift and Super Chat settings include restore-defaults buttons. Versioned sections below retain history; v0.6.8 describes final behavior.
+Current package: BiliGiftDrop-v0.6.15-windows-x64.zip. One preview edits gifts, SC and enabled-by-default subscriptions; opacity defaults to100% per layer. Subscription proportions follow media with viewer details below, up to100% requested width and scaling down to fit canvas height. Custom subscription media replaces the default pixel ship, all three tiers share one center axis, play time per viewer is configurable, and position/size can be restored to defaults. Gift caps follow your settings, gift size depends only on the unit price, and both gift and Super Chat settings include restore-defaults buttons. A collapsible this-stream gift history at the bottom of the control panel groups support by viewer and shows batteries; it shows viewer avatars and names, resolving masked anonymous gift names through public UID lookup when a UID exists and falling back to the event face when the UID is empty. A Bilibili login (QR/manual cookies) is available on the left; after login the app connects with the account's cookies/UID. Anonymous connections may hide gift-viewer names/UIDs; full nicknames usually require login. Versioned sections below retain history; v0.6.15 describes final behavior.
+
+v0.6.15 登录二维码修复：本地静态服务现在为 `.js` 返回 JavaScript Content-Type，二维码库可正常执行，登录面板显示二维码。兜底不再显示可点击链接，只显示可选文本，避免误跳 B 站外部登录页或下载第三方播放器；界面提示用手机客户端扫码。登录/Cookie/历史/翻译逻辑不变。用户实测扫码登录成功（2026-10-31）；登录后完整礼物昵称是否解除遮罩待确认。
+
+v0.6.15 ログイン QR 修正：静的配信が `.js` に JavaScript Content-Type を返すようになり、QR ライブラリが実行されログイン画面に QR が表示されます。フォールバックはクリック可能なリンクをやめ、選択可能なテキストのみにして、外部ログインページや第三者プレイヤーのダウンロードへの誤遷移を防ぎます。スマホアプリでのスキャンを案内します。ログイン/Cookie/履歴/翻訳は変更ありません。ユーザーが QR ログイン成功を実測（2026-10-31）。ログイン後の完全なギフト名の伏せ解除は確認待ちです。
+
+v0.6.15 login QR fix: the static server now returns a JavaScript Content-Type for `.js`, so the QR library executes and the login panel shows a QR code. The fallback is selectable text instead of a clickable link, preventing accidental navigation to Bilibili's external login page or third-party player downloads; the UI tells users to scan with the mobile app. Login/cookie/history/translation logic is unchanged. The user confirmed a successful QR login on 2026-10-31; whether gift-name masks are fully removed after login is pending confirmation.
+
+v0.6.14 B 站登录：控制台左侧可手机扫码或手动粘贴 Cookie。界面提示匿名连接可能隐藏礼物观众昵称/UID，完整昵称通常需要登录。登录后使用账号 Cookie/UID 连接；凭据默认只在内存，勾选「记住登录」才写入本机数据目录；不写日志、不出现在状态 API/OBS/截图，也不发往 Bilibili 以外服务。登录成功自动重连，退出登录回匿名。二维码使用 MIT 许可的 qrcode-generator，许可随 ZIP 提供。
+
+v0.6.14 B 站ログイン：コンソール左側でスマホ QR または Cookie 貼り付け。匿名接続では名前/UID が隠れる場合があり、完全な名前には通常ログインが必要と明示。ログイン後はアカウントの Cookie/UID で接続。情報は初期設定でメモリのみ、『ログインを記憶』でローカル保存。ログ、状態 API、OBS、スクリーンショットには出さず、Bilibili 以外へ送りません。成功時は自動再接続、ログアウトで匿名。QR は MIT ライセンスの qrcode-generator を使用し、ライセンスを ZIP に同梱。
+
+v0.6.14 Bilibili login: the left panel supports mobile QR or manual cookie input. The UI warns that anonymous connections may hide gift-viewer names/UIDs and that full nicknames usually require login. After login the app connects with the account's cookies/UID. Credentials are memory-only by default; "Remember login" writes them to the local data directory. They never appear in logs, status APIs, OBS or screenshots, and are not sent anywhere except Bilibili. A successful login reconnects automatically; logout returns to anonymous. QR generation uses the MIT-licensed qrcode-generator, whose license is included in the ZIP.
+
+v0.6.13 空 UID 礼物头像兜底：部分匿名礼物事件的 UID 为空、昵称被平台遮罩，但 `face` 头像仍在。历史现在即使没有 UID 也会缓存事件头像并更新对应观众，头像可正常显示；昵称仍保留平台 `欠***` 遮罩，因为事件没有 UID，公开资料无法补全。完整昵称需要登录/Cookie 或其他授权来源；v0.6.13 当时仍不使用 Cookie，v0.6.14 起支持登录。
+
+v0.6.13 空 UID ギフトのアバター補完：匿名ギフトイベントの一部は UID が空で名前が伏せられますが、`face` アバターは残っています。UID がなくてもイベント画像を保存して該当視聴者に反映し、アバターを表示します。UID がないため公開情報で名前は補完できず、`欠***` の伏せ名は残ります。完全な名前にはログイン/Cookie など許可済みの情報源が必要です。v0.6.13 時点では Cookie を使いませんでしたが、v0.6.14 でログインを追加しました。
+
+v0.6.13 empty-UID gift avatar fallback: some anonymous gift events have an empty UID and a masked name, but still carry a `face` avatar. History now caches that face and updates the viewer even without a UID, so the avatar appears. The nickname remains the platform mask such as `欠***` because the event has no UID and public lookup cannot recover it. A full nickname needs login/cookies or another authorized source; v0.6.13 still used no cookies, and v0.6.14 adds a login option.
+
+v0.6.12 礼物翻译与 SC 翻译按钮：历史礼物名称默认用内置词典翻译；中文原名保留，日语界面显示日语译名和片假名读音，英语界面只显示英文译名、不做英文发音。未知礼物保持原名，历史工具栏可关闭翻译。每条 SC 旁有「翻译」按钮，点击后才用 Chrome 内置 Translator API 翻成当前界面语言，原文保留并附译文；不自动翻译 SC，不使用 Cookie 或外部翻译 API。译文只在控制台历史显示，OBS 内置浏览器通常不支持。
+
+v0.6.12 ギフト翻訳と SC 翻訳ボタン：履歴のギフト名は内蔵辞書で初期設定のまま翻訳。中国語の原名を残し、日本語 UI は日本語訳と片仮名の読み、英語 UI は英語訳のみ（英語の読みなし）。未知ギフトは原名のまま、履歴ツールバーでオフ可。各 SC の「翻訳」ボタンを押した時だけ Chrome 内蔵 Translator API で現在の UI 言語へ翻訳し、原文を残して訳文を表示。SC の自動翻訳はせず、Cookie も外部翻訳 API も使いません。訳文はコンソール履歴のみで、OBS 内蔵ブラウザは通常非対応です。
+
+v0.6.12 gift translation and SC button: history gift names use the built-in glossary by default. The Chinese original stays; Japanese UI shows a Japanese translation and katakana reading, English UI shows English only (no English pronunciation). Unknown gifts keep their original name, and the history toolbar can disable translation. Each SC has a "Translate" button; only a click uses Chrome's built-in Translator API to translate into the current UI language, keeping the original and appending the translation. SC is never translated automatically; no cookies or external translation API. Translations are console-history only; OBS's embedded browser usually does not support the API.
+
+v0.6.11 历史只保留有电池的礼物：免费/0 电池礼物不进入本场直播礼物历史，只送免费礼物的观众不会出现，免费礼物也不会占一行「0 电池」。控制台「最近礼物」和 OBS 掉落仍按原设置显示免费礼物；模拟事件仍不计入。
+
+v0.6.11 履歴はバッテリーのあるギフトのみ：無料/0 バッテリーのギフトは履歴に入らず、無料ギフトだけ送った視聴者も表示されません。0 バッテリーの行も出ません。コンソールの「最近のギフト」と OBS の落下は従来どおり無料ギフトを表示し、テスト送信は履歴に含みません。
+
+v0.6.11 history keeps only gifts with batteries: free/0-battery gifts stay out of the stream gift history, viewers who sent only free gifts do not appear, and free gifts do not take a "0 batteries" row. The console's "Recent gifts" and OBS drops still show free gifts per their settings; simulations remain excluded.
+
+v0.6.10 头像与昵称：历史观众显示圆形头像和昵称。匿名连接的礼物昵称被平台遮罩为「首字***」时，用礼物事件 UID 查询公开用户资料补全昵称和头像；SC/大航海头像也同步到历史。不需要 Cookie 或登录。查询失败保留星号昵称，并用昵称首字占位头像；查询有缓存、并发限制和失败退避。
+
+v0.6.10 アバターと名前：履歴に丸いアバターと名前を表示。匿名接続でギフト名が「先頭文字***」に伏せられた場合、ギフトイベントの UID で公開プロフィールを照会して名前とアバターを補完。SC・大航海のアバターも履歴へ反映。Cookie・ログイン不要。失敗時は星号名と先頭文字の代替アバターを表示。キャッシュ・同時実行制限・バックオフあり。
+
+v0.6.10 avatars and names: history shows a round avatar and name. When an anonymous connection masks a gift name as "first character***", the gift UID resolves the public profile nickname and avatar; SC/subscription avatars are also applied. No cookies or login. Failures keep the masked name and use the initial as an avatar placeholder, with caching, concurrency limits and backoff.
+
+v0.6.9 历史：控制台最下方可折叠的「本场直播礼物历史」按观众汇总礼物、SC 和大航海。相同礼物累加数量，同一等级大航海累加次数和月份，不同礼物/等级分开；SC 留言全文始终展开。每位观众和每条记录显示电池；默认只显示电池，「金额显示」可切换人民币/日元，日元使用每日在线汇率并显示日期，失败时回退电池。只记录真实事件，模拟不计入；清空画面不清空历史，可单独清空。历史只在本次运行内保存，SC 留言不写盘。
+
+v0.6.9 履歴：コンソール最下部の折りたたみ式「この配信のギフト履歴」は、視聴者ごとにギフト・SC・大航海をまとめます。同じギフトは数量、同ランクの大航海は回数と月数を合算し、異なるギフト・ランクは分離。SC コメントは常に全文表示。視聴者ごとの合計と各記録のバッテリーを表示し、初期値はバッテリーのみ。「金額表示」で人民元/日本円を切り替え、日本円は毎日のオンラインレートと日付を表示、失敗時はバッテリーに戻します。実際のイベントのみ記録し、テストは含まず、画面クリアでは履歴を消さず専用ボタンで消去。履歴は今回の起動中のみ保持し、SC コメントは保存しません。
+
+v0.6.9 history: the collapsible "This stream's gift history" at the bottom groups gifts, SC and subscriptions by viewer. The same gift adds quantity; the same tier adds purchases and months; different gifts/tiers stay separate. SC messages always show in full. Each viewer and every record shows batteries; the default is batteries only, with CNY/JPY switching. JPY uses a daily online rate with the date shown and falls back to batteries on failure. Real events only; simulations are excluded. Clearing the screen does not clear history, which has its own clear button. History lasts only for this run and SC messages are not written to disk.
 
 v0.6.8 头像：SC 昵称左侧显示圆形头像；SC 和大航海优先使用事件头像，缺失或下载失败时按 UID 查询公开资料，再下载到本地。无需登录或付费触发测试；平台查询失败时显示昵称首字，模拟事件用本地示例头像。下载异步完成，不改变 SC 到期/折叠状态或大航海播放时间。公开接口可能受网络或平台限制，不保证每次获取成功。
 
@@ -14,7 +56,7 @@ v0.6.8 avatars: SC shows a round avatar before the sender name. SC and subscript
 
 当前礼物待生成队列无固定容量或超时丢弃，停刷后仍可能继续播放积压礼物。 / 現在のギフト生成待ちに固定容量や期限はなく、受信停止後も残りを再生する場合があります。 / Pending gifts have no fixed queue capacity or expiry and may continue playing after incoming gifts stop.
 
-验收：37项自动测试和本机EXE回归，浏览器移动/缩放、竖版GIF、替换素材实际显示、放开后的上限保存、三个上舰模拟按钮、礼物/大航海/醒目留言恢复默认、不同比例素材共用中轴及播放时长生效检查已有证据。真实上舰、付费SC、OBS、全部视频编码、长期和全新Windows仍待验收。 / 検証：自動37件・EXE回帰、ブラウザ操作・縦長GIF・カスタム素材表示・上限値の保存・3つの大航海テストボタン・各設定の初期化・比率の異なる素材の中心軸一致・再生時間の反映を確認。実際の上艦・SC・OBS・全コーデック・長時間・新規Windowsは未検証。 / Validation includes37 automated tests, local EXE regression, browser interaction, portrait GIF, replaced media display, saved uncapped values, all three subscription test buttons, gift/Great Voyage/Super Chat resets, one shared center axis across media ratios and the configured play time. Real subscriptions, paid SC, OBS, all codecs, long-running streams and clean Windows installations remain unverified.
+验收：55项自动测试和本机EXE回归，浏览器移动/缩放、竖版GIF、替换素材实际显示、放开后的上限保存、三个上舰模拟按钮、礼物/大航海/醒目留言恢复默认、不同比例素材共用中轴、播放时长生效、390px三语历史面板、历史头像布局、礼物翻译/SC 翻译按钮、登录面板/二维码和日元显示已有证据；公开 UID 昵称与真实头像下载实测成功；用户实测扫码登录成功（2026-10-31）。真实上舰、付费SC、OBS、全部视频编码、长期和全新Windows仍待验收。 / 検証：自動55件・EXE回帰、ブラウザ操作・縦長GIF・カスタム素材表示・上限値の保存・3つの大航海テストボタン・各設定の初期化・比率の異なる素材の中心軸一致・再生時間の反映・390pxの3言語履歴パネル・履歴アバター配置・ギフト/SC 翻訳・ログイン画面/QR・日本円表示を確認。公開 UID の名前と実画像取得、ユーザーによる QR ログイン成功（2026-10-31）を実測。実際の上艦・SC・OBS・全コーデック・長時間・新規Windowsは未検証。 / Validation includes 55 automated tests, local EXE regression, browser interaction, portrait GIF, replaced media display, saved uncapped values, all three subscription test buttons, gift/Great Voyage/Super Chat resets, one shared center axis across media ratios, the configured play time, the 390px three-language history panel, history avatar layout, gift/SC translation, login panel/QR and JPY display; public UID nickname and real avatar download were verified, and the user confirmed a successful QR login on 2026-10-31. Real subscriptions, paid SC, OBS, all codecs, long-running streams and clean Windows installations remain unverified.
 
 
 命令行提示始终同时显示中文、日语和英语；不受控制面板语言设置影响。

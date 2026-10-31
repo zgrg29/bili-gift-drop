@@ -7,9 +7,10 @@ export function sign(params,img,sub,time=Math.floor(Date.now()/1000)){
   return query+'&w_rid='+createHash('md5').update(query+key).digest('hex');
 }
 let device='',keys=null;
-export async function credentials(){
-  const get=async url=>{const r=await fetch(url,{headers:{'User-Agent':'Mozilla/5.0','Referer':'https://www.bilibili.com/'},signal:AbortSignal.timeout(10000)});if(!r.ok)throw Error('platform');return r.json();};
+export async function credentials(cookie=''){
+  const cookieDevice=/(?:^|;\s*)buvid3=([^;]+)/.exec(String(cookie??''))?.[1];
+  const get=async url=>{const r=await fetch(url,{headers:{'User-Agent':'Mozilla/5.0','Referer':'https://www.bilibili.com/',...(cookie?{Cookie:cookie}:{})},signal:AbortSignal.timeout(10000)});if(!r.ok)throw Error('platform');return r.json();};
   if(!device){const d=await get('https://api.bilibili.com/x/frontend/finger/spi');device=d.data?.b_3??'';}
   if(!keys||Date.now()-keys.time>1800000){const d=await get('https://api.bilibili.com/x/web-interface/nav');const images=d.data?.wbi_img;const extract=url=>new URL(url).pathname.split('/').pop().split('.')[0];keys={img:extract(images.img_url),sub:extract(images.sub_url),time:Date.now()};}
-  return {device,...keys};
+  return {device:cookieDevice||device,...keys};
 }

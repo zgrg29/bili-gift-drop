@@ -1,7 +1,9 @@
-export const defaults = {language:'zh-CN',guardEnabled:true,guardX:20,guardY:29,guardWidth:60,guardDuration:8,guardAnchor:'left',giftOpacity:100,scOpacity:100,guardOpacity:100,scEnabled:true,scX:5,scY:5,scWidth:30,scCollapse:15,scHeight:100,scScrollSpeed:20,room:'',gravity:900,bounce:0.35,lifetime:30,maxObjects:120,includeFree:true,minGiftPrice:0,minGiftScale:50,maxGiftScale:150,maxGiftScaleAmount:100,maxCoverage:15,spawnRate:12,regionX:0,regionY:0,regionWidth:100,regionHeight:100};
+export const defaults = {language:'zh-CN',historyCurrency:'battery',giftTranslation:true,guardEnabled:true,guardX:20,guardY:29,guardWidth:60,guardDuration:8,guardAnchor:'left',giftOpacity:100,scOpacity:100,guardOpacity:100,scEnabled:true,scX:5,scY:5,scWidth:30,scCollapse:15,scHeight:100,scScrollSpeed:20,room:'',gravity:900,bounce:0.35,lifetime:30,maxObjects:120,includeFree:true,minGiftPrice:0,minGiftScale:50,maxGiftScale:150,maxGiftScaleAmount:100,maxCoverage:15,spawnRate:12,regionX:0,regionY:0,regionWidth:100,regionHeight:100};
 export function config(input, previous=defaults) {
   const out={...previous};
   if (['zh-CN','ja','en'].includes(input.language)) out.language=input.language;
+  if (['battery','cny','jpy'].includes(input.historyCurrency)) out.historyCurrency=input.historyCurrency;
+  if(typeof input.giftTranslation==='boolean')out.giftTranslation=input.giftTranslation;
   if (typeof input.room==='string' && /^\d{0,12}$/.test(input.room)) out.room=input.room;
   // Gift caps stay user-controlled: min/max size, object count, area and spawn rate have no upper bound.
   for (const [k,min,max] of [['giftOpacity',0,100],['scOpacity',0,100],['guardOpacity',0,100],['guardX',0,100],['guardY',0,89.5],['guardWidth',15,100],['guardDuration',1,null],['scHeight',10,100],['scScrollSpeed',0,120],['scX',0,80],['scY',0,90],['scWidth',20,80],['scCollapse',0,300],['minGiftScale',10,null],['maxGiftScale',10,null],['maxGiftScaleAmount',.001,100000],['gravity',100,2400],['bounce',0,0.85],['lifetime',5,120],['maxObjects',10,null],['maxCoverage',1,null],['spawnRate',1,null],['regionX',0,90],['regionY',0,90],['regionWidth',10,100],['regionHeight',10,100]]) {
@@ -29,7 +31,7 @@ export function normalizeGift(message) {
   const price=Number(d.price),total=Number(d.total_coin ?? price*d.num);
   if (![price,total].every(x=>Number.isSafeInteger(x)&&x>=0)) return null;
   return {id:d.tid ? String(d.tid) : `${d.uid}:${d.giftId}:${d.timestamp}:${d.rnd}:${d.num}:${total}`,
-    giftId:d.giftId,name:String(d.giftName??d.giftId),user:String(d.uname??''),count:d.num,
+    giftId:d.giftId,uid:String(d.uid??''),name:String(d.giftName??d.giftId),user:String(d.uname??''),face:d.face??null,count:d.num,
     coinType:d.coin_type==='gold'?'gold':'silver',unitCoin:price,totalCoin:total,
     image:d.gift_info?.img_basic??null,
     blindBox:d.blind_gift ? {paidCoin:d.blind_gift.original_gift_price,valueCoin:total}:null};

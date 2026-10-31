@@ -17,6 +17,6 @@ export function expandGiftV2(message){
   const encoded=message.data?.pb;if(typeof encoded!=='string'||encoded.length>1024*1024)throw Error('protocol');
   const root=fields(Buffer.from(encoded,'base64')),blind=root.get(9)?.[0],blindFields=blind?fields(blind):null;
   return (root.get(10)??[]).map(raw=>{const f=fields(raw),info=f.get(35)?.[0];return {cmd:'SEND_GIFT',data:{
-    uid:str(root,1),uname:str(root,2),giftId:num(f,1),giftName:str(f,2),num:num(f,3),price:num(f,5),total_coin:num(f,7),coin_type:str(f,8),tid:str(f,9),timestamp:num(f,10),rnd:str(f,12),gift_info:{img_basic:info?str(fields(info),1):''},blind_gift:blindFields?{original_gift_price:num(blindFields,6)}:null
+    uid:str(root,1),uname:str(root,2),face:str(root,3),giftId:num(f,1),giftName:str(f,2),num:num(f,3),price:num(f,5),total_coin:num(f,7),coin_type:str(f,8),tid:str(f,9),timestamp:num(f,10),rnd:str(f,12),gift_info:{img_basic:info?str(fields(info),1):''},blind_gift:blindFields?{original_gift_price:num(blindFields,6)}:null
   }};});
 }
