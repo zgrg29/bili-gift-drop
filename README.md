@@ -8,12 +8,18 @@ A local, transparent OBS overlay for Bilibili gifts, Super Chat and Great Voyage
 
 ## 当前版本 / 現行版 / Current version
 
-**v0.6.15 Preview** · Windows x64 · [Release notes](docs/releases/v0.6.15.md) · [验收记录 / 検証 / Acceptance](docs/ACCEPTANCE.md)
+**v0.6.16 Preview** · Windows x64 · [Release notes](docs/releases/v0.6.16.md) · [验收记录 / 検証 / Acceptance](docs/ACCEPTANCE.md)
 
-- ZIP: `BiliGiftDrop-v0.6.15-windows-x64.zip`
-- Tag: `v0.6.15`
-- Title: **Bili Gift Drop v0.6.15 — 登录二维码显示修复（Preview）**
+- ZIP: `BiliGiftDrop-v0.6.16-windows-x64.zip`
+- Tag: `v0.6.16`
+- Title: **Bili Gift Drop v0.6.16 — SC 永久显示（Preview）**
 - 发布材料位于 `dist/RELEASE_TAG.txt`、`dist/RELEASE_TITLE.txt`、`dist/RELEASE_NOTES.md` 和 `dist/SHA256SUMS.txt`。 / リリース用ファイルは `dist/` 内。 / Release fields and checksums are prepared in `dist/`.
+
+v0.6.16：醒目留言新增「SC 永久显示」开关，默认关闭。开启后，当前及新收到的 SC 不再因平台有效期结束而消失，所有金额使用同一规则，不显示额外倒计时，仍只保留最新 100 条；第 101 条进入时移除最旧一条。关闭后，当前保留的 SC 从切换时刻起重新获得一次完整的平台显示时长，不因原有效期早已结束而清空，也不改变已有折叠状态。自动折叠、手动展开、滚动、透明度、语言、头像异步补齐和翻译状态仍相互独立。清空画面、切换直播间和重启继续按原逻辑清除 SC；不把留言写入磁盘。
+
+v0.6.16：スーパーチャット設定に「SCを常時表示」スイッチを追加しました。初期値はオフです。オンにすると、現在表示中および新しく受信した SC は B 站の有効期限が切れても消えず、金額にかかわらず同じルールで、追加のカウントダウンなしに最新 100 件のみ保持します。101 件目が届くと最も古い 1 件を削除します。オフに戻すと、その時点で保持している SC はプラットフォーム本来の表示時間を一度だけ再設定され、元の期限が過ぎていても一瞬で消えず、既存の折りたたみ状態も変わりません。自動折りたたみ、手動展開、スクロール、不透明度、言語、アバターの非同期補完、翻訳状態は独立したままです。画面クリア、ルーム変更、再起動では従来どおり SC を消去し、コメントをディスクへ保存しません。
+
+v0.6.16: Adds a "Keep Super Chats Visible" switch to the Super Chat settings, off by default. While on, current and newly received Super Chats no longer disappear when Bilibili's platform expiry ends. Every amount follows the same rule, no extra countdown is shown, and only the latest 100 are kept; the 101st arrival removes the oldest card. Turning it off gives every retained Super Chat one full platform display duration from the moment of switching, so cards do not vanish because their original expiry already passed, and their existing collapse state is unchanged. Auto-collapse, manual expand, scrolling, opacity, language, asynchronous avatar completion and translation state remain independent. Clearing the screen, changing rooms and restarting still clear Super Chats as before; messages are never written to disk.
 
 v0.6.15：修复登录面板只显示原始 URL、不显示二维码的问题。本地静态服务现在为 `.js` 返回 JavaScript Content-Type，二维码库可在浏览器执行；兜底不再显示可点击链接，只显示可选中的纯文本，避免误跳外部登录页或下载第三方播放器。界面提示用 B 站手机客户端扫码，不要点击外部页面或下载第三方播放器。登录逻辑、Cookie 保存、历史与翻译不变。
 
@@ -86,18 +92,18 @@ v0.6.8: SC shows a round avatar to the left of the sender name. Missing or faile
 - 一个预览，三个独立设置分区。绿色框为礼物掉落区域，拖动标签移动，右下角调整宽高；紫色框为SC，可移动和独立调整宽高；蓝色框为大航海，按素材比例缩放。保留百分比输入与方向键微调，拖动松开保存，数值停止输入约400毫秒后保存。
 - 礼物、SC、大航海各有0–100%透明度滑杆，默认100%。切换语言和修改透明度不清空效果、不重置SC到期或大航海队列。
 - 礼物按单个礼物的单价缩放，数量只影响图标个数；最小50%、最大150%、100元达到最大为默认值。100%对应1920×1080画布中的80像素。最低触发金额按单价判断；画面数量、生成速度、面积和尺寸由用户设置约束；待生成队列不设固定容量或超时丢弃。礼物设置可独立恢复默认。
-- SC默认开启，独立按平台有效期移除，无可见倒计时。默认15秒折叠，0关闭折叠；标题可展开。有效卡片按区域高度排列，超出后往返滚动，默认20画布像素/秒，0停止。悬停或聚焦暂停滚动但不暂停到期。最多保留最新100条。可打开透明画面或在OBS浏览器源中使用“交互”操作卡片。
+- SC默认开启，独立按平台有效期移除，无可见倒计时。默认15秒折叠，0关闭折叠；标题可展开。有效卡片按区域高度排列，超出后往返滚动，默认20画布像素/秒，0停止。悬停或聚焦暂停滚动但不暂停到期。最多保留最新100条。SC设置新增「SC 永久显示」，默认关闭；开启后当前及新收到的留言不再按平台有效期移除，仅保留最新100条，关闭时当前留言从切换时刻起重新获得一次完整平台显示时长且折叠状态不变。可打开透明画面或在OBS浏览器源中使用“交互”操作卡片。
 - 大航海默认开启，显示头像、原始昵称、舰长/提督/总督和本次购买期限。明确单位为月时显示“3个月舰长”等，特殊单位保留原信息，缺期限标记未知，缺头像显示昵称首字。
 - 每位上舰播放时长可设置（默认8秒、最小1秒、无上限，修改从下一位生效），按收到顺序依次播放，最多100位等待；满队提示并跳过新事件。关闭大航海、换房或清空会清除对应队列；重启不回放旧购买。一次多月只播放一次。
 - 三个等级分别提供AI像素舰船默认素材，可替换PNG/JPEG/WebP/GIF/MP4/WebM，单文件不超过32 MiB。视频静音循环，每位按配置时长轮换。各等级按实际图片/GIF尺寸或视频元数据决定比例，观众信息独立位于素材下方。设置宽度最大100%，高素材会整体缩小以适应画面，不拉伸素材。读取或解码失败回退默认显示。
-- 更换素材后，预览会按当前播放等级布局；空闲时点击舰长、提督或总督模拟按钮测试对应等级，共用月数输入。三个等级共用中轴线；大航海位置与大小、醒目留言设置各有恢复默认按钮，保留素材和现有留言有效期。
+- 更换素材后，预览会按当前播放等级布局；空闲时点击舰长、提督或总督模拟按钮测试对应等级，共用月数输入。三个等级共用中轴线；大航海位置与大小、醒目留言设置各有恢复默认按钮。恢复默认保留素材；SC恢复默认会把永久显示恢复为关闭，当前留言按切换规则重新计时，但不会删除留言。
 - 控制台最下方「本场直播礼物历史」可折叠。按观众汇总：相同礼物累加数量、同一等级大航海累加次数和月份，不同礼物和等级分开；SC 留言全文始终展开，不折叠。每位观众显示头像和昵称；匿名连接下平台把礼物昵称遮罩成「首字***」时，若事件仍有 UID，就用公开资料补全昵称和头像；若平台连 UID 也隐藏，则只能用事件 `face` 补头像，昵称保留平台星号。礼物名称默认用内置词典翻译，日语界面同时显示片假名读音；未知礼物保持原名，可在历史工具栏关闭。每条 SC 有「翻译」按钮，点击后才用 Chrome 内置翻译显示译文，原文保留；不自动翻译 SC。每位观众显示总电池，每条礼物、SC 和大航海也显示电池。默认只显示电池，「金额显示」可切换人民币或日元；日元使用每日在线汇率并显示汇率日期，取不到时回退显示电池。只记录有电池的真实礼物；免费/0 电池礼物、模拟送礼/SC/上舰不计入；清空画面不会清空历史，可单独点「清空历史」。历史仅本次运行内保留，重启清空，不把 SC 留言写入磁盘。
 
 ### 保存、验收与限制
 
 EXE设置、缓存及上传素材在 `%LOCALAPPDATA%\BiliGiftDrop`；配置在 `data/`、上传素材在 `media/`。升级替换EXE即可；迁移电脑时保留配置和素材两个目录。源码运行默认使用项目目录，`BILI_GIFT_DATA_DIR`可指定隔离数据目录。
 
-55项自动测试和本机EXE隔离回归通过；本轮新增 B 站登录（Cookie 解析、二维码状态、持久化/退出、无效凭据、状态不暴露 Cookie）和登录面板三语渲染的回归，保留空 UID 头像兜底、礼物词典翻译/日语读音、SC 翻译按钮、免费/0 电池过滤、公开 UID 昵称/头像、390px 历史头像布局和日元显示检查；已有浏览器鼠标移动/缩放、三语桌面和100×200竖版GIF比例证据。真实大航海、真实付费SC与各金额配色、OBS实机、完整三语窄屏、全部视频编码、长期直播和全新Windows环境仍待验收。匿名连接可能受平台限制；不保证收到的上舰通知总含头像、明确月份或稳定的交易标识。部分真实V2礼物已验证，不能据此推定所有平台事件均通过。本构建未签名，作为预览发布。
+63项自动测试和本机EXE隔离回归通过；本轮新增 SC 永久显示（旧配置默认关闭、普通有效期、永久保留、切换不清空/重新计时、100条淘汰、与0/15秒自动折叠共存、语言/透明度/头像更新不改变生命周期、清空/重启、三语设置及控制台与 overlay 同步）的回归，保留 B 站登录、空 UID 头像兜底、礼物词典翻译/日语读音、SC 翻译按钮、免费/0 电池过滤、公开 UID 昵称/头像、390px 历史头像布局和日元显示检查；已有浏览器鼠标移动/缩放、三语桌面和100×200竖版GIF比例证据。真实大航海、真实付费SC与各金额配色、真实平台SC到期/删除事件、OBS实机、完整三语窄屏、全部视频编码、长期直播和全新Windows环境仍待验收。匿名连接可能受平台限制；不保证收到的上舰通知总含头像、明确月份或稳定的交易标识。部分真实V2礼物已验证，不能据此推定所有平台事件均通过。本构建未签名，作为预览发布。
 
 ## 日本語
 
@@ -105,11 +111,11 @@ EXE设置、缓存及上传素材在 `%LOCALAPPDATA%\BiliGiftDrop`；配置在 `
 2. OBSブラウザソースに `http://127.0.0.1:19321/overlay`、幅1920・高さ1080を設定。市松模様と編集枠は出力されません。終了はコンソールを閉じるかCtrl+C。更新前に旧サービスを停止してください。
 3. 単一プレビュー上で、緑のギフト領域はラベルをドラッグして移動、右下で幅・高さ変更。紫のSCも幅と高さを個別に変更。青の大航海は素材比率を維持。数値入力・矢印キーも使用でき、離した時または入力停止後約400msで自動保存します。各エフェクトの不透明度は0–100%、初期100%。言語・不透明度の変更でタイマーをリセットしません。
 4. ギフトサイズは1個あたりの単価で決まり、個数はアイコン数のみ変更。既定50%–150%、100人民元で最大、100%は1920×1080上の80px。最低額は単価で判定し、表示個数・面積・生成速度・サイズはユーザー設定に従います。生成待ちに固定容量や時間切れはなく、ギフト設定は初期化できます。
-5. SCは初期設定で有効。期限は個別、カウントダウンなし。既定15秒で折りたたみ、0で無効。領域を超えると初期20画素/秒で往復し、0で停止。ホバー・フォーカスでスクロールを一時停止しますが期限は進みます。最新100件まで保持。透明画面、またはOBSの「対話」で見出しを操作できます。
+5. SCは初期設定で有効。期限は個別、カウントダウンなし。既定15秒で折りたたみ、0で無効。領域を超えると初期20画素/秒で往復し、0で停止。ホバー・フォーカスでスクロールを一時停止しますが期限は進みます。最新100件まで保持。SC設定に「SCを常時表示」（初期値オフ）を追加し、オンでは現在および新規のSCを期限で消さず最新100件のみ保持、オフに戻すと保持中のSCをその時点から完全な表示時間で再計時し、折りたたみ状態は変えません。透明画面、またはOBSの「対話」で見出しを操作できます。
 6. 大航海は初期設定で有効。アバター・元の名前・ランク・今回の購入期間を表示。月以外の単位は元情報を保持し、期間不明は不明、アバター未取得は名前の先頭文字を表示。1人あたりの時間は設定可能（初期8秒、最小1秒、上限なし、次の人から適用）。受信順、最大100人待機。満杯時は新規分を通知してスキップ。複数月でも1回再生。無効化・ルーム変更・クリアで列を消去し、再起動後は過去分を再生しません。
-7. 各ランクの標準AI素材をPNG/JPEG/WebP/GIF/MP4/WebM（最大32 MiB）に置換可能。動画は無音ループ。画像・GIFサイズまたは動画メタデータから比率を自動計算し、視聴者情報は下に表示。設定幅は最大100%、縦長素材は画面内に収まるよう全体を縮小。失敗時は標準表示。待機中は艦長・提督・総督の3つのテストボタンと共通の月数入力を使用します。3ランクは同じ中心軸で揃い、大航海の位置・サイズとSC設定を初期化できます。素材やコメントの有効期限は保持します。
+7. 各ランクの標準AI素材をPNG/JPEG/WebP/GIF/MP4/WebM（最大32 MiB）に置換可能。動画は無音ループ。画像・GIFサイズまたは動画メタデータから比率を自動計算し、視聴者情報は下に表示。設定幅は最大100%、縦長素材は画面内に収まるよう全体を縮小。失敗時は標準表示。待機中は艦長・提督・総督の3つのテストボタンと共通の月数入力を使用します。3ランクは同じ中心軸で揃い、大航海の位置・サイズとSC設定を初期化できます。素材は保持し、SC初期化では常時表示をオフに戻して現在のコメントを切替規則で再計時しますが、コメントは削除しません。
 8. コンソール最下部の「この配信のギフト履歴」は折りたたみ式。視聴者ごとにギフト・SC・大航海をまとめ、同じギフトは数量、同ランクの大航海は回数と月数を合算し、異なるギフト・ランクは分離します。SC コメントは常に全文表示。各視聴者のアバターと名前を表示し、匿名接続で名前が「先頭文字***」に伏せられた場合はギフトの UID で公開プロフィールを照会して名前とアバターを補完、失敗時は星号と先頭文字の代替アバターを表示します。ギフト名は内蔵辞書で初期設定のまま翻訳し、日本語 UI では片仮名の読みも表示（未知ギフトは原名、履歴ツールバーでオフ可）。各 SC の「翻訳」ボタンを押した時だけ Chrome 内蔵翻訳で訳文を表示し、原文は残します。SC の自動翻訳はしません。各視聴者の合計と各記録のバッテリーを表示し、初期値はバッテリーのみ。「金額表示」で人民元または日本円に切り替えられ、日本円は毎日のオンラインレートと日付を表示し、取得できない場合はバッテリー表示に戻します。実際のイベントのうち、バッテリーのあるギフトのみ記録し、無料/0 バッテリーのギフトとテスト送信は含みません。画面クリアでは履歴を消さず専用ボタンで消去します。履歴は今回の起動中のみ保持し、SC コメントはディスクに保存しません。
-9. 保存先は `%LOCALAPPDATA%\BiliGiftDrop`、設定は `data/`、素材は `media/`。移行時は両方を保持。55件の自動テスト・EXE回帰と一部ブラウザ操作は検証済み。実際の上艦・有料SC・OBS、完全な3言語狭幅レイアウト、全コーデック、長時間配信、新規Windows環境は未検証。匿名接続が制限されたり、一部フィールドが欠ける場合があります。署名なしのプレビュー版です。
+9. 保存先は `%LOCALAPPDATA%\BiliGiftDrop`、設定は `data/`、素材は `media/`。移行時は両方を保持。63件の自動テスト・EXE回帰と一部ブラウザ操作は検証済み。実際の上艦・有料SCの期限/削除イベント・OBS、完全な3言語狭幅レイアウト、全コーデック、長時間配信、新規Windows環境は未検証。匿名接続が制限されたり、一部フィールドが欠ける場合があります。署名なしのプレビュー版です。
 
 ### B站ログイン（任意）
 
@@ -125,11 +131,11 @@ EXE设置、缓存及上传素材在 `%LOCALAPPDATA%\BiliGiftDrop`；配置在 `
 2. Add an OBS browser source at `http://127.0.0.1:19321/overlay`, width 1920, height 1080. Checkerboard and editing frames are preview-only. Close the console or press Ctrl+C to stop; stop the previous service before upgrading.
 3. One preview contains green gift-region, purple SC and blue subscription frames. Drag the gift label to move its region; use bottom-right handles to resize gift/SC width and height independently. Subscription resizing follows media proportions. Numbers and arrow keys remain available. Changes save on release or about 400 ms after typing. Each layer has a 0–100% opacity slider, default 100%. Language and opacity changes preserve timers.
 4. Gift sizes follow the unit price; quantity only changes the icon count. Defaults are 50%–150%, reaching maximum at CNY 100;100% means 80 px on a 1920×1080 canvas. Minimum trigger price uses unit price. On-screen count, spawn rate, area and size follow user settings. Pending gifts have no fixed queue cap or expiry. Gift settings have a restore-defaults button.
-5. SC is enabled by default, expires independently and shows no countdown. Default collapse delay is 15 seconds;0 disables it. Overflow scrolls back and forth at 20 canvas pixels/second by default;0 stops motion. Hover/focus pauses scrolling without pausing expiry. Retains the latest 100 active messages. Use the transparent page or OBS Interact to operate headings.
+5. SC is enabled by default, expires independently and shows no countdown. Default collapse delay is 15 seconds;0 disables it. Overflow scrolls back and forth at 20 canvas pixels/second by default;0 stops motion. Hover/focus pauses scrolling without pausing expiry. Retains the latest 100 active messages. The SC settings add "Keep Super Chats Visible" (off by default): while on, current and new Super Chats do not expire and only the latest 100 are kept; turning it off retimes retained cards for one full duration from that moment without changing their collapse state. Use the transparent page or OBS Interact to operate headings.
 6. Subscriptions are enabled by default and show avatar, original name, tier and purchased duration. Non-month units retain their original information; missing duration is marked unknown and missing avatars use the first name character. Play time is configurable (8 seconds by default, minimum 1, no upper bound), applying from the next viewer, in arrival order, with up to 100 waiting. Full queues skip new events with a warning. Multi-month purchases play once. Disabling, changing room or clearing removes the queue; shutdown never replays old purchases.
-7. Replace each tier’s default AI pixel ship with PNG/JPEG/WebP/GIF/MP4/WebM, up to 32 MiB per file. Videos loop muted. Native image/GIF dimensions or video metadata determine layout; viewer details sit below. Requested width supports 100%, with tall content scaling down to fit the canvas. Failures fall back to default display. While idle, use the Captain, Admiral or Governor test buttons with the shared month input. All tiers share a center axis. Restore buttons reset subscription position/size or SC settings while preserving media and message expiry.
+7. Replace each tier’s default AI pixel ship with PNG/JPEG/WebP/GIF/MP4/WebM, up to 32 MiB per file. Videos loop muted. Native image/GIF dimensions or video metadata determine layout; viewer details sit below. Requested width supports 100%, with tall content scaling down to fit the canvas. Failures fall back to default display. While idle, use the Captain, Admiral or Governor test buttons with the shared month input. All tiers share a center axis. Restore buttons reset subscription position/size or SC settings while preserving media; restoring SC defaults turns permanent display off, retimes current messages by the switch rule and does not delete them.
 8. The collapsible "This stream's gift history" at the bottom of the control panel groups gifts, SC and subscriptions by viewer. The same gift adds up quantity; the same subscription tier adds up purchases and months; different gifts and tiers stay separate. SC messages always show in full. Each viewer shows an avatar and name; when an anonymous connection masks the name as "first character***", the gift UID resolves the public profile nickname and avatar, with the masked name and an initial placeholder on failure. Gift names are translated by the built-in glossary by default, with a katakana reading in Japanese UI (unknown gifts keep the original and the history toolbar can disable it). Each SC has a "Translate" button; only a click uses Chrome's built-in translator and appends the translation while keeping the original. SC is never translated automatically. Each viewer's total and every record show batteries; the default is batteries only. "Amount display" can switch to CNY or JPY; JPY uses a daily online rate with the date shown and falls back to batteries when unavailable. Only real gifts with batteries are recorded; free/0-battery gifts and simulations are excluded. Clearing the screen does not clear history, and a separate button clears it. History lasts only for this run and SC messages are not written to disk.
-9. EXE data lives in `%LOCALAPPDATA%\BiliGiftDrop`: configuration in `data/`, uploaded files in `media/`. Retain both when moving computers. 55 automated tests and local EXE regressions pass, with browser interaction, the three-language 390px history panel, avatar/translation layout and portrait-GIF evidence. Real subscriptions, paid SC/colors, OBS, complete narrow layouts in all three languages, all codecs, long-running streams and clean Windows installations remain unverified. Anonymous access may be restricted and platform fields may be missing. This is an unsigned preview.
+9. EXE data lives in `%LOCALAPPDATA%\BiliGiftDrop`: configuration in `data/`, uploaded files in `media/`. Retain both when moving computers. 63 automated tests and local EXE regressions pass, with browser interaction, the three-language 390px history panel, avatar/translation layout and portrait-GIF evidence. Real subscriptions, paid SC expiry/delete events and colors, OBS, complete narrow layouts in all three languages, all codecs, long-running streams and clean Windows installations remain unverified. Anonymous access may be restricted and platform fields may be missing. This is an unsigned preview.
 
 ### Bilibili login (optional)
 
@@ -159,6 +165,6 @@ node scripts/smoke-windows.mjs
 
 ## 文档与许可 / 資料・ライセンス / Documentation and license
 
-[Windows说明](docs/WINDOWS.md) · [工程规划](docs/PROJECT_PLAN.md) · [验收报告](docs/ACCEPTANCE.md) · [本轮日志](log/2026-10-31-login-qr-mime.md) · [接入研究](docs/BILIBILI_INTEGRATION.md)
+[Windows说明](docs/WINDOWS.md) · [工程规划](docs/PROJECT_PLAN.md) · [验收报告](docs/ACCEPTANCE.md) · [本轮日志](log/2026-11-08-sc-persistent.md) · [接入研究](docs/BILIBILI_INTEGRATION.md)
 
 原创代码采用 [MIT License](LICENSE)，允许商用、修改和分发，保留版权与许可，无担保。第三方运行时、平台图片和商标遵循各自许可和平台规则。二维码生成使用 MIT 许可的 [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator)，许可见 `src/control/vendor/qrcode.LICENSE.txt` 和 ZIP 内 `QRCODE-LICENSE.txt`。 / オリジナルコードはMIT、商用利用・改変・再配布可。著作権と許諾表示を保持、無保証。第三者コンテンツには各規約が適用されます。QR 生成は MIT ライセンスの [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) を使用し、ライセンスは `src/control/vendor/qrcode.LICENSE.txt` と ZIP 内 `QRCODE-LICENSE.txt` にあります。 / Original code is MIT licensed, permitting commercial use, modification and redistribution with notices retained, without warranty. Third-party runtimes, platform images and trademarks follow their own licenses and rules. QR generation uses the MIT-licensed [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator); its license is in `src/control/vendor/qrcode.LICENSE.txt` and `QRCODE-LICENSE.txt` in the ZIP.

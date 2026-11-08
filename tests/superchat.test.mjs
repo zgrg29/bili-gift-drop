@@ -30,6 +30,28 @@ test('SC renderer: no countdown, auto collapse, click sync, language, expiry and
  c.scEnabled=false;tick();assert.equal(root.hidden,true);clock=x.end;tick();assert.equal(root.children.length,0);
 });
 
+test('SC renderer: persistent mode keeps expired cards, preserves collapse and ignores unrelated updates',async()=>{
+ const source=(await readFile(new URL('../src/overlay/superchat.mjs',import.meta.url),'utf8')).replace(/^import .*;$/gm,'').replace('export function','function');
+ class E{children=[];style={};_top=0;get scrollTop(){return this._top;}set scrollTop(v){this._top=Math.floor(v);}scrollHeight=0;clientHeight=0;handlers={};addEventListener(k,fn){this.handlers[k]=fn;}contains(){return false;}append(...x){this.children.push(...x);}replaceChildren(...x){this.children=x;}setAttribute(k,v){this[k]=v;}querySelectorAll(){return this.children.flatMap(x=>x.children.filter(y=>y.tag==='button'));}focus(){}}
+ let listener,tick,clock=now;const body=new E();let c={...defaults,scEnabled:true,scCollapse:15,scPersistent:true};
+ const sandbox={scrollSC,requestAnimationFrame(){},t,Intl,Date:{now:()=>clock},document:{documentElement:{clientWidth:1920},body,createElement:tag=>Object.assign(new E(),{tag})},setInterval:fn=>{tick=fn;},fetch:async()=>({ok:true}),events:{addEventListener:(type,fn)=>{listener=fn;}},getConfig:()=>c};
+ vm.runInNewContext(source+';superchat(events,getConfig);',sandbox);const send=(type,data)=>listener({data:JSON.stringify({type,data})});
+ const x=normalizeSC(msg(),now);send('sc',x);const root=body.children[0];assert.equal(root.children.length,1);
+ clock=x.end+5000;tick();
+ assert.equal(root.children.length,1,'the card survives the original platform expiry');
+ assert.equal(root.children[0].children.length,1,'15-second auto-collapse still folds the card');
+ const end=x.end;
+ c={...c,language:'ja',scOpacity:35};tick();
+ assert.equal(root.children.length,1,'language and opacity changes do not remove it');
+ assert.equal(root.style.opacity,.35);
+ assert.equal(x.end,end,'language and opacity changes do not reset its expiry');
+ send('sc-list',[{...x,avatar:'/cache/test-avatar'}]);assert.equal(x.end,end,'avatar updates do not reset its expiry');
+ assert.equal(root.children.length,1);
+ c={...c,scCollapse:0};tick();assert.equal(root.children[0].children.length,2,'collapse 0 keeps the message expanded');
+ c={...c,scPersistent:false};send('sc-list',[{...x,start:x.start,end:clock+60000}]);tick();assert.equal(root.children.length,1,'normal mode shows the retimed card');
+ clock+=60001;tick();assert.equal(root.children.length,0,'normal mode expires the retimed card');
+});
+
 test('SC scrolling obeys speed, pauses at edges, reverses and handles shrinking content',()=>{
  let s={offset:0,direction:1,hold:0};s=scrollSC(s,1,100,20);assert.equal(s.offset,20);s=scrollSC(s,1,100,40);assert.equal(s.offset,60);s=scrollSC(s,1,100,40);assert.deepEqual(s,{offset:100,direction:-1,hold:2});s=scrollSC(s,1,100,40);assert.equal(s.offset,100);s=scrollSC(s,1,100,40);s=scrollSC(s,1,100,40);assert.equal(s.offset,60);assert.equal(scrollSC(s,1,10,0).offset,10);assert.equal(scrollSC(s,1,0,20).offset,0);
  const cfg=config({scY:70,scHeight:100,scScrollSpeed:999});assert.equal(cfg.scHeight,30);assert.equal(cfg.scScrollSpeed,120);assert.equal(config({scScrollSpeed:0}).scScrollSpeed,0);assert.equal(config({language:'ja'},cfg).scScrollSpeed,120);

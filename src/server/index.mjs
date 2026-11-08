@@ -18,7 +18,7 @@ import {Catalog} from './catalog.mjs';
 import {expandGiftV2} from './gift-v2.mjs';
 await mkdir(path.join(runtimeRoot,'data'),{recursive:true});
 let cfg={...defaults},configured=false;try{cfg=config(JSON.parse(await readFile(path.join(runtimeRoot,'data/config.json'),'utf8')));configured=true;}catch{}
-const scStore=new SCStore(),guardQueue=new GuardQueue((cfg.guardDuration??8)*1000),historyLedger=new HistoryLedger(),exchange=new ExchangeRates();
+const scStore=new SCStore(cfg.scPersistent),guardQueue=new GuardQueue((cfg.guardDuration??8)*1000),historyLedger=new HistoryLedger(),exchange=new ExchangeRates();
 let status='disconnected',warning=null;const clients=new Set(),catalog=new Catalog(),avatars=new Avatars(catalog),profiles=new Profiles(catalog),dedup=new Deduplicator();
 const login=new LoginStore({cacheImage:url=>catalog.cacheImage(url)});await login.load();
 let configWrites=Promise.resolve();
@@ -62,7 +62,7 @@ async function receive(msg){
           send('sc',sc);
           const profile=await (scMasked?profiles.resolve(sc.uid,face):avatars.resolve(sc.uid,face).then(avatar=>({avatar,name:null}))).catch(()=>null);
           const avatar=profile?.avatar??null;
-          if(avatar&&generation===live.generation&&scStore.items.get(sc.id)===sc&&sc.end>Date.now()){
+          if(avatar&&generation===live.generation&&scStore.items.get(sc.id)===sc&&(cfg.scPersistent||sc.end>Date.now())){
             sc.avatar=avatar;if(scMasked&&profile.name)sc.user=profile.name;send('sc-list',scStore.list());
           }
           if(generation===live.generation){
@@ -140,13 +140,17 @@ const server=http.createServer(async(req,res)=>{
         case '/api/login/qr/poll':{const result=await login.pollQR(d.qrcode_key);if(result.status==='success')applyLogin();res.writeHead(200,{'Content-Type':'application/json'}).end(JSON.stringify(result));return;}
         case '/api/login/cookie':{const cookies=parseCookieString(d.cookie);if(!cookies.SESSDATA)throw Error('auth');const status=await login.setCookies(cookies,{remember:!!d.remember});applyLogin();res.writeHead(200,{'Content-Type':'application/json'}).end(JSON.stringify(status));return;}
         case '/api/login/logout':{const status=await login.logout();applyLogin();res.writeHead(200,{'Content-Type':'application/json'}).end(JSON.stringify(status));return;}
-        case '/api/config':{const task=configWrites.catch(()=>{}).then(async()=>{const next=config(d,cfg);await writeFile(path.join(runtimeRoot,'data/config.tmp'),JSON.stringify(next,null,2));await rename(path.join(runtimeRoot,'data/config.tmp'),path.join(runtimeRoot,'data/config.json'));cfg=next;guardQueue.duration=(cfg.guardDuration??8)*1000;if(!cfg.guardEnabled){guardQueue.clear();send('guard-state',guardQueue.snapshot());}configured=true;send('config',cfg);});configWrites=task;await task;break;}
-        case '/api/connect':if(!/^\d{1,12}$/.test(d.room)||Number(d.room)<1)throw Error('invalid');warning=null;send('warning',null);if(live.room!==d.room){guardQueue.clear();send('guard-state',guardQueue.snapshot());scStore.items.clear();send('sc-list',[]);}if(historyLedger.room!==d.room){historyLedger.reset(d.room);sendHistoryReset();}await live.connect(d.room);catalog.refresh(d.room).catch(()=>send('warning','catalog'));break;
+        case '/api/config':{const task=configWrites.catch(()=>{}).then(async()=>{const next=config(d,cfg);await writeFile(path.join(runtimeRoot,'data/config.tmp'),JSON.stringify(next,null,2));await rename(path.join(runtimeRoot,'data/config.tmp'),path.join(runtimeRoot,'data/config.json'));const now=Date.now(),persistentChanged=next.scPersistent!==cfg.scPersistent;if(persistentChanged)scStore.setPersistent(next.scPersistent,now);guardQueue.duration=(next.guardDuration??8)*1000;if(!next.guardEnabled){guardQueue.clear();send('guard-state',guardQueue.snapshot());}cfg=next;configured=true;
+          // Send the retimed list while the old mode is still active so cards never flash empty.
+          if(persistentChanged&&!cfg.scPersistent)send('sc-list',scStore.list(now));
+          send('config',cfg);
+          if(persistentChanged&&cfg.scPersistent)send('sc-list',scStore.list(now));});configWrites=task;await task;break;}
+        case '/api/connect':if(!/^\d{1,12}$/.test(d.room)||Number(d.room)<1)throw Error('invalid');warning=null;send('warning',null);if(live.room!==d.room){guardQueue.clear();send('guard-state',guardQueue.snapshot());scStore.clear();send('sc-list',[]);}if(historyLedger.room!==d.room){historyLedger.reset(d.room);sendHistoryReset();}await live.connect(d.room);catalog.refresh(d.room).catch(()=>send('warning','catalog'));break;
         case '/api/guard-test':{const level=Number(d.level??3),count=Number(d.count??1);if(![1,2,3].includes(level)||!Number.isSafeInteger(count)||count<1||count>1200)throw Error('invalid');const id=randomUUID();if(!cfg.guardEnabled)throw Error('invalid');if(guardQueue.add({id,key:id,demo:true,user:'',avatar:null,level,count,unit:'月'})==='full')throw Error('invalid');send('guard-state',guardQueue.snapshot());break;}
         case '/api/disconnect':live.stop();break;
         case '/api/sc-toggle':{const x=scStore.items.get(String(d.id));if(x){x.expanded=!!d.expanded;x.interactedAt=Date.now();send('sc-list',scStore.list());}break;}
-        case '/api/sc-test':{const now=Date.now();const price=Number(d.price??30),duration=Number(d.duration??60);if(!Number.isFinite(price)||price<0||!Number.isFinite(duration)||duration<1||duration>7200)throw Error('invalid');const x={id:randomUUID(),demo:true,user:'',message:'',price,start:now,end:now+duration*1000,color:'#2a60b2',background:'#edf5ff',text:'#172033'};scStore.add(x);send('sc',x);break;}
-        case '/api/clear':guardQueue.clear();send('guard-state',guardQueue.snapshot());scStore.items.clear();send('sc-list',[]);send('clear',null);break;
+        case '/api/sc-test':{const now=Date.now();const price=Number(d.price??30),duration=Number(d.duration??60);if(!Number.isFinite(price)||price<0||!Number.isFinite(duration)||duration<1||duration>7200)throw Error('invalid');const x={id:randomUUID(),demo:true,user:'',message:'',price,start:now,end:now+duration*1000,duration,color:'#2a60b2',background:'#edf5ff',text:'#172033'};scStore.add(x);send('sc',x);break;}
+        case '/api/clear':guardQueue.clear();send('guard-state',guardQueue.snapshot());scStore.clear();send('sc-list',[]);send('clear',null);break;
         case '/api/history-clear':historyLedger.clear();sendHistoryReset();break;
         case '/api/test':{const count=Number(d.count),price=Number(d.price);if(!Number.isInteger(count)||count<1||count>1000||!Number.isFinite(price)||price<0||price>100000)throw Error('invalid');const metadata=catalog.gifts.get(Number(d.giftId));const image=metadata?await catalog.cacheImage(metadata.image).catch(()=>null):null;send('gift',{id:randomUUID(),giftId:Number(d.giftId)||0,name:metadata?.name??null,user:null,demo:true,count,coinType:price?'gold':'silver',unitCoin:Math.round(price*1000),totalCoin:Math.round(price*1000)*count,image});break;}
         default:res.writeHead(404).end();return;

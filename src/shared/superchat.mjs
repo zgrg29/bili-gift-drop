@@ -10,13 +10,45 @@ export function normalizeSC(msg,now=Date.now()) {
   if(!Number.isFinite(end)||end<=now||!Number.isFinite(start)||start<=0||end<=start)return null;
   const price=Number(d.price);if(!Number.isFinite(price)||price<0)return null;
   const color=(v,f)=>/^#[0-9a-f]{6}$/i.test(v)?v:f;
-  return {id:String(d.id),uid:String(d.uid??d.user_info?.uid??''),avatar:d.user_info?.face??null,user:String(d.user_info?.uname??''),message:String(d.message??''),price,start,end,
+  // Keep the platform-derived window so leaving persistent mode restarts one full duration.
+  return {id:String(d.id),uid:String(d.uid??d.user_info?.uid??''),avatar:d.user_info?.face??null,user:String(d.user_info?.uname??''),message:String(d.message??''),price,start,end,duration:(end-start)/1000,
     color:color(d.background_bottom_color,'#2a60b2'),background:color(d.background_color,'#edf5ff'),text:color(d.message_font_color,'#172033')};
 }
 export class SCStore {
-  items=new Map();seen=new Map();
-  prune(now=Date.now()){for(const [id,x]of this.items)if(x.end<=now)this.items.delete(id);for(const [id,end]of this.seen)if(end<=now)this.seen.delete(id);}
-  add(x,now=Date.now()){this.prune(now);if(!x||x.end<=now||this.seen.has(x.id))return false;this.items.set(x.id,x);this.seen.set(x.id,x.end);if(this.items.size>100)this.items.delete(this.items.keys().next().value);if(this.seen.size>10000)this.seen.delete(this.seen.keys().next().value);return true;}
-  remove(ids){for(const id of Array.isArray(ids)?ids:[]){this.items.delete(String(id));this.seen.set(String(id),Date.now()+7200000);if(this.seen.size>10000)this.seen.delete(this.seen.keys().next().value);}}
-  list(){this.prune();return [...this.items.values()];}
+  items=new Map();seen=new Map();persistent=false;
+  constructor(persistent=false){this.persistent=!!persistent;}
+  // Permanent mode only changes expiry; the 100-item cap and explicit clears still apply.
+  setPersistent(enabled,now=Date.now()){
+    const persistent=!!enabled;
+    if(persistent===this.persistent)return false;
+    this.persistent=persistent;
+    if(persistent)return true;
+    for(const x of this.items.values()){
+      const duration=Number(x.duration)>0?Number(x.duration):Math.max(0,(Number(x.end)-Number(x.start))/1000);
+      if(!Number.isFinite(duration)||duration<=0)continue;
+      x.end=now+duration*1000;
+      this.seen.set(x.id,x.end);
+    }
+    return true;
+  }
+  prune(now=Date.now()){
+    if(this.persistent)return;
+    for(const [id,x]of this.items)if(x.end<=now)this.items.delete(id);
+    for(const [id,end]of this.seen)if(end<=now)this.seen.delete(id);
+  }
+  add(x,now=Date.now()){
+    this.prune(now);
+    if(!x||this.seen.has(x.id)||(!this.persistent&&x.end<=now))return false;
+    this.items.set(x.id,x);this.seen.set(x.id,x.end);
+    if(this.items.size>100)this.items.delete(this.items.keys().next().value);
+    if(this.seen.size>10000)this.seen.delete(this.seen.keys().next().value);
+    return true;
+  }
+  remove(ids){
+    // While permanent mode is on, platform delete/expiry events must not remove cards.
+    if(this.persistent)return;
+    for(const id of Array.isArray(ids)?ids:[]){this.items.delete(String(id));this.seen.set(String(id),Date.now()+7200000);if(this.seen.size>10000)this.seen.delete(this.seen.keys().next().value);}
+  }
+  clear(){this.items.clear();}
+  list(now=Date.now()){this.prune(now);return [...this.items.values()];}
 }

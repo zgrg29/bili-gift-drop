@@ -1,8 +1,17 @@
 # 项目规划与工程进度
 
-## 2026-10-31 v0.6.15 登录二维码显示修复（当前状态）
+## 2026-11-08 v0.6.16 SC 永久显示（当前状态）
 
-- 当前版本 **v0.6.15 Preview**，取代下方 v0.6.14 的当前状态；历史版本章节保留。
+- 当前版本 **v0.6.16 Preview**，取代下方 v0.6.15 的当前状态；历史版本章节保留。
+- 已实现：SC 设置新增「SC 永久显示」开关，默认关闭；旧配置缺字段视为关闭，保存后跨重启恢复，SC「恢复默认」恢复为关闭。开启后当前及新收到的 SC 不再按平台有效期移除，所有金额同一规则，无额外倒计时，仅保留最新 100 条，第 101 条淘汰最旧一条；关闭后当前保留的 SC 从切换时刻起重新获得一次完整平台显示时长，不因原有效期已过而瞬间清空，不改变折叠状态，也不产生重复计时器。
+- 实现：`src/shared/superchat.mjs` 从平台 start/end 提取并保存 `duration`，`SCStore` 支持永久模式、在永久模式下忽略到期清理与平台删除事件、切回普通模式时按 `duration` 重设 `end` 且保留原 `start`；`src/server/index.mjs` 将 `scPersistent` 纳入配置，切换时按方向先后广播重排列表，避免预览闪空；`src/overlay/superchat.mjs` 在永久模式不按 `end` 过滤；`src/control/control.mjs` 新增开关及默认重置；三语文案同步。清空画面、换房、重启仍沿用原有清除逻辑，不把 SC 留言写入磁盘。
+- 验证：`node --test --test-isolation=none` 63/63；隔离源码 HTTP/SSE smoke 通过模拟 SC 永久保留与切回普通模式后的重新计时；Windows v0.6.16 EXE/ZIP 已构建，`node scripts/smoke-windows.mjs` 通过启动/重复启动、HTTP/SSE、SC 持久保留/重计时、三语、配置重启持久化和全部内嵌源码逐字节一致、退出端口释放。
+- 发布产物：v0.6.16 EXE/ZIP、三语 release notes、tag/title/notes、SHA256SUMS。用户授权本地 commit；不打标签、不推送、不发布远程 Release。
+- 未验收：真实付费 SC 的平台到期/删除事件与真实直播换房；真实 OBS 实机；完整三语窄屏浏览器视觉检查；长期高峰和全新 Windows 环境。
+
+## 2026-10-31 v0.6.15 登录二维码显示修复（历史状态）
+
+- 当时版本 **v0.6.15 Preview**，取代下方 v0.6.14 的状态；历史版本章节保留。
 - 已修复：登录面板只显示原始 URL、不显示二维码。根因是本地静态服务缺少 `.js` 的 JavaScript Content-Type，配合 `X-Content-Type-Options: nosniff` 导致 `qrcode.js` 不执行。现在 `.js` 按 `text/javascript; charset=utf-8` 提供，二维码正常生成。
 - 兜底不再渲染可点击 `<a>`，只显示可选纯文本，避免误跳 B 站外部登录页或第三方播放器下载；登录提示新增“请用 B 站手机客户端扫码，不要点击外部页面或下载第三方播放器”。
 - 验证：`node --test --test-isolation=none` 55/55；smoke 新增 `.js` Content-Type 断言；源码服务 + Chrome 实测 `typeof qrcode==='function'`；390px 登录面板/二维码静态布局通过；Windows v0.6.15 EXE/ZIP 已构建，smoke 通过启动/重复启动、HTTP/SSE、历史快照与模拟排除、金额显示重启持久化、三语、初始匿名登录状态、内嵌源码一致和退出端口释放。用户实测扫码登录成功（2026-10-31）。

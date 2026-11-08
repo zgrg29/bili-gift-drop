@@ -27,6 +27,7 @@ test('control panel executes in all locales, renders new strings and submits all
     const sandbox={guardBox,GuardMedia,HistoryLedger,giftDisplayName,defaults,Event:class{},t,Intl,JSON,Number,Map,console,Translator:{async availability(){return 'available';},async create(){return {async translate(text){return `T:${text}`;},destroy(){}};}},document:{documentElement:{},body,getElementById:id=>ids.get(id),createElement:()=>new Element(),querySelector:q=>q==='iframe'?iframe:preview,querySelectorAll:()=>elements.filter(e=>e.dataset.t)},localStorage:{getItem:()=>language,setItem(){}},navigator:{language},location:{origin:'http://test'},setTimeout:(fn,delay)=>{timers.set(++timerId,{fn,delay});return timerId;},clearTimeout:id=>timers.delete(id),EventSource:class{constructor(){events=this;}},window:{addEventListener(type,fn){listener=fn;}},fetch:async(url,options)=>{if(url==='/api/exchange-rate')return {ok:true,json:async()=>({rate:20,rateTime:Date.now(),fetchedAt:Date.now(),source:'test',error:null})};posted=JSON.parse(options.body);return {ok:true,json:async()=>({})};}};
     vm.runInNewContext(source,sandbox);
     events.onmessage({data:JSON.stringify({type:'init',data:{config:{...defaults,language},configured:true,status:'disconnected',warning:null,gifts:[]}})});
+    const scPersistentToggle=ids.get('scPersistent');assert.ok(scPersistentToggle);assert.equal(scPersistentToggle.checked,false,'old configs default Super Chat permanent mode off');
     for(const key of ['minGiftScale','maxGiftScale','maxGiftScaleAmount','maxCoverage','spawnRate','regionX','regionY','regionWidth','regionHeight'])assert.ok(ids.get(key));
     assert.ok(ids.get('guardDuration'));assert.equal(ids.get('guardDuration').min,1);assert.equal(ids.get('guardDuration').max,undefined);
     for(const el of elements.filter(e=>e.dataset.t))assert.equal(el.textContent,t(language,el.dataset.t));
@@ -51,6 +52,11 @@ test('control panel executes in all locales, renders new strings and submits all
     change('maxGiftScaleAmount','50');await [...timers.values()].find(x=>x.delay===400).fn();assert.equal(posted.maxGiftScaleAmount,50);
     ids.get('includeFree').checked=false;ids.get('settings').oninput({target:ids.get('includeFree')});
     await [...timers.values()].find(x=>x.delay===400).fn();assert.equal(posted.includeFree,false);
+    // The permanent-display switch lives in the SC group and autosaves like other SC settings.
+    scPersistentToggle.checked=true;ids.get('settings').oninput({target:scPersistentToggle});
+    await [...timers.values()].find(x=>x.delay===400).fn();assert.equal(posted.scPersistent,true);
+    events.onmessage({data:JSON.stringify({type:'config',data:{...defaults,language,scPersistent:true}})});
+    assert.equal(scPersistentToggle.checked,true,'the control panel reflects the saved switch');
     events.onmessage({data:JSON.stringify({type:'config',data:{...defaults,language,guardAnchor:'center',guardX:50,scHeight:40}})});
     const pointer={clientX:0,clientY:0,pointerId:1,preventDefault(){},stopPropagation(){}};
     const handle=elements.find(e=>e.className==='sc-move');handle.onpointerdown(pointer);handle.onpointermove({clientX:100,clientY:50});await handle.onpointerup();assert.equal(posted.scX,15);assert.equal(posted.scY,15);
@@ -72,7 +78,7 @@ test('control panel executes in all locales, renders new strings and submits all
     const guardReset=elements.find(e=>e.dataset.t==='guardResetLayout');await guardReset.onclick({preventDefault(){}});
     assert.equal(posted.guardX,50);assert.equal(posted.guardY,29);assert.equal(posted.guardWidth,60);assert.equal(posted.guardAnchor,'center');assert.equal(Object.hasOwn(posted,'scX'),false);assert.equal(Object.hasOwn(posted,'guardAsset3'),false);
     const scReset=elements.find(e=>e.dataset.t==='scReset');await scReset.onclick({preventDefault(){}});
-    for(const key of ['scEnabled','scOpacity','scX','scY','scWidth','scHeight','scCollapse','scScrollSpeed'])assert.equal(posted[key],defaults[key]);
+    for(const key of ['scEnabled','scPersistent','scOpacity','scX','scY','scWidth','scHeight','scCollapse','scScrollSpeed'])assert.equal(posted[key],defaults[key]);
     assert.equal(Object.hasOwn(posted,'guardX'),false);
     // The bottom history panel groups one viewer's guard/SC/gift and shows battery amounts.
     events.onmessage({data:JSON.stringify({type:'history',data:{room:'123',viewerCount:2,battery:4270,unknownBattery:false,viewers:[
