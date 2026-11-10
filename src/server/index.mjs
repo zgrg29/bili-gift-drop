@@ -136,9 +136,9 @@ const server=http.createServer(async(req,res)=>{
     if(req.method==='POST'&&url.pathname.startsWith('/api/')){
       const d=await body(req);
       switch(url.pathname){
-        case '/api/login/qr':{const qr=await login.startQR(!!d.remember);res.writeHead(200,{'Content-Type':'application/json'}).end(JSON.stringify(qr));return;}
+        case '/api/login/qr':{const qr=await login.startQR();res.writeHead(200,{'Content-Type':'application/json'}).end(JSON.stringify(qr));return;}
         case '/api/login/qr/poll':{const result=await login.pollQR(d.qrcode_key);if(result.status==='success')applyLogin();res.writeHead(200,{'Content-Type':'application/json'}).end(JSON.stringify(result));return;}
-        case '/api/login/cookie':{const cookies=parseCookieString(d.cookie);if(!cookies.SESSDATA)throw Error('auth');const status=await login.setCookies(cookies,{remember:!!d.remember});applyLogin();res.writeHead(200,{'Content-Type':'application/json'}).end(JSON.stringify(status));return;}
+        case '/api/login/cookie':{const cookies=parseCookieString(d.cookie);if(!cookies.SESSDATA)throw Error('auth');const status=await login.setCookies(cookies);applyLogin();res.writeHead(200,{'Content-Type':'application/json'}).end(JSON.stringify(status));return;}
         case '/api/login/logout':{const status=await login.logout();applyLogin();res.writeHead(200,{'Content-Type':'application/json'}).end(JSON.stringify(status));return;}
         case '/api/config':{const task=configWrites.catch(()=>{}).then(async()=>{const next=config(d,cfg);await writeFile(path.join(runtimeRoot,'data/config.tmp'),JSON.stringify(next,null,2));await rename(path.join(runtimeRoot,'data/config.tmp'),path.join(runtimeRoot,'data/config.json'));const now=Date.now(),persistentChanged=next.scPersistent!==cfg.scPersistent;if(persistentChanged)scStore.setPersistent(next.scPersistent,now);guardQueue.duration=(next.guardDuration??8)*1000;if(!next.guardEnabled){guardQueue.clear();send('guard-state',guardQueue.snapshot());}cfg=next;configured=true;
           // Send the retimed list while the old mode is still active so cards never flash empty.

@@ -12,7 +12,7 @@ test('cookie parsing accepts SESSDATA-only and full cookie strings', () => {
   assert.deepEqual(parseCookieString('  '), {});
 });
 
-test('QR login stores verified profile without exposing cookies, persists and logs out', async () => {
+test('QR login stores verified profile, saves automatically without consent and logs out', async () => {
   const dir = await mkdtemp(path.join(os.tmpdir(), 'bili-login-test-'));
   const file = path.join(dir, 'login.json');
   const calls = [];
@@ -35,7 +35,7 @@ test('QR login stores verified profile without exposing cookies, persists and lo
         throw Error('unexpected ' + url);
       }
     });
-    const qr = await store.startQR(true);
+    const qr = await store.startQR();
     assert.equal(qr.key, 'key123');
     assert.ok(qr.url.includes('qrcode_key=key123'));
     const pending = await store.pollQR('key123');
@@ -45,7 +45,7 @@ test('QR login stores verified profile without exposing cookies, persists and lo
     assert.equal(status.uid, '123');
     assert.equal(status.user, '测试主播');
     assert.equal(status.avatar, '/cache/avatar');
-    assert.equal(status.remembered, true);
+    assert.equal(status.remembered, true, 'login is saved without a remember option');
     assert.equal(Object.hasOwn(status, 'cookies'), false, 'status never exposes cookies');
     assert.match(store.auth().cookie, /SESSDATA=sess/);
     assert.match(store.auth().cookie, /bili_jct=csrf/);
@@ -65,6 +65,31 @@ test('QR login stores verified profile without exposing cookies, persists and lo
   }
 });
 
+test('manual cookie login also persists automatically', async () => {
+  const dir = await mkdtemp(path.join(os.tmpdir(), 'bili-login-test-'));
+  const file = path.join(dir, 'login.json');
+  try {
+    const store = new LoginStore({
+      file,
+      fetchImpl: async url => {
+        assert.ok(url.includes('web-interface/nav'));
+        return {ok: true, json: async () => ({data: {isLogin: true, mid: 42, uname: '主播', face: null}})};
+      }
+    });
+    const status = await store.setCookies({SESSDATA: 'sess', bili_jct: 'csrf'});
+    assert.equal(status.loggedIn, true);
+    assert.equal(status.remembered, true);
+    const saved = JSON.parse(await readFile(file, 'utf8'));
+    assert.equal(saved.cookies.SESSDATA, 'sess');
+    const reloaded = new LoginStore({file});
+    await reloaded.load();
+    assert.equal(reloaded.status().loggedIn, true);
+    assert.equal(reloaded.status().user, '主播');
+  } finally {
+    await rm(dir, {recursive: true, force: true});
+  }
+});
+
 test('invalid login credentials are rejected and QR states map correctly', async () => {
   const dir = await mkdtemp(path.join(os.tmpdir(), 'bili-login-test-'));
   const file = path.join(dir, 'login.json');
@@ -79,7 +104,7 @@ test('invalid login credentials are rejected and QR states map correctly', async
         throw Error('unexpected');
       }
     });
-    await store.startQR(false);
+    await store.startQR();
     assert.equal((await store.pollQR('k')).status, 'waiting');
     pollCode = 86090;
     assert.equal((await store.pollQR('k')).status, 'scanned');
@@ -87,6 +112,7 @@ test('invalid login credentials are rejected and QR states map correctly', async
     assert.equal((await store.pollQR('k')).status, 'expired');
     await assert.rejects(store.setCookies({SESSDATA: 'invalid'}), /auth/);
     assert.equal(store.status().loggedIn, false);
+    await assert.rejects(readFile(file, 'utf8'), 'rejected credentials never create a saved login');
   } finally {
     await rm(dir, {recursive: true, force: true});
   }

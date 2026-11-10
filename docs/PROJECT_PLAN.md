@@ -1,6 +1,15 @@
 # 项目规划与工程进度
 
-## 2026-11-08 v0.6.16 SC 永久显示（当前状态）
+## 2026-11-10 v0.6.17 登录自动保存（当前状态）
+
+- 当前版本 **v0.6.17 Preview**，取代下方 v0.6.16 的当前状态；历史版本章节保留。
+- 已实现：登录改为自动保存，移除「记住登录」勾选。扫码或手动 Cookie 校验成功后，凭据立即写入本机数据目录 `data/login.json`（`0o600`，未额外加密），下次启动恢复并直接显示已登录；「退出登录」删除文件并回到匿名。登录面板移除勾选框，登录 API 不再接收 `remember`；三语提示说明保存位置与删除方式。
+- 实现：`src/server/login.mjs` 的 `LoginStore` 去掉 `remember` 参数与 `qrRemember`，`setCookies()` 成功后调用 `persist()`，写盘失败仅令 `remembered=false` 不阻断登录，`logout()` 删除文件；`src/server/index.mjs` 登录路由改为 `startQR()`／`setCookies(cookies)`；`src/control/control.mjs`、`src/control/index.html` 移除 `rememberLogin`；三语文案删除对应键并更新 `loginHint`/`loginCookieHint`。
+- 验证：`node --test --test-isolation=none` 64/64（新增 Cookie 自动保存；扫码不传 remember 仍持久化、重载恢复、退出删除；无效凭据不落盘；三语键一致）。打包 EXE 预置 `login.json` 后连续启动两次，`/api/login/status` 两次均 `loggedIn:true`、`remembered:true`。Windows v0.6.17 EXE/ZIP 已构建，`node scripts/smoke-windows.mjs` 通过启动/重复启动、HTTP/SSE、SC、大航海、三语、内嵌源码逐字节一致和退出端口释放。
+- 发布产物：v0.6.17 EXE/ZIP、三语 release notes、tag/title/notes、SHA256SUMS。用户授权本地 commit 与本地 tag `v0.6.17`；不推送、不发布远程 Release。
+- 未验收：真实扫码登录后的昵称遮罩解除、真实礼物/SC 链路、OBS 实机、完整三语窄屏、长期高峰、全新 Windows；启动不重新校验过期 Cookie。
+
+## 2026-11-08 v0.6.16 SC 永久显示（历史状态）
 
 - 当前版本 **v0.6.16 Preview**，取代下方 v0.6.15 的当前状态；历史版本章节保留。
 - 已实现：SC 设置新增「SC 永久显示」开关，默认关闭；旧配置缺字段视为关闭，保存后跨重启恢复，SC「恢复默认」恢复为关闭。开启后当前及新收到的 SC 不再按平台有效期移除，所有金额同一规则，无额外倒计时，仅保留最新 100 条，第 101 条淘汰最旧一条；关闭后当前保留的 SC 从切换时刻起重新获得一次完整平台显示时长，不因原有效期已过而瞬间清空，不改变折叠状态，也不产生重复计时器。

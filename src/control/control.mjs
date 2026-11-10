@@ -56,14 +56,14 @@ async function pollLogin(){
 }
 $('loginButton').onclick=run(async()=>{
   showLoginPanel(true);$('loginQRStatus').textContent=t(language,'loginWaiting');$('loginQR').replaceChildren();
-  const qr=await post('login/qr',{remember:$('rememberLogin').checked});
+  const qr=await post('login/qr',{});
   loginQrKey=qr.key;renderQR(qr.url);pollLogin();
 });
 $('loginClose').onclick=()=>{stopLoginPoll();showLoginPanel(false);};
 $('logoutButton').onclick=run(async()=>{login=await post('login/logout',{});renderLogin();toast('logoutDone');});
 $('loginCookieButton').onclick=run(async()=>{
   const cookie=$('loginCookie').value.trim();if(!cookie)throw Error('invalid');
-  login=await post('login/cookie',{cookie,remember:$('rememberLogin').checked});
+  login=await post('login/cookie',{cookie});
   $('loginCookie').value='';renderLogin();showLoginPanel(false);toast('loginSuccess');
 });
 $('obs').value=location.origin+'/overlay';

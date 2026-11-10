@@ -8,12 +8,18 @@ A local, transparent OBS overlay for Bilibili gifts, Super Chat and Great Voyage
 
 ## 当前版本 / 現行版 / Current version
 
-**v0.6.16 Preview** · Windows x64 · [Release notes](docs/releases/v0.6.16.md) · [验收记录 / 検証 / Acceptance](docs/ACCEPTANCE.md)
+**v0.6.17 Preview** · Windows x64 · [Release notes](docs/releases/v0.6.17.md) · [验收记录 / 検証 / Acceptance](docs/ACCEPTANCE.md)
 
-- ZIP: `BiliGiftDrop-v0.6.16-windows-x64.zip`
-- Tag: `v0.6.16`
-- Title: **Bili Gift Drop v0.6.16 — SC 永久显示（Preview）**
+- ZIP: `BiliGiftDrop-v0.6.17-windows-x64.zip`
+- Tag: `v0.6.17`
+- Title: **Bili Gift Drop v0.6.17 — 登录自动保存（Preview）**
 - 发布材料位于 `dist/RELEASE_TAG.txt`、`dist/RELEASE_TITLE.txt`、`dist/RELEASE_NOTES.md` 和 `dist/SHA256SUMS.txt`。 / リリース用ファイルは `dist/` 内。 / Release fields and checksums are prepared in `dist/`.
+
+v0.6.17：登录改为自动保存，不再需要勾选「记住登录」。扫码或手动 Cookie 登录成功后，凭据自动写入本机数据目录（未加密），下次启动保持登录；点「退出登录」即删除本机凭据。登录面板移除勾选框，三语提示同步说明保存位置与删除方式；扫码/Cookie 校验、连接和昵称逻辑不变。
+
+v0.6.17：ログインを自動保存に変更し、「ログインを記憶」のチェックは不要になりました。QR または Cookie でログインに成功すると、認証情報は本機のデータフォルダーへ自動保存され（暗号化なし）、次回起動時もログイン状態が続きます。「ログアウト」で本機の認証情報を削除します。ログイン画面のチェックボックスを削除し、3 言語の説明も保存場所と削除方法に合わせて更新しました。QR/Cookie の検証、接続、名前の処理は変わりません。
+
+v0.6.17: Login is now saved automatically; there is no "Remember login" checkbox to tick. After a successful QR or cookie login, credentials are written to the local data folder (unencrypted) and the next start stays logged in; use "Log out" to delete them. The login panel no longer shows the checkbox, and the three-language text explains where credentials are saved and how to remove them. QR/cookie verification, connection and nickname handling are unchanged.
 
 v0.6.16：醒目留言新增「SC 永久显示」开关，默认关闭。开启后，当前及新收到的 SC 不再因平台有效期结束而消失，所有金额使用同一规则，不显示额外倒计时，仍只保留最新 100 条；第 101 条进入时移除最旧一条。关闭后，当前保留的 SC 从切换时刻起重新获得一次完整的平台显示时长，不因原有效期早已结束而清空，也不改变已有折叠状态。自动折叠、手动展开、滚动、透明度、语言、头像异步补齐和翻译状态仍相互独立。清空画面、切换直播间和重启继续按原逻辑清除 SC；不把留言写入磁盘。
 
@@ -83,7 +89,7 @@ v0.6.8: SC shows a round avatar to the left of the sender name. Missing or faile
 
 - 控制台左侧「B站登录」支持手机客户端扫码，也支持手动粘贴 Cookie（一般只需 SESSDATA，也可粘贴完整 Cookie）。
 - **匿名连接下 B 站可能隐藏礼物观众的昵称和 UID；完整昵称通常需要登录。** 登录后使用账号 Cookie/UID 连接直播间，B 站可能返回完整昵称。
-- 登录凭据默认只保存在内存；勾选「记住登录」后写入本机数据目录（未额外加密），请只在可信电脑使用并保护 Windows 账户。不会出现在日志、状态 API、OBS 画面或截图中，也不发往 Bilibili 以外的服务。
+- 登录成功后凭据自动写入本机数据目录（未额外加密），重启后仍保持登录；点「退出登录」即删除本机凭据。请只在可信电脑使用并保护 Windows 账户。凭据不会出现在日志、状态 API、OBS 画面或截图中，也不发往 Bilibili 以外的服务。
 - 登录成功会自动重连当前直播间；退出登录回到匿名连接。二维码 180 秒失效。
 - 2026-10-31 用户实测扫码登录成功；登录后完整礼物昵称是否解除遮罩请以实际直播为准。
 
@@ -103,7 +109,7 @@ v0.6.8: SC shows a round avatar to the left of the sender name. Missing or faile
 
 EXE设置、缓存及上传素材在 `%LOCALAPPDATA%\BiliGiftDrop`；配置在 `data/`、上传素材在 `media/`。升级替换EXE即可；迁移电脑时保留配置和素材两个目录。源码运行默认使用项目目录，`BILI_GIFT_DATA_DIR`可指定隔离数据目录。
 
-63项自动测试和本机EXE隔离回归通过；本轮新增 SC 永久显示（旧配置默认关闭、普通有效期、永久保留、切换不清空/重新计时、100条淘汰、与0/15秒自动折叠共存、语言/透明度/头像更新不改变生命周期、清空/重启、三语设置及控制台与 overlay 同步）的回归，保留 B 站登录、空 UID 头像兜底、礼物词典翻译/日语读音、SC 翻译按钮、免费/0 电池过滤、公开 UID 昵称/头像、390px 历史头像布局和日元显示检查；已有浏览器鼠标移动/缩放、三语桌面和100×200竖版GIF比例证据。真实大航海、真实付费SC与各金额配色、真实平台SC到期/删除事件、OBS实机、完整三语窄屏、全部视频编码、长期直播和全新Windows环境仍待验收。匿名连接可能受平台限制；不保证收到的上舰通知总含头像、明确月份或稳定的交易标识。部分真实V2礼物已验证，不能据此推定所有平台事件均通过。本构建未签名，作为预览发布。
+64项自动测试和本机EXE隔离回归通过；本轮新增 SC 永久显示（旧配置默认关闭、普通有效期、永久保留、切换不清空/重新计时、100条淘汰、与0/15秒自动折叠共存、语言/透明度/头像更新不改变生命周期、清空/重启、三语设置及控制台与 overlay 同步）的回归，保留 B 站登录、空 UID 头像兜底、礼物词典翻译/日语读音、SC 翻译按钮、免费/0 电池过滤、公开 UID 昵称/头像、390px 历史头像布局和日元显示检查；已有浏览器鼠标移动/缩放、三语桌面和100×200竖版GIF比例证据。真实大航海、真实付费SC与各金额配色、真实平台SC到期/删除事件、OBS实机、完整三语窄屏、全部视频编码、长期直播和全新Windows环境仍待验收。匿名连接可能受平台限制；不保证收到的上舰通知总含头像、明确月份或稳定的交易标识。部分真实V2礼物已验证，不能据此推定所有平台事件均通过。本构建未签名，作为预览发布。
 
 ## 日本語
 
@@ -115,13 +121,13 @@ EXE设置、缓存及上传素材在 `%LOCALAPPDATA%\BiliGiftDrop`；配置在 `
 6. 大航海は初期設定で有効。アバター・元の名前・ランク・今回の購入期間を表示。月以外の単位は元情報を保持し、期間不明は不明、アバター未取得は名前の先頭文字を表示。1人あたりの時間は設定可能（初期8秒、最小1秒、上限なし、次の人から適用）。受信順、最大100人待機。満杯時は新規分を通知してスキップ。複数月でも1回再生。無効化・ルーム変更・クリアで列を消去し、再起動後は過去分を再生しません。
 7. 各ランクの標準AI素材をPNG/JPEG/WebP/GIF/MP4/WebM（最大32 MiB）に置換可能。動画は無音ループ。画像・GIFサイズまたは動画メタデータから比率を自動計算し、視聴者情報は下に表示。設定幅は最大100%、縦長素材は画面内に収まるよう全体を縮小。失敗時は標準表示。待機中は艦長・提督・総督の3つのテストボタンと共通の月数入力を使用します。3ランクは同じ中心軸で揃い、大航海の位置・サイズとSC設定を初期化できます。素材は保持し、SC初期化では常時表示をオフに戻して現在のコメントを切替規則で再計時しますが、コメントは削除しません。
 8. コンソール最下部の「この配信のギフト履歴」は折りたたみ式。視聴者ごとにギフト・SC・大航海をまとめ、同じギフトは数量、同ランクの大航海は回数と月数を合算し、異なるギフト・ランクは分離します。SC コメントは常に全文表示。各視聴者のアバターと名前を表示し、匿名接続で名前が「先頭文字***」に伏せられた場合はギフトの UID で公開プロフィールを照会して名前とアバターを補完、失敗時は星号と先頭文字の代替アバターを表示します。ギフト名は内蔵辞書で初期設定のまま翻訳し、日本語 UI では片仮名の読みも表示（未知ギフトは原名、履歴ツールバーでオフ可）。各 SC の「翻訳」ボタンを押した時だけ Chrome 内蔵翻訳で訳文を表示し、原文は残します。SC の自動翻訳はしません。各視聴者の合計と各記録のバッテリーを表示し、初期値はバッテリーのみ。「金額表示」で人民元または日本円に切り替えられ、日本円は毎日のオンラインレートと日付を表示し、取得できない場合はバッテリー表示に戻します。実際のイベントのうち、バッテリーのあるギフトのみ記録し、無料/0 バッテリーのギフトとテスト送信は含みません。画面クリアでは履歴を消さず専用ボタンで消去します。履歴は今回の起動中のみ保持し、SC コメントはディスクに保存しません。
-9. 保存先は `%LOCALAPPDATA%\BiliGiftDrop`、設定は `data/`、素材は `media/`。移行時は両方を保持。63件の自動テスト・EXE回帰と一部ブラウザ操作は検証済み。実際の上艦・有料SCの期限/削除イベント・OBS、完全な3言語狭幅レイアウト、全コーデック、長時間配信、新規Windows環境は未検証。匿名接続が制限されたり、一部フィールドが欠ける場合があります。署名なしのプレビュー版です。
+9. 保存先は `%LOCALAPPDATA%\BiliGiftDrop`、設定は `data/`、素材は `media/`。移行時は両方を保持。64件の自動テスト・EXE回帰と一部ブラウザ操作は検証済み。実際の上艦・有料SCの期限/削除イベント・OBS、完全な3言語狭幅レイアウト、全コーデック、長時間配信、新規Windows環境は未検証。匿名接続が制限されたり、一部フィールドが欠ける場合があります。署名なしのプレビュー版です。
 
 ### B站ログイン（任意）
 
 - コンソール左側の「B站ログイン」でスマホ QR または Cookie 貼り付け（通常は SESSDATA のみ、完全な Cookie も可）に対応します。
 - **匿名接続では B 站がギフト視聴者の名前と UID を隠す場合があり、完全な名前には通常ログインが必要です。** ログイン後はアカウントの Cookie/UID で接続し、B 站が完全な名前を返す場合があります。
-- ログイン情報は初期設定でメモリのみ。「ログインを記憶」でローカルデータに保存（追加暗号化なし）。信頼できる PC でのみ使用し、Windows アカウントを保護してください。ログ、状態 API、OBS 画面、スクリーンショットには出さず、Bilibili 以外へ送りません。
+- ログインに成功すると認証情報は本機のデータフォルダーへ自動保存され（追加暗号化なし）、再起動後もログイン状態が続きます。「ログアウト」で削除されます。信頼できる PC でのみ使用し、Windows アカウントを保護してください。ログ、状態 API、OBS 画面、スクリーンショットには出さず、Bilibili 以外へ送りません。
 - ログイン成功時は現在のルームへ自動再接続し、ログアウトで匿名に戻ります。QR は180秒で失効します。
 - 2026-10-31 ユーザーが QR ログイン成功を実測。ログイン後にギフト名の伏せが解除されるかは実際の配信で確認してください。
 
@@ -135,13 +141,13 @@ EXE设置、缓存及上传素材在 `%LOCALAPPDATA%\BiliGiftDrop`；配置在 `
 6. Subscriptions are enabled by default and show avatar, original name, tier and purchased duration. Non-month units retain their original information; missing duration is marked unknown and missing avatars use the first name character. Play time is configurable (8 seconds by default, minimum 1, no upper bound), applying from the next viewer, in arrival order, with up to 100 waiting. Full queues skip new events with a warning. Multi-month purchases play once. Disabling, changing room or clearing removes the queue; shutdown never replays old purchases.
 7. Replace each tier’s default AI pixel ship with PNG/JPEG/WebP/GIF/MP4/WebM, up to 32 MiB per file. Videos loop muted. Native image/GIF dimensions or video metadata determine layout; viewer details sit below. Requested width supports 100%, with tall content scaling down to fit the canvas. Failures fall back to default display. While idle, use the Captain, Admiral or Governor test buttons with the shared month input. All tiers share a center axis. Restore buttons reset subscription position/size or SC settings while preserving media; restoring SC defaults turns permanent display off, retimes current messages by the switch rule and does not delete them.
 8. The collapsible "This stream's gift history" at the bottom of the control panel groups gifts, SC and subscriptions by viewer. The same gift adds up quantity; the same subscription tier adds up purchases and months; different gifts and tiers stay separate. SC messages always show in full. Each viewer shows an avatar and name; when an anonymous connection masks the name as "first character***", the gift UID resolves the public profile nickname and avatar, with the masked name and an initial placeholder on failure. Gift names are translated by the built-in glossary by default, with a katakana reading in Japanese UI (unknown gifts keep the original and the history toolbar can disable it). Each SC has a "Translate" button; only a click uses Chrome's built-in translator and appends the translation while keeping the original. SC is never translated automatically. Each viewer's total and every record show batteries; the default is batteries only. "Amount display" can switch to CNY or JPY; JPY uses a daily online rate with the date shown and falls back to batteries when unavailable. Only real gifts with batteries are recorded; free/0-battery gifts and simulations are excluded. Clearing the screen does not clear history, and a separate button clears it. History lasts only for this run and SC messages are not written to disk.
-9. EXE data lives in `%LOCALAPPDATA%\BiliGiftDrop`: configuration in `data/`, uploaded files in `media/`. Retain both when moving computers. 63 automated tests and local EXE regressions pass, with browser interaction, the three-language 390px history panel, avatar/translation layout and portrait-GIF evidence. Real subscriptions, paid SC expiry/delete events and colors, OBS, complete narrow layouts in all three languages, all codecs, long-running streams and clean Windows installations remain unverified. Anonymous access may be restricted and platform fields may be missing. This is an unsigned preview.
+9. EXE data lives in `%LOCALAPPDATA%\BiliGiftDrop`: configuration in `data/`, uploaded files in `media/`. Retain both when moving computers. 64 automated tests and local EXE regressions pass, with browser interaction, the three-language 390px history panel, avatar/translation layout and portrait-GIF evidence. Real subscriptions, paid SC expiry/delete events and colors, OBS, complete narrow layouts in all three languages, all codecs, long-running streams and clean Windows installations remain unverified. Anonymous access may be restricted and platform fields may be missing. This is an unsigned preview.
 
 ### Bilibili login (optional)
 
 - The "Bilibili login" section supports mobile QR login and manual cookie input (usually SESSDATA only; a full cookie string also works).
 - **On anonymous connections Bilibili may hide gift viewers' names and UIDs; full nicknames usually require login.** After login the app connects with the account's cookies/UID, and Bilibili may return full names.
-- Credentials are memory-only by default; "Remember login" writes them to the local data directory without extra encryption. Use only on a trusted computer and protect your Windows account. They never appear in logs, status APIs, the OBS overlay or screenshots, and are not sent anywhere except Bilibili.
+- After a successful login credentials are saved automatically to the local data directory without extra encryption, and the login survives restarts; "Log out" deletes them. Use only on a trusted computer and protect your Windows account. They never appear in logs, status APIs, the OBS overlay or screenshots, and are not sent anywhere except Bilibili.
 - A successful login reconnects the current room automatically; logout returns to anonymous access. The QR code expires after 180 seconds.
 - On 2026-10-31 the user confirmed a successful QR login; whether gift-name masks are fully removed after login still depends on the actual stream.
 

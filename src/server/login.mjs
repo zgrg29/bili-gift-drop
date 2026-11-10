@@ -66,7 +66,6 @@ function cookieHeader(cookies) {
 
 export class LoginStore {
   state = {cookies: {}, uid: '', user: '', avatar: null, loggedIn: false, verifiedAt: 0, remembered: false};
-  qrRemember = false;
 
   constructor({file = path.join(runtimeRoot, 'data/login.json'), fetchImpl = fetch, cacheImage = null} = {}) {
     this.file = file;
@@ -111,12 +110,8 @@ export class LoginStore {
     return this.status();
   }
 
-  async persist(remember) {
-    if (!remember) {
-      await rm(this.file, {force: true}).catch(() => {});
-      this.state.remembered = false;
-      return;
-    }
+  // Login always persists: there is no "remember" choice to make. Logout deletes the file.
+  async persist() {
     await mkdir(path.dirname(this.file), {recursive: true});
     const temp = `${this.file}.tmp`;
     await writeFile(temp, JSON.stringify({...this.state, remembered: true}), {mode: 0o600});
@@ -140,7 +135,7 @@ export class LoginStore {
     return {uid: String(json.data.mid ?? ''), user: String(json.data.uname ?? ''), avatar};
   }
 
-  async setCookies(cookies, {remember = false} = {}) {
+  async setCookies(cookies) {
     const next = {...cookies};
     if (!next.SESSDATA) throw Error('auth');
     const profile = await this.verify(next);
@@ -153,16 +148,16 @@ export class LoginStore {
       verifiedAt: Date.now(),
       remembered: false
     };
-    await this.persist(!!remember);
+    // A failed save must not block the in-memory login; the status then reports remembered=false.
+    await this.persist().catch(() => {});
     return this.status();
   }
 
-  async startQR(remember = false) {
+  async startQR() {
     const response = await this.fetchImpl(LOGIN_URL, {headers: {'User-Agent': UA, Referer: 'https://www.bilibili.com/'}, signal: AbortSignal.timeout(8000)});
     if (!response.ok) throw Error('failed');
     const json = await response.json();
     if (json?.code !== 0 || !json.data?.url || !json.data?.qrcode_key) throw Error('failed');
-    this.qrRemember = !!remember;
     return {url: String(json.data.url), key: String(json.data.qrcode_key)};
   }
 
@@ -178,8 +173,7 @@ export class LoginStore {
     if (code === 0) {
       const cookies = {...parseLoginUrl(json.data?.url), ...setCookies};
       if (!cookies.SESSDATA) throw Error('auth');
-      const status = await this.setCookies(cookies, {remember: this.qrRemember});
-      this.qrRemember = false;
+      const status = await this.setCookies(cookies);
       return {status: 'success', login: status};
     }
     if (code === 86090) return {status: 'scanned'};
@@ -189,7 +183,6 @@ export class LoginStore {
 
   async logout() {
     this.state = {cookies: {}, uid: '', user: '', avatar: null, loggedIn: false, verifiedAt: 0, remembered: false};
-    this.qrRemember = false;
     await rm(this.file, {force: true}).catch(() => {});
     return this.status();
   }
