@@ -1,6 +1,31 @@
 # 对话任务汇总与验收
 
-## 2026-11-10 v0.6.17 登录自动保存（当前状态）
+## 2026-11-12 v0.6.18 SC 停止滚动与最新位置（当前状态）
+
+- 当前版本为 **v0.6.18 Preview**，取代 v0.6.17；源码、测试、文档和 Windows v0.6.18 EXE/ZIP 已完成，三语发布说明与 SHA256SUMS 已准备。未提交、未打 Git 标签、未推送、未发布远程 Release。下方 v0.6.17「登录自动保存」结论保留为历史状态。
+- 需求结论：在 SC 设置中新增「停止滚动」（默认关闭）和「最新 SC 显示位置」（顶部／底部，默认底部）。停止滚动关闭时保留现有滚动；开启时不播放自动滚动，按所选方向直接更新，新 SC 始终优先，旧 SC 可退出可见区域但不得从数据存储删除。两设置独立保存，三语切换、永久显示开关、折叠、透明度、头像和翻译不受影响。
+- 实现结论：
+  - `src/shared/rules.mjs` 新增默认值与校验：`scDisableScroll:false`、`scNewestPosition:'bottom'`；缺失旧字段沿用默认，非法位置保持旧值。
+  - `src/overlay/superchat.mjs` 按位置排序（`top` 时为最新到最旧，`bottom` 时为最旧到最新）。停止滚动时设置 `overflow:hidden`，停止后按实际滚动高度锚定最新卡：底部模式 `scrollTop=max`，顶部模式 `scrollTop=0`；单卡高于区域时显示其标题顶部。新卡、展开/折叠、自动折叠、宽高/位置变化、ResizeObserver 与字体加载后重新锚定。旧卡留在内存列表中（受 100 条上限约束），只被裁出可见区域。
+  - 关闭停止滚动时恢复原往返滚动、速度、悬停/聚焦暂停；底部保持原顺序，顶部只反转顺序；普通更新保留当前滚动位置，不产生额外跳动。重新开启或切换顶部/底部时从对应边缘开始。
+  - `src/control/control.mjs` 在永久显示下方新增开关和互斥单选（`name=scNewestPosition`），自动保存、SSE 回显、语言切换保持选中；SC「恢复默认」提交 `scDisableScroll:false`、`scNewestPosition:'bottom'`，不重置礼物/大航海/语言/登录。
+  - 三语文案新增 `scDisableScroll`、`scNewestPosition`、`scNewestTop`、`scNewestBottom`、`scNewestHint`，更新 `scHint`；`src/control/style.css` 增加紧凑单选组，避免窄屏溢出。
+- 自动测试：`node --test --test-isolation=none` **68/68 通过**（原 64 项全部保留）。新增覆盖：默认值与旧配置兼容/JSON 重启/语言保持/非法值；顶部与底部顺序；停止时 120 帧内滚动位置不变；新 SC 后底部锚点更新；单条超高卡片；ResizeObserver 重排；100 条 store 上限与可见区域独立；控制台开关/互斥单选自动保存、SSE 回显和恢复默认；三语键。
+- HTTP/SSE：隔离数据目录与端口 19331 下运行 `scripts/smoke-sc.mjs` 通过，覆盖模拟 SC、快照、折叠同步、语言/禁用保持到期、新设置保存并在请求间保持、永久模式保留/切回重计时、清空。未连接真实 Bilibili 付费事件。
+- 浏览器视觉（Chrome 154 无头 + CDP，隔离端口 19331/9223）：通过。
+  - 底部模式：5 张卡片、区域高 216px，`scrollTop=486` 等于最大滚动；最新卡完整可见，最旧卡离开可见区域，`overflow:hidden`；等待 900ms 滚动位置不变。
+  - 新 SC：底部模式新卡加入后 `scrollTop` 更新到新最大 626，最新卡仍可见；旧卡仍在 DOM。
+  - 顶部模式：`scrollTop=0`，顺序为最新到最旧；新卡进入第一位；调整区域高度到 40% 后仍锚定顶部。
+  - 单条超长：卡片高 1406px、区域 130px 时显示卡片标题顶部，未把标题裁出。
+  - 连续 105 条：overlay DOM 保留 100 张，最旧 `n0` 已按 100 条上限淘汰，最新 `n104` 可见。
+  - 恢复滚动：`scrollTop` 从 0 推进到约 98/101，确认自动滚动仍工作。
+  - 控制台预览与 overlay：3 条真实模拟 SC 时同序、同为 `overflow:hidden`、顶部锚定；390px 三语控制台无横向溢出（`scrollWidth=375 < 390`），语言切换后开关与顶部选中状态保持，截图 `docs/screenshots/sc-no-scroll-zh-CN-390.png`、`sc-no-scroll-ja-390.png`、`sc-no-scroll-en-390.png`。
+  - 说明：上述 SC 内容由测试脚本向 overlay 的 EventSource 注入合成事件，用于稳定覆盖长文本、超高卡和连续 100 条；不等同真实 Bilibili 付费 SC 事件。
+- Windows：仓库中执行 `node scripts/build-windows.mjs` 与 `node scripts/smoke-windows.mjs` 通过，已生成 v0.6.18 EXE/ZIP；覆盖启动/重复启动、HTTP/SSE、SC 停止滚动与新位置配置、三语、配置重启持久化、全部内嵌前端逐字节一致、退出端口释放。发布材料：`dist/BiliGiftDrop-v0.6.18-windows-x64.zip`、`dist/BiliGiftDrop-windows-x64.exe`、`dist/RELEASE_TAG.txt`、`dist/RELEASE_TITLE.txt`、`dist/RELEASE_NOTES.md`、`dist/SHA256SUMS.txt`；三语说明见 `docs/releases/v0.6.18.md`。
+- 未验收：真实付费 SC 平台事件、真实直播换房、真实 OBS 实机、完整三语窄屏所有控件、全部视频编码、长期高峰和全新 Windows 环境。不得用本轮自动测试替代这些检查。
+- 文档：`README.md`、`docs/PROJECT_PLAN.md`、`docs/WINDOWS.md`、本文件和 `log/2026-11-12-sc-no-scroll.md` 已更新。
+
+## 2026-11-10 v0.6.17 登录自动保存（历史状态）
 
 - 当前版本 **v0.6.17 Preview**，取代下方 v0.6.16 的当前状态；历史结论保留。
 - 已实现：登录改为自动保存，移除「记住登录」勾选。扫码或手动 Cookie 校验成功后，凭据立即写入本机数据目录 `data/login.json`（`0o600`，未额外加密）；下次启动由 `LoginStore.load()` 恢复并直接显示已登录；「退出登录」删除文件并回到匿名。登录面板移除勾选框，`POST /api/login/qr`、`POST /api/login/cookie` 不再接收 `remember`；三语 `loginHint`/`loginCookieHint` 说明保存位置与删除方式，删除 `rememberLogin` 键。扫码/Cookie 解析、nav 校验、连接与昵称处理不变。

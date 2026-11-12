@@ -20,7 +20,7 @@ test('control panel executes in all locales, renders new strings and submits all
       checkValidity(){return this.value!==''&&Number.isFinite(Number(this.value))&&(!this.min||Number(this.value)>=Number(this.min))&&(!this.max||Number(this.value)<=Number(this.max));}
       querySelectorAll(){return elements.filter(e=>['number','range'].includes(e.type)&&e.id!=='count'&&e.id!=='price').concat(ids.get('includeFree'));}
       append(...items){this.children.push(...items);}prepend(...items){this.children.unshift(...items);}
-      replaceChildren(...items){this.children=items;}after(){}before(){}getBoundingClientRect(){return {width:1000,height:500};}setPointerCapture(){}dispatchEvent(){ids.get('settings').oninput({target:this});}get options(){return this.children;}
+      replaceChildren(...items){this.children=items;}after(){}before(){}getBoundingClientRect(){return {width:1000,height:500};}setPointerCapture(){}dispatchEvent(){ids.get('settings').oninput({target:this});}get options(){return this.children;}setAttribute(k,v){this[k]=v;}
     }
     for(const id of ['demo','fields','language','status','warning','empty','events','room','includeFree','toast','obs','connection','disconnect','settings','clear','copy','count','price','loginSection','loginStatus','loginAccount','loginAvatar','loginAvatarFallback','loginUser','loginUid','loginHint','loginButton','logoutButton','loginPanel','loginQR','loginQRStatus','loginCookie','loginCookieButton','loginClose']){const e=new Element();e.id=id;}
     const preview=new Element(),iframe=new Element(),body=new Element();
@@ -57,6 +57,16 @@ test('control panel executes in all locales, renders new strings and submits all
     await [...timers.values()].find(x=>x.delay===400).fn();assert.equal(posted.scPersistent,true);
     events.onmessage({data:JSON.stringify({type:'config',data:{...defaults,language,scPersistent:true}})});
     assert.equal(scPersistentToggle.checked,true,'the control panel reflects the saved switch');
+    const scDisableToggle=ids.get('scDisableScroll'),scTop=ids.get('scNewestTop'),scBottom=ids.get('scNewestBottom');
+    assert.ok(scDisableToggle);assert.equal(scDisableToggle.checked,false,'scrolling is enabled by default');
+    assert.ok(scTop&&scBottom);assert.equal(scTop.checked,false);assert.equal(scBottom.checked,true,'the newest card defaults to the bottom');
+    scDisableToggle.checked=true;ids.get('settings').oninput({target:scDisableToggle});
+    await [...timers.values()].find(x=>x.delay===400).fn();assert.equal(posted.scDisableScroll,true);
+    scTop.checked=true;scBottom.checked=false;ids.get('settings').oninput({target:scTop});
+    await [...timers.values()].find(x=>x.delay===400).fn();assert.equal(posted.scNewestPosition,'top');
+    events.onmessage({data:JSON.stringify({type:'config',data:{...defaults,language,scDisableScroll:true,scNewestPosition:'top'}})});
+    assert.equal(scDisableToggle.checked,true,'the saved stop-scroll switch is restored');
+    assert.equal(scTop.checked,true);assert.equal(scBottom.checked,false,'the saved newest position is restored exclusively');
     events.onmessage({data:JSON.stringify({type:'config',data:{...defaults,language,guardAnchor:'center',guardX:50,scHeight:40}})});
     const pointer={clientX:0,clientY:0,pointerId:1,preventDefault(){},stopPropagation(){}};
     const handle=elements.find(e=>e.className==='sc-move');handle.onpointerdown(pointer);handle.onpointermove({clientX:100,clientY:50});await handle.onpointerup();assert.equal(posted.scX,15);assert.equal(posted.scY,15);
@@ -78,7 +88,7 @@ test('control panel executes in all locales, renders new strings and submits all
     const guardReset=elements.find(e=>e.dataset.t==='guardResetLayout');await guardReset.onclick({preventDefault(){}});
     assert.equal(posted.guardX,50);assert.equal(posted.guardY,29);assert.equal(posted.guardWidth,60);assert.equal(posted.guardAnchor,'center');assert.equal(Object.hasOwn(posted,'scX'),false);assert.equal(Object.hasOwn(posted,'guardAsset3'),false);
     const scReset=elements.find(e=>e.dataset.t==='scReset');await scReset.onclick({preventDefault(){}});
-    for(const key of ['scEnabled','scPersistent','scOpacity','scX','scY','scWidth','scHeight','scCollapse','scScrollSpeed'])assert.equal(posted[key],defaults[key]);
+    for(const key of ['scEnabled','scPersistent','scDisableScroll','scNewestPosition','scOpacity','scX','scY','scWidth','scHeight','scCollapse','scScrollSpeed'])assert.equal(posted[key],defaults[key]);
     assert.equal(Object.hasOwn(posted,'guardX'),false);
     // The bottom history panel groups one viewer's guard/SC/gift and shows battery amounts.
     events.onmessage({data:JSON.stringify({type:'history',data:{room:'123',viewerCount:2,battery:4270,unknownBattery:false,viewers:[

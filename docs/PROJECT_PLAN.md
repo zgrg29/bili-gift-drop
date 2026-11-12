@@ -1,6 +1,23 @@
 # 项目规划与工程进度
 
-## 2026-11-10 v0.6.17 登录自动保存（当前状态）
+## 2026-11-12 v0.6.18 SC 停止滚动与最新位置（当前状态）
+
+- 当前版本为 **v0.6.18 Preview**，取代 v0.6.17；Windows x64 EXE/ZIP、三语发布说明和 SHA256SUMS 已构建。未提交、未打 Git 标签、未推送、未发布远程 Release；`dist/RELEASE_TAG.txt` 和 `docs/releases/v0.6.18.md` 已准备。下方 v0.6.17「登录自动保存」章节保留为历史状态。
+- 需求：日本主播反馈开启「SC 永久显示」后，SC 超过画布垂直范围时新 SC 可能不可见；希望不滚动、让旧 SC 退出可见区域，并选择最新 SC 在顶部或底部。需求只改 SC 显示布局，不改连接、礼物、大航海、登录、金额/有效期、翻译、头像补全、历史数据结构或 100 条上限。
+- 已实现：
+  - SC 设置新增「停止滚动」（`scDisableScroll`，布尔，默认 `false`）与「最新 SC 显示位置」（`scNewestPosition`，`top`／`bottom`，默认 `bottom`，两项互斥单选）。
+  - 停止滚动关闭：保留现有自动往返滚动、速度、两端停留、悬停/聚焦暂停与原有排列；顶部模式仅把画面顺序改为最新在上，底部模式保持原顺序。新 SC 不强制打断当前滚动位置。
+  - 停止滚动开启：不播放自动滚动，按所选方向直接重排。底部模式将最底部对齐到最新 SC；顶部模式从顶部开始。新 SC 到来、展开/折叠、自动折叠、画布宽高/位置变化、语言切换后重新锚定最新 SC；最旧 SC 被裁出可见区域但不从 `SCStore` 删除。
+  - 可见性按实际渲染高度和矩形计算，不按固定条数；单条 SC 高于整个区域时，底部模式对齐其标题顶部而非裁掉标题，保持可点击折叠。
+  - 溢出使用现有 SC 矩形与裁切（`overflow:hidden`），不新建画布。旧卡仍留在渲染列表中，但总数受现有 100 条上限约束，不无界增长。
+  - 两项设置进入配置系统，旧配置缺字段自动默认；保存后跨重启恢复；语言切换不清空 SC、不重置有效期/折叠；控制台预览与 overlay 通过 SSE 同步；SC「恢复默认」同时提交这两项默认值，不影响礼物/大航海/语言/登录。
+- 实现文件：`src/shared/rules.mjs`（默认值与校验）、`src/overlay/superchat.mjs`（排序、锚定、裁切与滚动分支）、`src/control/control.mjs`（开关、互斥单选、自动保存/回显/恢复默认）、`src/control/style.css`（窄屏单选布局）、三语 `src/shared/i18n/{zh-CN,ja,en}.mjs`、`scripts/smoke-sc.mjs` 与 `scripts/smoke-windows.mjs`。
+- 验证：`node --test --test-isolation=none` 68/68 通过。新增覆盖配置默认/旧配置/持久化、顶部/底部顺序、停止滚动无动画、新 SC 优先、单条超高、尺寸变化重排、100 条上限、控制台开关/互斥/回显/恢复默认、三语键。隔离源码 HTTP/SSE `scripts/smoke-sc.mjs` 通过。Chrome 无头 + CDP 实测 overlay 顶部/底部/单条超高/105 条连续进入、停止时不滚动、恢复滚动后动画、控制台预览与 overlay 同序，以及 390px 中日英控制台无横向溢出（截图 `docs/screenshots/sc-no-scroll-{zh-CN,ja,en}-390.png`）。Windows v0.6.18 EXE/ZIP 已构建，`node scripts/smoke-windows.mjs` 通过，覆盖启动/重复启动、HTTP/SSE、三语、内嵌源码逐字节一致、新配置重启持久化和退出端口释放。
+- 发布产物：`dist/BiliGiftDrop-v0.6.18-windows-x64.zip`、`dist/BiliGiftDrop-windows-x64.exe`、`dist/RELEASE_TAG.txt`（`v0.6.18`）、`dist/RELEASE_TITLE.txt`、`dist/RELEASE_NOTES.md`、`dist/SHA256SUMS.txt`；三语发布说明见 `docs/releases/v0.6.18.md`。
+- 未验收：真实付费 SC 的平台到期/删除事件与真实直播换房；真实 OBS 实机；完整三语窄屏所有控件逐项视觉；全部视频编码、长期高峰和全新 Windows 环境。真实平台事件与 OBS 实机不能由自动测试替代。
+- 文档：README 三语、`docs/WINDOWS.md`、`docs/ACCEPTANCE.md` 和 `log/2026-11-12-sc-no-scroll.md` 已同步。
+
+## 2026-11-10 v0.6.17 登录自动保存（历史状态）
 
 - 当前版本 **v0.6.17 Preview**，取代下方 v0.6.16 的当前状态；历史版本章节保留。
 - 已实现：登录改为自动保存，移除「记住登录」勾选。扫码或手动 Cookie 校验成功后，凭据立即写入本机数据目录 `data/login.json`（`0o600`，未额外加密），下次启动恢复并直接显示已登录；「退出登录」删除文件并回到匿名。登录面板移除勾选框，登录 API 不再接收 `remember`；三语提示说明保存位置与删除方式。

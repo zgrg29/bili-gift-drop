@@ -1,4 +1,4 @@
-export const defaults = {language:'zh-CN',historyCurrency:'battery',giftTranslation:true,guardEnabled:true,guardX:20,guardY:29,guardWidth:60,guardDuration:8,guardAnchor:'left',giftOpacity:100,scOpacity:100,guardOpacity:100,scEnabled:true,scPersistent:false,scX:5,scY:5,scWidth:30,scCollapse:15,scHeight:100,scScrollSpeed:20,room:'',gravity:900,bounce:0.35,lifetime:30,maxObjects:120,includeFree:true,minGiftPrice:0,minGiftScale:50,maxGiftScale:150,maxGiftScaleAmount:100,maxCoverage:15,spawnRate:12,regionX:0,regionY:0,regionWidth:100,regionHeight:100};
+export const defaults = {language:'zh-CN',historyCurrency:'battery',giftTranslation:true,guardEnabled:true,guardX:20,guardY:29,guardWidth:60,guardDuration:8,guardAnchor:'left',giftOpacity:100,scOpacity:100,guardOpacity:100,scEnabled:true,scPersistent:false,scDisableScroll:false,scNewestPosition:'bottom',scX:5,scY:5,scWidth:30,scCollapse:15,scHeight:100,scScrollSpeed:20,room:'',gravity:900,bounce:0.35,lifetime:30,maxObjects:120,includeFree:true,minGiftPrice:0,minGiftScale:50,maxGiftScale:150,maxGiftScaleAmount:100,maxCoverage:15,spawnRate:12,regionX:0,regionY:0,regionWidth:100,regionHeight:100};
 export function config(input, previous=defaults) {
   const out={...previous};
   if (['zh-CN','ja','en'].includes(input.language)) out.language=input.language;
@@ -17,6 +17,8 @@ export function config(input, previous=defaults) {
   out.scWidth=Math.min(out.scWidth,100-out.scX);
   if(typeof input.scEnabled==='boolean')out.scEnabled=input.scEnabled;
   if(typeof input.scPersistent==='boolean')out.scPersistent=input.scPersistent;
+  if(typeof input.scDisableScroll==='boolean')out.scDisableScroll=input.scDisableScroll;
+  if(input.scNewestPosition==='top'||input.scNewestPosition==='bottom')out.scNewestPosition=input.scNewestPosition;
   out.maxGiftScale=Math.max(out.minGiftScale,out.maxGiftScale);
   out.maxObjects=Math.floor(out.maxObjects);
   out.regionWidth=Math.min(out.regionWidth,100-out.regionX);
